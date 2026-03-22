@@ -56,6 +56,16 @@ Se preferir rodar so o banco no Docker e a API localmente:
 
 API disponivel em `http://localhost:3333/api`.
 
+### Testes unitarios (Jest)
+Na pasta `backend`:
+
+1. Rodar todos os testes:
+  `npm test`
+2. Rodar em modo watch:
+  `npm run test:watch`
+3. Gerar cobertura:
+  `npm run test:coverage`
+
 ### Usuario admin padrao
 O backend cria automaticamente um usuario admin na primeira execucao da migration:
 - Email: `ADMIN_DEFAULT_EMAIL` (padrao: `admin@controle-epis.local`)
