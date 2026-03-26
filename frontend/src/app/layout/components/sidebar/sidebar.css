@@ -1,0 +1,9 @@
+/* src/app/layout/components/sidebar/sidebar.css */
+.active-link .active-indicator {
+  display: block;
+}
+
+/* Adiciona um pouco de peso na fonte quando ativo */
+.active-link span {
+  font-weight: 600;
+}

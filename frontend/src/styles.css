@@ -1,1 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
+
+@import "@phosphor-icons/web/regular/style.css";
+@import "@phosphor-icons/web/bold/style.css";
+@import "@phosphor-icons/web/fill/style.css";
+
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+*, ::before, ::after {
+ 
+}

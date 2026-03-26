@@ -1,0 +1,58 @@
+<aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-full pt-6 px-3">
+  
+  <div class="flex items-center gap-2 mb-10 pl-3">
+    <img 
+    src="logo.png" 
+    alt="Logo" 
+    class="w-10 h-10 object-contain"
+  >
+    <div>
+      <h1 class="font-semibold text-xl text-slate-800 leading-none">EPI</h1>
+      <p class="text-[10px] text-gray-500 tracking-wide uppercase">Sistema de Controle</p>
+    </div>
+  </div>
+
+  <nav class="flex-1 flex flex-col justify-between">
+    <ul class="space-y-1">
+      
+      <li>
+        <a [routerLink]="['/dashboard']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link" class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 hover:text-slate-800 transition-all">
+          <div class="active-indicator hidden absolute inset-y-0 right-0 w-1 bg-blue-600 rounded-r"></div>
+          <i class="ph ph-squares-four text-xl"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+
+      <li>
+        <a [routerLink]="['/epis']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link" class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 hover:text-slate-800 transition-all relative">
+          <div class="active-indicator hidden absolute inset-y-0 right-0 w-1 bg-blue-600 rounded-r"></div>
+          <i class="ph ph-package text-xl"></i>
+          <span>Catálogo de EPIs</span>
+        </a>
+      </li>
+
+      <li>
+        <a [routerLink]="['/colaboradores']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link" class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 hover:text-slate-800 transition-all relative">
+          <div class="active-indicator hidden absolute inset-y-0 right-0 w-1 bg-blue-600 rounded-r"></div>
+          <i class="ph ph-users text-xl"></i>
+          <span>Colaboradores</span>
+        </a>
+      </li>
+
+      <li>
+        <a [routerLink]="['/entregas']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link" class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 hover:text-slate-800 transition-all relative">
+          <div class="active-indicator hidden absolute inset-y-0 right-0 w-1 bg-blue-600 rounded-r"></div>
+          <i class="ph ph-clipboard-text text-xl"></i>
+          <span>Registro de Entrega</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="border-t border-gray-100 pt-4 pb-8 space-y-1">      
+      <a [routerLink]="['/login']" class="flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all">
+        <i class="ph ph-sign-out text-xl"></i>
+        <span>Sair</span>
+      </a>
+    </div>
+  </nav>
+</aside>
