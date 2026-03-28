@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// FASE 3: Interface espelhando a Entidade 'epi' do seu Backend
+// Interface espelhando a Entidade 'epi' do seu Backend
 export interface Epi {
   id: number;
   nome: string;
@@ -22,7 +22,7 @@ export interface Epi {
   styleUrls: ['./list.css']
 })
 export class List {
-  // FASE 3: Dados Mockados para o Catálogo
+  // Dados Mockados para o Catálogo
   epis: Epi[] = [
     { id: 1, nome: 'Capacete de Segurança Classe A', numero_ca: '12345', categoria: 'Cabeça', vida_util_dias: 365, estoque_atual: 45, estoque_minimo: 10, ativo: true },
     { id: 2, nome: 'Luva Nitrílica G', numero_ca: '98765', categoria: 'Mãos', vida_util_dias: 30, estoque_atual: 8, estoque_minimo: 20, ativo: true },

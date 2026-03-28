@@ -2,9 +2,12 @@
   <div class="flex justify-between items-end">
     <div>
       <h2 class="text-2xl font-bold text-slate-800">Colaboradores</h2>
-      <p class="text-slate-500">Gerencie os funcionários habilitados para receber EPIs.</p>
+      <p class="text-slate-500">Controle de Funcionários</p>
     </div>
-    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all">
+    <button 
+      routerLink="/colaboradores/novo"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all shadow-lg shadow-blue-100"
+    >
       <i class="ph ph-plus-circle text-xl"></i>
       Novo Colaborador
     </button>
