@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 // Interface espelhando a Entidade 'epi' do seu Backend
 export interface Epi {
@@ -17,7 +18,7 @@ export interface Epi {
 @Component({
   selector: 'app-epi-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './list.html',
   styleUrls: ['./list.css']
 })
