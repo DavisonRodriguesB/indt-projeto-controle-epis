@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { ColaboradorFormComponent } from './features/colaboradores/pages/form/form';
+import { EpiFormComponent } from './features/epis/pages/form/form';
 
 export const routes: Routes = [
   {
@@ -28,6 +29,10 @@ export const routes: Routes = [
           import('./features/epis/pages/list/list').then(
             (m) => m.List
           ),
+      },
+      { 
+        path: 'epis/novo', 
+        component: EpiFormComponent
       },
       {
         path: 'colaboradores',

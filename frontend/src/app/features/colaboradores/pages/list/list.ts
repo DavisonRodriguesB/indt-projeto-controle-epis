@@ -20,12 +20,13 @@ interface Colaborador {
   templateUrl: './list.html',
   styleUrls: ['./list.css']
 })
+
 export class List {
   // Dados de exemplo (Seed) para visualização
   colaboradores: Colaborador[] = [
-    { id: 1, nome: 'Davison Bentes', matricula: 'MT-2024-01', cargo: 'Operador de Máquina', setor: 'Produção', ativo: true },
-    { id: 2, nome: 'Denise Cibele', matricula: 'MT-2024-05', cargo: 'Técnico de Manutenção', setor: 'Engenharia', ativo: true },
-    { id: 3, nome: 'Bruce Wayne', matricula: 'MT-2023-99', cargo: 'Auxiliar de Logística', setor: 'Almoxarifado', ativo: false },
+    { id: 1, nome: 'Davison Bentes', matricula: '202601', cargo: 'Operador de Máquina', setor: 'Produção', ativo: true },
+    { id: 2, nome: 'Denise Cibele', matricula: '202602', cargo: 'Técnico de Manutenção', setor: 'Engenharia', ativo: true },
+    { id: 3, nome: 'Bruce Wayne', matricula: '202603', cargo: 'Auxiliar de Logística', setor: 'Almoxarifado', ativo: false },
   ];
 
   searchTerm: string = '';
@@ -36,5 +37,15 @@ export class List {
       c.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
       c.matricula.includes(this.searchTerm)
     );
+    
+  }
+  // Função para confirmar exclusão (Simulação)
+  confirmarExclusao(id: number, nome: string) {
+  const confirmou = confirm(`Deseja realmente excluir o colaborador ${nome}?`);
+    if (confirmou) {
+      console.log('Solicitando exclusão ao backend para o ID:', id);
+      // Aqui chamaremos o service.delete futuramente
+      alert('Colaborador excluído (Simulação)');
+    }
   }
 }

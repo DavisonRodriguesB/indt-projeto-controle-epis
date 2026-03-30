@@ -46,7 +46,6 @@ jobs:
             "${{ github.event.pull_request.url }}" \
             > pr.diff
 
-          # Limita tamanho para evitar payloads gigantes e custo elevado.
           head -c 200000 pr.diff > pr.diff.trimmed
 
       - name: Build prompt
@@ -90,13 +89,13 @@ jobs:
             exit 1
           fi
 
-          JSON=$(jq -Rs '{contents:[{parts:[{text:.}]}]}' prompt.txt)
+          jq -Rs '{contents:[{parts:[{text:.}]}]}' prompt.txt > payload.json
 
           curl -sS \
             -X POST \
             -H "Content-Type: application/json" \
             "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
-            -d "$JSON" \
+            -d @payload.json \
             > response.json
 
       - name: Extract review
