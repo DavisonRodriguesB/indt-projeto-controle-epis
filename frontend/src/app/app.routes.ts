@@ -45,6 +45,19 @@ export const routes: Routes = [
         path: 'colaboradores/novo', 
         component: ColaboradorFormComponent 
       },
+
+      {
+        path: 'cargos',
+        loadComponent: () =>
+          import('./features/configuracoes/cargos/pages/list/list').then((m) => m.List),
+      },
+      
+      {
+        path: 'setores',
+        loadComponent: () =>
+          import('./features/configuracoes/setores/pages/list/list').then((m) => m.List),
+      },
+
       {
         path: 'entregas',
         loadComponent: () =>

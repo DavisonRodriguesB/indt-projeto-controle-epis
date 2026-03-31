@@ -17,6 +17,7 @@
       <input 
         type="text" 
         formControlName="nome"
+        placeholder="Digite o nome completo"
         class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
         [class.border-red-400]="colaboradorForm.get('nome')?.invalid && colaboradorForm.get('nome')?.touched"
       >
@@ -31,6 +32,7 @@
         <input 
           type="text" 
           formControlName="matricula"
+          placeholder="000000"
           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none font-mono"
           [class.border-red-400]="colaboradorForm.get('matricula')?.invalid && colaboradorForm.get('matricula')?.touched"
         >
@@ -38,22 +40,57 @@
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Setor / Departamento</label>
-        <select 
-          formControlName="setor"
-          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer appearance-none"
-          [class.border-red-400]="colaboradorForm.get('setor')?.invalid && colaboradorForm.get('setor')?.touched"
-        >
-          <option value="">Selecione o setor...</option>
-          <option value="Produção">Produção</option>
-          <option value="Logística">Logística</option>
-          <option value="Manutenção">Manutenção</option>
-          <option value="Administrativo">Administrativo</option>
-        </select>
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Cargo / Função</label>
+        <div class="relative">
+          <select 
+            formControlName="cargo"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer appearance-none text-slate-600"
+            [class.border-red-400]="colaboradorForm.get('cargo')?.invalid && colaboradorForm.get('cargo')?.touched"
+          >
+            <option value="" disabled selected>Selecione o cargo...</option>
+            <option *ngFor="let cargo of cargos" [value]="cargo.nome">
+              {{ cargo.nome }}
+            </option>
+          </select>
+          <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+        </div>
       </div>
     </div>
 
-    <div class="flex flex-col md:flex-row justify-end gap-3 pt-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Setor / Departamento</label>
+        <div class="relative">
+          <select 
+            formControlName="setor"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer appearance-none text-slate-600"
+            [class.border-red-400]="colaboradorForm.get('setor')?.invalid && colaboradorForm.get('setor')?.touched"
+          >
+            <option value="" disabled selected>Selecione o setor...</option>
+            <option *ngFor="let setor of setores" [value]="setor.nome">
+              {{ setor.nome }}
+            </option>
+          </select>
+          <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Status</label>
+        <div class="relative">
+          <select 
+            formControlName="status"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer appearance-none text-slate-600"
+          >
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+          </select>
+          <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-end gap-3 pt-6 border-t border-slate-50">
       <button 
         type="button" 
         routerLink="/colaboradores"
@@ -63,9 +100,9 @@
       </button>
       <button 
         type="submit" 
-        class="px-10 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-100 transition-all order-1 md:order-2"
+        class="px-10 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-100 transition-all order-1 md:order-2 flex items-center justify-center gap-2"
       >
-        Cadastrar
+        Salvar Colaborador
       </button>
     </div>
 

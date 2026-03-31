@@ -2,10 +2,10 @@
   
   <div class="flex items-center gap-2 mb-10 pl-3">
     <img 
-    src="logo.png" 
-    alt="Logo" 
-    class="w-10 h-10 object-contain"
-  >
+      src="logo.png" 
+      alt="Logo" 
+      class="w-10 h-10 object-contain"
+    >
     <div>
       <h1 class="font-semibold text-xl text-slate-800 leading-none">EPI</h1>
       <p class="text-[10px] text-gray-500 tracking-wide uppercase">Sistema de Controle</p>
@@ -16,39 +16,98 @@
     <ul class="space-y-1">
       
       <li>
-        <a [routerLink]="['/dashboard']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link" class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 hover:text-slate-800 transition-all">
-          <div class="active-indicator hidden absolute inset-y-0 right-0 w-1 bg-blue-600 rounded-r"></div>
+        <a [routerLink]="['/dashboard']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link" 
+          class="group flex items-center gap-3 rounded-lg py-2.5 px-3 
+            text-sm font-medium text-gray-500 
+            hover:bg-slate-50 hover:text-slate-800 transition-all relative">
           <i class="ph ph-squares-four text-xl"></i>
           <span>Dashboard</span>
         </a>
       </li>
+
       <li>
-        <a [routerLink]="['/epis']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link" class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 hover:text-slate-800 transition-all relative">
-          <div class="active-indicator hidden absolute inset-y-0 right-0 w-1 bg-blue-600 rounded-r"></div>
+        <a [routerLink]="['/epis']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link" 
+        class="group flex items-center gap-3 rounded-lg py-2.5 px-3 
+          text-sm font-medium text-gray-500
+         hover:bg-slate-50 hover:text-slate-800 transition-all relative">
           <i class="ph ph-package text-xl"></i>
           <span>Catálogo de EPIs</span>
         </a>
       </li>
 
       <li>
-        <a [routerLink]="['/colaboradores']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link" class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 hover:text-slate-800 transition-all relative">
-          <div class="active-indicator hidden absolute inset-y-0 right-0 w-1 bg-blue-600 rounded-r"></div>
+        <a [routerLink]="['/colaboradores']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link" 
+        class="group flex items-center gap-3 rounded-lg py-2.5 px-3 
+          text-sm font-medium text-gray-500 
+          hover:bg-slate-50 hover:text-slate-800 transition-all relative">
           <i class="ph ph-users text-xl"></i>
           <span>Colaboradores</span>
         </a>
       </li>
 
       <li>
-        <a [routerLink]="['/entregas']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link" class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 hover:text-slate-800 transition-all relative">
-          <div class="active-indicator hidden absolute inset-y-0 right-0 w-1 bg-blue-600 rounded-r"></div>
+        <a [routerLink]="['/entregas']" routerLinkActive="bg-blue-50/50 text-blue-700 active-link"
+        class="group flex items-center gap-3 rounded-lg py-2.5 px-3 
+          text-sm font-medium text-gray-500 
+          hover:bg-slate-50 hover:text-slate-800 transition-all relative">
           <i class="ph ph-clipboard-text text-xl"></i>
           <span>Registro de Entrega</span>
         </a>
       </li>
+
+      <li class="pt-4">
+        <p class="px-3 text-xs font-semibold text-slate-400 
+        uppercase tracking-wider mb-2">Configurações</p>
+
+        <button 
+          (click)="toggleCadastroBase()"
+          class="w-full flex items-center justify-between px-3 py-2.5 
+          text-sm font-medium text-slate-600 
+          hover:bg-slate-50 rounded-lg transition-all group focus:outline-none">
+          
+          <div class="flex items-center gap-3">
+            <i class="ph ph-database text-xl text-slate-600"></i>
+            <span>Cadastros Base</span>
+          </div>
+
+          <i class="ph ph-caret-down text-xs transition-transform duration-300"
+            [class.rotate-180]="isCadastroBaseOpen"></i>
+        </button>
+
+        <div 
+          class="overflow-hidden transition-all duration-300 ease-in-out ml-4 border-l border-slate-100"
+          [style.max-height]="isCadastroBaseOpen ? '120px' : '0px'"
+          [style.opacity]="isCadastroBaseOpen ? '1' : '0'">
+          
+          <div class="py-1 space-y-1 pr-2">
+            
+            <a routerLink="/cargos" 
+              routerLinkActive="bg-blue-50/50 text-blue-700 font-semibold active-link"
+              class="group flex items-center gap-3 rounded-lg py-2 px-3 
+                text-sm font-medium text-gray-500 
+                hover:bg-slate-50 hover:text-slate-800 transition-all relative">
+              <i class="ph ph-identification-card text-lg"></i>
+              <span>Cargos</span>
+            </a>
+
+            <a routerLink="/setores" 
+              routerLinkActive="bg-blue-50/50 text-blue-700 font-semibold active-link"
+              class="group flex items-center gap-3 rounded-lg py-2 px-3 
+                text-sm font-medium text-gray-500 
+                hover:bg-slate-50 hover:text-slate-800 transition-all relative">
+              <i class="ph ph-tree-structure text-lg"></i>
+              <span>Setores</span>
+            </a>
+            
+          </div>
+        </div>
+      </li>
     </ul>
 
-    <div class="border-t border-gray-100 pt-4 pb-8 space-y-1">      
-      <a [routerLink]="['/login']" class="flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all">
+    <div class="border-t border-gray-100 pt-4 pb-8">      
+      <a [routerLink]="['/login']" class="flex items-center gap-3 rounded-lg py-2.5 px-3 
+      text-sm font-medium text-gray-500 
+      hover:bg-red-50 hover:text-red-600 transition-all">
         <i class="ph ph-sign-out text-xl"></i>
         <span>Sair</span>
       </a>
