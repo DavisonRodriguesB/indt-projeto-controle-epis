@@ -9,4 +9,14 @@ import { RouterModule } from '@angular/router'; // Importante para o routerLink
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.css']
 })
-export class SidebarComponent {}
+export class SidebarComponent {
+
+  // Controle do submenu
+  isCadastroBaseOpen = false;
+
+  toggleCadastroBase() {
+    this.isCadastroBaseOpen = !this.isCadastroBaseOpen;
+  }
+
+
+}

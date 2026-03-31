@@ -15,21 +15,29 @@ export class ColaboradorFormComponent implements OnInit {
   isEdicao = false;
   colaboradorId: string | null = null;
 
+  // Listas para alimentar os selects do HTML
+  setores: any[] = [];
+  cargos: any[] = [];
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private route: ActivatedRoute // Necessário para ler o ID da rota
+    private route: ActivatedRoute 
   ) {}
 
   ngOnInit(): void {
-    // Inicializa a estrutura do formulário
+    // 1. CARREGAR OS DADOS PARA OS SELECTS
+    this.carregarListasAuxiliares();
+
+    // 2. INICIALIZA O FORMULÁRIO (Incluindo o campo 'cargo')
     this.colaboradorForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
       matricula: ['', [Validators.required]],
-      setor: ['', [Validators.required]]
+      cargo: ['', [Validators.required]], // Campo adicionado
+      setor: ['', [Validators.required]],
+      status: ['Ativo', [Validators.required]]
     });
 
-    // Verifica se existe um ID na rota (ex: /colaboradores/editar/1)
     this.colaboradorId = this.route.snapshot.paramMap.get('id');
     
     if (this.colaboradorId) {
@@ -38,9 +46,25 @@ export class ColaboradorFormComponent implements OnInit {
     }
   }
 
+  // Simula a busca de dados que você cadastrou nas outras telas
+  carregarListasAuxiliares() {
+    this.setores = [
+      { nome: 'Operação' },
+      { nome: 'Manutenção' },
+      { nome: 'Logística' }
+    ];
+
+    this.cargos = [
+      { nome: 'Técnico de Segurança' },
+      { nome: 'Almoxarife' },
+      { nome: 'Operador de Máquina' }
+    ];
+  }
+
   carregarDadosParaEdicao(id: string) {
     console.log('Modo Edição: Buscando dados do colaborador ID', id);
-    
+    // Exemplo de como preencheria o form após buscar na API:
+    // this.colaboradorForm.patchValue(dadosVindoDaApi);
   }
 
   onSubmit() {
@@ -60,4 +84,5 @@ export class ColaboradorFormComponent implements OnInit {
       this.colaboradorForm.markAllAsTouched();
     }
   }
+  
 }
