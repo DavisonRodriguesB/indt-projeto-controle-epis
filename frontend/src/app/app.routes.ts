@@ -59,6 +59,12 @@ export const routes: Routes = [
       },
 
       {
+        path: 'categorias',
+        loadComponent: () =>
+          import('./features/configuracoes/categorias/pages/list/list').then((m) => m.CategoriasEpiComponent),
+      },
+
+      {
         path: 'entregas',
         loadComponent: () =>
           import('./features/entregas/pages/list/list').then(

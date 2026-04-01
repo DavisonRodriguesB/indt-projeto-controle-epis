@@ -3,13 +3,11 @@
   <div class="flex justify-between items-end">
     <div>
       <h2 class="text-2xl font-bold text-slate-800">Catálogo de EPIs</h2>
-      <p class="text-slate-500">Controle técnico de Certificados de Aprovação (CA) e validade.</p>
+      <p class="text-slate-500">Controle técnico de Certificados de Aprovação (CA) e categorias.</p>
     </div>
     <button 
-     routerLink="/epis/novo"
-            class="bg-blue-600 hover:bg-blue-700
-          text-white px-4 py-2 rounded-lg font-medium flex 
-            items-center gap-2 transition-all shadow-lg shadow-blue-100">
+      routerLink="/epis/novo"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all shadow-lg shadow-blue-100">
       <i class="ph ph-package text-xl"></i>
       Novo EPI
     </button>
@@ -21,7 +19,7 @@
       <input 
         type="text" 
         [(ngModel)]="searchTerm"
-        placeholder="Buscar por nome ou número do CA" 
+        placeholder="Buscar por nome, código ou CA..." 
         class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20"
       >
     </div>
@@ -32,9 +30,9 @@
       <thead class="bg-slate-50 border-b border-slate-200">
         <tr>
           <th class="px-6 py-4 text-sm font-semibold text-slate-700">Equipamento</th>
+          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Cód. Produto</th>
           <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Nº CA</th>
           <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Vida Útil</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Estoque Atual</th>
           <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Ações</th>
         </tr>
       </thead>
@@ -43,34 +41,36 @@
           <td class="px-6 py-4">
             <div class="flex flex-col">
               <span class="font-semibold text-slate-800">{{ item.nome }}</span>
-              <span class="text-xs text-slate-400 uppercase tracking-tighter">{{ item.categoria }}</span>
+              <span class="text-[10px] text-slate-400 uppercase tracking-wider">
+                {{ item.categoria }}
+              </span>
             </div>
           </td>
+          
+          <td class="px-6 py-4 text-center">
+            <span class="text-sm font-mono text-slate-600 font-medium">
+              {{ item.codigo || '---' }}
+            </span>
+          </td>
+
           <td class="px-6 py-4 text-center">
             <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-mono font-bold">
               {{ item.numero_ca }}
             </span>
           </td>
+
           <td class="px-6 py-4 text-center text-sm text-slate-600">
             {{ item.vida_util_dias }} dias
-          </td>
-          
-          <td class="px-6 py-4">
-            <div class="flex flex-col items-center">
-              <span [class]="item.estoque_atual <= item.estoque_minimo ? 'text-red-600 font-bold' : 'text-slate-800 font-medium'">
-                {{ item.estoque_atual }} un.
-              </span>
-              <span *ngIf="item.estoque_atual <= item.estoque_minimo" 
-                    class="text-[9px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-semibold uppercase mt-1 animate-pulse">
-                Estoque Baixo
-              </span>
-            </div>
           </td>
 
           <td class="px-6 py-4 text-right">
             <div class="flex justify-end gap-2">
-              <button class="text-slate-400 hover:text-blue-600 transition-colors"><i class="ph ph-pencil-simple text-xl"></i></button>
-              <button class="text-slate-400 hover:text-red-600 transition-colors"><i class="ph ph-trash text-xl"></i></button>
+              <button class="text-slate-400 hover:text-blue-600 transition-colors">
+                <i class="ph ph-pencil-simple text-xl"></i>
+              </button>
+              <button class="text-slate-400 hover:text-red-600 transition-colors">
+                <i class="ph ph-trash text-xl"></i>
+              </button>
             </div>
           </td>
         </tr>
