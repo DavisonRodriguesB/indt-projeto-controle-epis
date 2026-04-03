@@ -1,0 +1,64 @@
+<div id="section-to-print" class="p-10 bg-white text-slate-900 font-sans min-h-[29.7cm]">
+  
+  <div class="flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-8">
+    <div>
+      <h2 class="text-2xl font-black uppercase tracking-tighter italic">Protocolo de Entrega de EPI</h2>
+      <p class="text-[10px] text-slate-500 font-mono uppercase tracking-widest">Documento de Controle Interno</p>
+    </div>
+    <div class="text-right text-[10px] leading-tight">
+      <p class="font-bold text-sm uppercase">INDT - Manaus</p>
+      <p>Gestão de Segurança do Trabalho</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-8 mb-8 bg-slate-50 p-6 rounded-2xl border border-slate-100 print:bg-white print:border-slate-300">
+    <div class="space-y-1.5">
+      <p class="text-[9px] uppercase font-bold text-slate-400">Dados do Colaborador</p>
+      <p class="font-bold text-lg text-slate-800 leading-none">{{ dados.colaborador }}</p>
+      <div class="text-xs text-slate-600 space-y-0.5 pt-1">
+        <p>Colaborador: <span class="font-bold text-slate-800">{{ dados.colaborador }}</span></p>
+        <p>Setor: <span class="font-bold text-slate-800">{{ dados.setor }}</span></p>
+      </div>
+    </div>
+    <div class="space-y-1.5 text-right">
+      <p class="text-[9px] uppercase font-bold text-slate-400">Registro da Entrega</p>
+      <p class="text-sm font-bold text-slate-800">{{ dados.dataEntrega | date:'dd/MM/yyyy - HH:mm' }}</p>
+      <p class="text-[10px] text-slate-500">Emitido por: <span class="uppercase font-semibold">{{ dados.usuarioSistema }}</span></p>
+    </div>
+  </div>
+
+  <table class="w-full mb-12 border-collapse">
+    <thead>
+      <tr class="border-b-2 border-slate-800 text-[10px] uppercase text-slate-500">
+        <th class="py-3 px-2 text-left font-bold">Código / Descrição do Equipamento</th>
+        <th class="py-3 px-2 text-center font-bold">C.A (MTE)</th>
+        <th class="py-3 px-2 text-right font-bold">Quantidade</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-200">
+      <tr *ngFor="let item of dados.itens" class="animate-in fade-in">
+        <td class="py-4 px-2">
+          <p class="text-sm font-bold text-slate-800">{{ item.material }}</p>
+          <p class="text-[10px] text-slate-400 font-mono tracking-tighter">{{ item.codigo }}</p>
+        </td>
+        <td class="py-4 px-2 text-center text-sm font-mono font-bold">{{ item.ca }}</td>
+        <td class="py-4 px-2 text-right text-sm font-black">{{ item.quantidade }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="text-[10px] text-slate-500 leading-relaxed mb-24 text-justify border-t pt-6 italic">
+    <strong>Termo de Recebimento e Responsabilidade:</strong> Declaro para os devidos fins que recebi da empresa os Equipamentos de Proteção Individual (EPIs) acima relacionados, novos e em perfeitas condições de uso. Comprometo-me a utilizá-los adequadamente durante o exercício de minhas funções, zelar pela sua guarda e conservação, e solicitar a substituição quando os mesmos estiverem danificados ou extraviados, conforme determina a Norma Regulamentadora NR-6.
+  </div>
+
+  <div class="grid grid-cols-2 gap-20 pt-10">
+    <div class="border-t border-slate-900 text-center pt-2">
+      <p class="text-[10px] font-bold uppercase">{{ dados.colaborador }}</p>
+      <p class="text-[8px] text-slate-400 tracking-[0.2em]">Assinatura do Colaborador</p>
+    </div>
+    <div class="border-t border-slate-900 text-center pt-2">
+      <p class="text-[10px] font-bold uppercase">{{ dados.usuarioSistema }}</p>
+      <p class="text-[8px] text-slate-400 tracking-[0.2em]">Responsável pela Entrega</p>
+    </div>
+  </div>
+</div>

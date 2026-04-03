@@ -1,0 +1,30 @@
+@media print {
+  /* Esconde tudo o que não deve sair no papel */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Garante que o fundo da página de impressão seja branco */
+  body, html {
+    background: #fff !important;
+  }
+
+  /* Faz o modal e seu conteúdo serem visíveis e ocuparem o topo da página */
+  #section-to-print, #section-to-print * {
+    visibility: visible;
+  }
+
+  #section-to-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Remove sombras e bordas de modal no papel */
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+}
