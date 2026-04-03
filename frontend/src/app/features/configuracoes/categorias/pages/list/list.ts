@@ -11,7 +11,7 @@ import { RouterModule } from '@angular/router';
 })
 export class CategoriasEpiComponent implements OnInit {
   categoriaForm!: FormGroup;
-  isModalOpen = false; // Controle do Modal
+  isModalOpen = false; 
   
   categorias = [
     { id: 1, nome: 'Proteção Auditiva' },

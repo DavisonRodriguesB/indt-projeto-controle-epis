@@ -1,17 +1,17 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Importante para diretivas comuns
-import { RouterModule } from '@angular/router'; // Importante para o routerLink
+import { CommonModule } from '@angular/common'; 
+import { RouterModule } from '@angular/router'; 
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule], // Adicione estes dois aqui
+  imports: [CommonModule, RouterModule], 
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.css']
 })
 export class SidebarComponent {
 
-  // Controle do submenu
+
   isCadastroBaseOpen = false;
 
   toggleCadastroBase() {
