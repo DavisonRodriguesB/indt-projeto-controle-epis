@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-// Interface espelhando a Entidade 'epi' do seu Backend
+
 export interface Epi {
   id: number;
   nome: string;

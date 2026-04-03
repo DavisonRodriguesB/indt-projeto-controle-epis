@@ -29,8 +29,8 @@ export class EpiFormComponent implements OnInit {
   ngOnInit(): void {
     this.epiForm = this.fb.group({
       nome: ['', [Validators.required]],
-      codigo: ['', [Validators.required]], // Novo campo
-      categoria: ['', [Validators.required]], // Novo campo
+      codigo: ['', [Validators.required]], 
+      categoria: ['', [Validators.required]], 
       ca: ['', [Validators.required]],
       validade: [null, [Validators.required, Validators.min(1)]]
     });

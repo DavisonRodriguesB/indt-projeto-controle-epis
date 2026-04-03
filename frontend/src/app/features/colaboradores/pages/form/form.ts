@@ -26,14 +26,13 @@ export class ColaboradorFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // 1. CARREGAR OS DADOS PARA OS SELECTS
     this.carregarListasAuxiliares();
 
-    // 2. INICIALIZA O FORMULÁRIO (Incluindo o campo 'cargo')
+    
     this.colaboradorForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
       matricula: ['', [Validators.required]],
-      cargo: ['', [Validators.required]], // Campo adicionado
+      cargo: ['', [Validators.required]], 
       setor: ['', [Validators.required]],
       status: ['Ativo', [Validators.required]]
     });
@@ -46,7 +45,7 @@ export class ColaboradorFormComponent implements OnInit {
     }
   }
 
-  // Simula a busca de dados que você cadastrou nas outras telas
+  
   carregarListasAuxiliares() {
     this.setores = [
       { nome: 'Operação' },
@@ -63,8 +62,7 @@ export class ColaboradorFormComponent implements OnInit {
 
   carregarDadosParaEdicao(id: string) {
     console.log('Modo Edição: Buscando dados do colaborador ID', id);
-    // Exemplo de como preencheria o form após buscar na API:
-    // this.colaboradorForm.patchValue(dadosVindoDaApi);
+    
   }
 
   onSubmit() {

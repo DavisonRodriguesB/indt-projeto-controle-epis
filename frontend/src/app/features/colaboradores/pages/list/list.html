@@ -24,10 +24,12 @@
         class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20"
       >
     </div>
-    <select class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none text-slate-600">
+    
+    <select 
+      [(ngModel)]="selectedSetor"
+      class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none text-slate-600 cursor-pointer focus:ring-2 focus:ring-blue-500/20">
       <option value="">Todos os Setores</option>
-      <option value="Produção">Produção</option>
-      <option value="Engenharia">Engenharia</option>
+      <option *ngFor="let setor of setores" [value]="setor">{{ setor }}</option>
     </select>
   </div>
 
