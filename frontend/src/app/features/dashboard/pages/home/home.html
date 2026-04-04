@@ -1,1 +1,120 @@
-<p>Dashboard</p>
+<div class="p-6 space-y-8 animate-in fade-in duration-500">
+  <div class="flex justify-between items-end">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Dashboard de Segurança</h1>
+      <p class="text-sm text-slate-500">EPI PIM - Gestão de Conformidade</p>
+    </div>
+    <div class="text-right hidden md:block">
+      <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Status do Sistema</span>
+      <div class="flex items-center gap-2 text-emerald-500 font-medium">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        Online e Atualizado
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div *ngFor="let item of stats" 
+      class="bg-white p-6 rounded-2xl border-l-4 shadow-sm border-y border-r border-slate-200"
+      [ngClass]="item.color.split(' ')[2]">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-slate-500">{{ item.label }}</p>
+          <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ item.value }}</h3>
+        </div>
+        <div class="p-2 rounded-lg" [ngClass]="item.color.split(' ')[1] + ' ' + item.color.split(' ')[0]">
+          <i class="ph {{ item.icon }} text-2xl"></i>
+        </div>
+      </div>
+      <p class="text-xs mt-4 font-medium" [ngClass]="item.color.split(' ')[0]">
+        {{ item.description }}
+      </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+      <div class="flex justify-between items-center mb-4">
+        <p class="text-sm font-medium text-slate-500">Conformidade Global</p>
+        <span class="text-xs font-bold px-2 py-1 bg-emerald-50 text-emerald-600 rounded-full">Meta 100%</span>
+      </div>
+      <div class="flex items-end gap-2 mb-2">
+        <h3 class="text-3xl font-bold text-slate-800">{{ conformidadeGeral }}%</h3>
+        <span class="text-emerald-500 text-sm font-bold mb-1">+2.4%</span>
+      </div>
+      <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+        <div class="bg-emerald-500 h-full rounded-full transition-all duration-1000" [style.width.%]="conformidadeGeral"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border border-slate-200 rounded-[1.5rem] shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+          <i class="ph ph-calendar-check text-xl font-bold"></i>
+        </div>
+        <div>
+          <h2 class="font-bold text-slate-800">Vencimentos Próximos (Top 10)</h2>
+          <p class="text-xs text-slate-400 font-medium">Listagem prioritária para renovação</p>
+        </div>
+      </div>
+      <button class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 text-white text-[10px] font-black rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-slate-200 uppercase tracking-widest">
+        Ver Relatório Completo
+      </button>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="text-slate-400 text-[10px] font-black uppercase tracking-[0.15em] border-b border-slate-50">
+            <th class="px-8 py-5 text-left">Colaborador</th>
+            <th class="px-8 py-5 text-left">Equipamento (EPI)</th>
+            <th class="px-8 py-5 text-left">Data Limite</th>
+            <th class="px-8 py-5 text-center">Status</th>
+            <th class="px-8 py-5 text-right">Ação</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          <tr *ngFor="let alerta of alertasVencimento" class="group hover:bg-slate-50/50 transition-all cursor-default">
+            <td class="px-8 py-5">
+              <div class="flex items-center gap-4">
+                
+                <div>
+                  <span class="block font-bold text-slate-700 tracking-tight  group-hover:text-blue-600 transition-colors">{{ alerta.colaborador }}</span>
+                  <span class="text-[10px] text-slate-400 font-medium italic">Matrícula: #{{ 1000 + (alerta.colaborador.length * 7) }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="px-8 py-5">
+              <div class="flex flex-col">
+                <span class="text-sm font-semibold text-slate-600 group-hover:text-blue-600 transition-colors">{{ alerta.epi }}</span>
+                <span class="text-[10px] text-slate-400">C.A: 42.152</span>
+              </div>
+            </td>
+            <td class="px-8 py-5 font-mono text-xs font-bold text-slate-500">
+              {{ alerta.data | date:'dd/MM/yyyy' }}
+            </td>
+            <td class="px-8 py-5 text-center">
+              <div class="flex justify-center">
+                <span [ngClass]="{
+                    'bg-red-50 text-red-600 border-red-100': alerta.status === 'critico',
+                    'bg-amber-50 text-amber-600 border-amber-100': alerta.status === 'alerta',
+                    'bg-slate-50 text-slate-400 border-slate-100': alerta.status === 'normal'
+                  }" class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border">
+                  {{ alerta.status }}
+                </span>
+              </div>
+            </td>
+            <td class="px-8 py-5 text-right">
+              <button class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Notificar">
+                <i class="ph ph-paper-plane-tilt text-xl"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
