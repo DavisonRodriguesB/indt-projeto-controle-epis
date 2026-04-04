@@ -1,0 +1,48 @@
+<div class="lg:col-span-1 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 h-fit">
+  <h3 class="font-bold text-slate-800 flex items-center gap-2 border-b pb-3 text-sm uppercase tracking-wider">
+    Montar Entrega
+  </h3>
+
+  <form [formGroup]="form" class="space-y-4">
+    <div>
+      <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Colaborador</label>
+      <div class="relative">
+        <select 
+          formControlName="colaborador" 
+          class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-600 appearance-none disabled:opacity-70 disabled:bg-blue-50 disabled:border-blue-200 disabled:text-blue-700 font-semibold"
+        >
+          <option value="">Selecione o funcionário...</option>
+          <option *ngFor="let colab of colaboradores" [value]="colab">{{ colab }}</option>
+        </select>
+        <button *ngIf="colaboradorFixado" (click)="onDesafixar.emit()" class="absolute right-3 top-2.5 text-blue-400 hover:text-red-500">
+          <i class="ph ph-x-circle text-xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="pt-2">
+      <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Material (EPI)</label>
+      <input list="listaEpis" formControlName="material" (input)="onLimparErro.emit()" placeholder="Busque por nome ou CA..." 
+        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-600"
+        [class.border-red-400]="erroSaldo">
+      <datalist id="listaEpis">
+        <option *ngFor="let item of estoque" [value]="item.codigo + ' - ' + item.material + ' (CA: ' + item.ca + ')'">
+          Saldo: {{ item.saldo }} unidades
+        </option>
+      </datalist>
+    </div>
+
+    <div>
+      <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Quantidade</label>
+      <input type="number" formControlName="quantidade" (input)="onLimparErro.emit()" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none" [class.border-red-400]="erroSaldo">
+      <div *ngIf="erroSaldo" class="mt-2 flex items-center gap-1.5 text-red-500 bg-red-50 p-2 rounded-lg border border-red-100">
+        <i class="ph ph-warning-circle text-lg"></i>
+        <span class="text-[10px] font-bold uppercase">{{ erroSaldo }}</span>
+      </div>
+    </div>
+
+    <button (click)="onIncluir.emit()" [disabled]="form.invalid" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100">
+      <i class="ph ph-plus-circle text-xl"></i> Incluir na Lista
+    </button>
+  </form>
+</div>

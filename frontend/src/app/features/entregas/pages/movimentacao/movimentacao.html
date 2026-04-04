@@ -5,135 +5,61 @@
       <h1 class="text-2xl font-bold text-slate-800">Movimentação de EPI</h1>
       <p class="text-sm text-slate-500">Gerencie entregas aos colaboradores e saldo de estoque</p>
     </div>
-    
     <div class="flex gap-3">
-      <button (click)="openModalVisualizar()" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm text-sm">
-        <i class="ph ph-eye text-xl"></i>
-        Visualizar Saldo
+      <button (click)="openModalVisualizar()" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-50 flex items-center gap-2 shadow-sm text-sm">
+        <i class="ph ph-eye text-xl"></i> Visualizar Saldo
       </button>
       <button (click)="openModalSaldo()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium flex items-center gap-2 transition-all shadow-md shadow-emerald-100 text-sm">
-        <i class="ph ph-plus-circle text-xl"></i>
-        Incluir Saldo
+        <i class="ph ph-plus-circle text-xl"></i> Incluir Saldo
       </button>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-1 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 h-fit">
-      <h3 class="font-bold text-slate-800 flex items-center gap-2 border-b pb-3 text-sm uppercase tracking-wider">
-        Montar Entrega
-      </h3>
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+  
+      <div class="lg:col-span-1">
+        <app-formulario-entrega 
+          [form]="formSaidaEpi"
+          [colaboradores]="colaboradores"
+          [estoque]="estoque"
+          [erroSaldo]="erroSaldo"
+          [colaboradorFixado]="colaboradorFixado"
+          (onIncluir)="incluirItemNaLista()"
+          (onDesafixar)="desafixarColaborador()"
+          (onLimparErro)="limparErro()">
+        </app-formulario-entrega>
+      </div>
 
-      <form [formGroup]="formSaidaEpi" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Colaborador</label>
-          <div class="relative">
-            <select 
-              formControlName="colaborador" 
-              [attr.disabled]="colaboradorFixado ? '' : null"
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-600 appearance-none disabled:opacity-70 disabled:bg-blue-50 disabled:border-blue-200 disabled:text-blue-700 font-semibold"
-            >
-              <option value="">Selecione o funcionário...</option>
-              <option *ngFor="let colab of colaboradores" [value]="colab">{{ colab }}</option>
-            </select>
-            <button *ngIf="colaboradorFixado" (click)="desafixarColaborador()" class="absolute right-3 top-2.5 text-blue-400 hover:text-red-500">
-              <i class="ph ph-x-circle text-xl"></i>
-            </button>
-          </div>
-        </div>
+      <div class="lg:col-span-3">
+        <app-lista-resumo 
+          [itens]="itensMovimentacao"
+          [colaboradorFixado]="colaboradorFixado"
+          (onRemover)="removerItemLista($event)"
+          (onFinalizar)="finalizarMovimentacao()">
+        </app-lista-resumo>
+      </div>
 
-        <div class="pt-2">
-          <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Material (EPI)</label>
-          <input 
-            list="listaEpis" 
-            formControlName="material" 
-            (input)="limparErro()"
-            placeholder="Busque por nome ou CA..." 
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-600"
-            [class.border-red-400]="erroSaldo"
-          >
-          <datalist id="listaEpis">
-            <option *ngFor="let item of estoque" [value]="item.codigo + ' - ' + item.material + ' (CA: ' + item.ca + ')'">
-              Saldo: {{ item.saldo }} unidades
-            </option>
-          </datalist>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Quantidade</label>
-          <input type="number" formControlName="quantidade" (input)="limparErro()" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-600" [class.border-red-400]="erroSaldo">
-          <div *ngIf="erroSaldo" class="mt-2 flex items-center gap-1.5 text-red-500 bg-red-50 p-2 rounded-lg border border-red-100">
-            <i class="ph ph-warning-circle text-lg"></i>
-            <span class="text-[10px] font-bold uppercase">{{ erroSaldo }}</span>
-          </div>
-        </div>
-
-        <button (click)="incluirItemNaLista()" [disabled]="formSaidaEpi.invalid" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100">
-          <i class="ph ph-plus-circle text-xl"></i> Incluir na Lista
-        </button>
-      </form>
     </div>
 
-    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[450px]">
-      <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-        <span class="font-bold text-slate-700 uppercase text-xs tracking-wider">Resumo da Entrega</span>
-        <span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-bold">{{ itensMovimentacao.length }} ITENS</span>
-      </div>
-
-      <div class="flex-1 overflow-y-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="text-[10px] text-slate-400 uppercase bg-white border-b sticky top-0">
-              <th class="px-6 py-4 font-bold">Material / CA</th>
-              <th class="px-6 py-4 text-center font-bold">Quantidade</th>
-              <th class="px-6 py-4 text-right font-bold">Remover</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-50">
-            <tr *ngFor="let item of itensMovimentacao" class="hover:bg-slate-50/50 transition-colors animate-in fade-in slide-in-from-right-2 duration-200">
-              <td class="px-6 py-4">
-                <div class="flex flex-col">
-                  <span class="text-sm font-semibold text-slate-700">{{ item.material }}</span>
-                  <span class="text-[10px] text-slate-400 font-mono">Cód: {{ item.codigo }} | CA: {{ item.ca }}</span>
-                </div>
-              </td>
-              <td class="px-6 py-4 text-center">
-                <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg font-bold text-sm">{{ item.quantidade }}</span>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <button (click)="removerItemLista(item.id)" class="text-slate-300 hover:text-red-500 transition-all p-1">
-                  <i class="ph ph-trash text-xl"></i>
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="itensMovimentacao.length === 0">
-              <td colspan="3" class="px-6 py-20 text-center text-slate-300 italic text-sm">Não há materiais incluídos...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="p-6 bg-slate-50 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p class="text-xs text-slate-500 italic">
-          {{ colaboradorFixado ? 'Entrega para: ' + colaboradorFixado : 'Selecione um colaborador para finalizar.' }}
-        </p>
-        <button (click)="finalizarMovimentacao()" [disabled]="itensMovimentacao.length === 0" class="w-full md:w-auto px-12 py-3.5 bg-slate-900 hover:bg-black text-white font-bold rounded-xl transition-all shadow-xl disabled:bg-slate-300">
-          Finalizar e Gerar Protocolo
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+<app-modal-entrada-saldo 
+  [isOpen]="isModalSaldoOpen"
+  [form]="formEntradaSaldo"
+  [estoque]="estoque"
+  [nomeArquivo]="nomeArquivoAnexo"
+  (onClose)="closeModalSaldo()"
+  (onFile)="onFileSelected($event)"
+  (onSalvar)="salvarNovoSaldo()">
+</app-modal-entrada-saldo>
 
 <div *ngIf="isModalVisualizarOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" (click)="closeModalVisualizar()"></div>
-  <div class="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in" (click)="closeModalVisualizar()"></div>
+  <div class="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in">
     <div class="p-5 border-b flex justify-between items-center bg-slate-50/50">
       <div class="flex items-center gap-3">
         <div class="p-2 bg-blue-100 text-blue-600 rounded-lg"><i class="ph ph-database text-xl"></i></div>
         <h3 class="font-bold text-slate-800">Saldo Atual em Estoque</h3>
       </div>
-      <button (click)="closeModalVisualizar()" class="text-slate-400 hover:text-slate-600 p-2 rounded-full"><i class="ph ph-x text-xl"></i></button>
+      <button (click)="closeModalVisualizar()" class="text-slate-400 p-2"><i class="ph ph-x text-xl"></i></button>
     </div>
     <div class="p-0 max-h-[60vh] overflow-y-auto">
       <table class="w-full text-left">
@@ -154,63 +80,12 @@
   </div>
 </div>
 
-<div *ngIf="isModalSaldoOpen" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" (click)="closeModalSaldo()"></div>
-  <div class="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
-    <div class="p-6 border-b flex justify-between items-center bg-emerald-50/30">
-      <div class="flex items-center gap-3">
-        <div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg"><i class="ph ph-plus-circle text-xl"></i></div>
-        <div>
-          <h3 class="font-bold text-slate-800">Entrada de Material</h3>
-          <p class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Ajuste de Saldo em Estoque</p>
-        </div>
-      </div>
-      <button (click)="closeModalSaldo()" class="text-slate-400 hover:text-slate-600 p-2 rounded-full"><i class="ph ph-x text-xl"></i></button>
-    </div>
-    <div class="p-6">
-      <form [formGroup]="formEntradaSaldo" class="space-y-5">
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Material do Catálogo</label>
-          <select formControlName="materialCodigo" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-slate-600 font-semibold">
-            <option value="">Selecione o EPI para abastecer...</option>
-            <option *ngFor="let item of estoque" [value]="item.codigo">{{ item.codigo }} - {{ item.material }} (Atual: {{ item.saldo }})</option>
-          </select>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Qtd. Entrada</label>
-            <input type="number" formControlName="quantidade" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Documento/NF</label>
-            <label class="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white border border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-emerald-400 text-slate-500">
-              <i class="ph ph-paperclip text-lg"></i>
-              <span class="text-xs font-medium truncate">{{ nomeArquivoAnexo || 'Anexar' }}</span>
-              <input type="file" class="hidden" (change)="onFileSelected($event)">
-            </label>
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Observação</label>
-          <textarea formControlName="observacao" rows="2" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm resize-none" placeholder="Ex: NF 1234 - Compra Mensal"></textarea>
-        </div>
-      </form>
-    </div>
-    <div class="p-4 bg-slate-50 border-t flex gap-3">
-      <button (click)="closeModalSaldo()" class="flex-1 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-200 rounded-xl">Cancelar</button>
-      <button (click)="salvarNovoSaldo()" [disabled]="formEntradaSaldo.invalid" class="flex-[2] py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
-        <i class="ph ph-check-circle text-xl"></i> Confirmar Entrada
-      </button>
-    </div>
-  </div>
-</div>
-
-<div *ngIf="isModalReciboOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm print:bg-white print:p-0">
+<div *ngIf="isModalReciboOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm print:bg-white">
   <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl print:shadow-none">
     <div class="p-4 border-b flex justify-between items-center bg-slate-50 print:hidden">
       <h3 class="font-bold text-slate-800 italic text-sm px-2">Pré-visualização do Protocolo</h3>
       <div class="flex gap-2">
-        <button (click)="isModalReciboOpen = false" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-200 rounded-lg">Cancelar</button>
+        <button (click)="isModalReciboOpen = false" class="px-4 py-2 text-sm font-semibold text-slate-500 rounded-lg">Cancelar</button>
         <button (click)="imprimirRecibo()" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold flex items-center gap-2 shadow-lg shadow-blue-200">
           <i class="ph ph-printer text-lg"></i> Gerar PDF
         </button>

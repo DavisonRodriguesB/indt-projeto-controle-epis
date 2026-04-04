@@ -68,7 +68,7 @@ export const routes: Routes = [
         path: 'entregas',
         loadComponent: () =>
           import('./features/entregas/pages/movimentacao/movimentacao').then(
-            (m) => m.MovimentacaoComponent
+            (m) => m.Movimentacao
           ),
       },
       {

@@ -2,36 +2,49 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
+import { FormularioEntrega } from './components/formulario-entrega/formulario-entrega';
+import { ListaResumo } from './components/lista-resumo/lista-resumo';
+import { ModalEntradaSaldo } from './components/modal-entrada-saldo/modal-entrada-saldo';
+
 import { RelatorioepiComponent } from '../../../../shared/components/relatorioepi/relatorioepi';
 import { RelatorioEpiData } from '../../../../shared/components/relatorioepi/relatorio-epi.model';
 
 @Component({
   selector: 'app-movimentacao',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RelatorioepiComponent],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    RelatorioepiComponent,
+    FormularioEntrega,
+    ListaResumo,
+    ModalEntradaSaldo
+  ],
   templateUrl: './movimentacao.html',
   styleUrls: ['./movimentacao.css']
 })
-export class MovimentacaoComponent implements OnInit {
+export class Movimentacao implements OnInit {
   
+  // Controles de estado dos Modais
   isModalVisualizarOpen = false;
   isModalReciboOpen = false;
   isModalSaldoOpen = false; 
 
+  // Formulários
   formSaidaEpi: FormGroup;
   formEntradaSaldo: FormGroup; 
   
+  // Estado da Movimentação
   colaboradorFixado: string | null = null;
   itensMovimentacao: any[] = [];
   erroSaldo: string | null = null;
   nomeArquivoAnexo: string | null = null;
 
+  // Dados para o Relatório (Shared Component)
   dadosParaRelatorio!: RelatorioEpiData;
   usuarioLogado = "DAVISON BENTES"; 
 
-  // Histórico para futura tela de relatórios
-  historicoEntradas: any[] = [];
-
+  // Dados de Simulação (Mock)
   listaColaboradoresCompleta = [
     { nome: 'João Silva', funcao: 'Eletricista de Manutenção', setor: 'Instalações' },
     { nome: 'Maria Oliveira', funcao: 'Operadora de Máquina B', setor: 'Produção' },
@@ -49,14 +62,14 @@ export class MovimentacaoComponent implements OnInit {
   ];
 
   constructor(private fb: FormBuilder) {
-    // Formulário de Saída (Entrega)
+    // Inicialização do Formulário de Entrega
     this.formSaidaEpi = this.fb.group({
       colaborador: ['', Validators.required],
       material: ['', Validators.required],
       quantidade: [1, [Validators.required, Validators.min(1)]]
     });
 
-    // Formulário de Entrada (Novo Saldo)
+    // Inicialização do Formulário de Entrada de Saldo
     this.formEntradaSaldo = this.fb.group({
       materialCodigo: ['', Validators.required],
       quantidade: [1, [Validators.required, Validators.min(1)]],
@@ -66,25 +79,13 @@ export class MovimentacaoComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  // Lógica de Entrada de Saldo
+  // --- Lógica de Entrada de Saldo ---
   salvarNovoSaldo() {
     const { materialCodigo, quantidade, observacao } = this.formEntradaSaldo.value;
     const item = this.estoque.find(i => i.codigo === materialCodigo);
 
     if (item) {
-      // Atualiza o saldo no estoque principal
       item.saldo += quantidade;
-
-      // Salva no histórico para consulta futura
-      this.historicoEntradas.push({
-        data: new Date(),
-        material: item.material,
-        quantidade,
-        usuario: this.usuarioLogado,
-        anexo: this.nomeArquivoAnexo,
-        obs: observacao
-      });
-
       alert(`Saldo de ${item.material} atualizado com sucesso!`);
       this.closeModalSaldo();
     }
@@ -97,7 +98,7 @@ export class MovimentacaoComponent implements OnInit {
     }
   }
 
-  // Métodos de Saída (Entregas) existentes
+  // --- Lógica de Saída (Entrega de EPIs) ---
   incluirItemNaLista() {
     const { colaborador, material, quantidade } = this.formSaidaEpi.getRawValue();
     const codigoMaterial = material.split(' - ')[0].trim();
@@ -108,6 +109,7 @@ export class MovimentacaoComponent implements OnInit {
         this.erroSaldo = `Saldo insuficiente! Disponível: ${itemEstoque.saldo}`;
         return;
       }
+      
       this.itensMovimentacao.push({
         id: Date.now(),
         codigo: itemEstoque.codigo,
@@ -115,6 +117,7 @@ export class MovimentacaoComponent implements OnInit {
         ca: itemEstoque.ca,
         quantidade: quantidade
       });
+
       this.colaboradorFixado = colaborador;
       this.formSaidaEpi.get('colaborador')?.disable();
       this.formSaidaEpi.patchValue({ material: '', quantidade: 1 });
@@ -124,7 +127,9 @@ export class MovimentacaoComponent implements OnInit {
 
   removerItemLista(id: number) {
     this.itensMovimentacao = this.itensMovimentacao.filter(item => item.id !== id);
-    if (this.itensMovimentacao.length === 0) this.desafixarColaborador();
+    if (this.itensMovimentacao.length === 0) {
+      this.desafixarColaborador();
+    }
   }
 
   desafixarColaborador() {
@@ -134,10 +139,13 @@ export class MovimentacaoComponent implements OnInit {
     this.formSaidaEpi.patchValue({ colaborador: '' });
   }
 
-  limparErro() { this.erroSaldo = null; }
+  limparErro() { 
+    this.erroSaldo = null; 
+  }
 
   finalizarMovimentacao() {
     const infoColaborador = this.listaColaboradoresCompleta.find(c => c.nome === this.colaboradorFixado);
+    
     this.dadosParaRelatorio = {
       colaborador: this.colaboradorFixado || 'Não Informado',
       funcao: infoColaborador?.funcao || 'Operacional',
@@ -146,12 +154,15 @@ export class MovimentacaoComponent implements OnInit {
       usuarioSistema: this.usuarioLogado,
       itens: [...this.itensMovimentacao]
     };
+    
     this.isModalReciboOpen = true;
   }
 
-  imprimirRecibo() { window.print(); }
+  imprimirRecibo() { 
+    window.print(); 
+  }
 
-  // Controles de Interface
+  // --- Controles de Interface (Modais) ---
   openModalVisualizar() { this.isModalVisualizarOpen = true; }
   closeModalVisualizar() { this.isModalVisualizarOpen = false; }
   

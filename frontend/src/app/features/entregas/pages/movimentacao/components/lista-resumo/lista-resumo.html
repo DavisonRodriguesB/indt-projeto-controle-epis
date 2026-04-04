@@ -1,0 +1,48 @@
+<div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[450px]">
+  <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+    <span class="font-bold text-slate-700 uppercase text-xs tracking-wider">Resumo da Entrega</span>
+    <span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-bold">{{ itens.length }} ITENS</span>
+  </div>
+
+  <div class="flex-1 overflow-y-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="text-[10px] text-slate-400 uppercase bg-white border-b sticky top-0">
+          <th class="px-6 py-4 font-bold">Material / CA</th>
+          <th class="px-6 py-4 text-center font-bold">Quantidade</th>
+          <th class="px-6 py-4 text-right font-bold">Remover</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+        <tr *ngFor="let item of itens" class="hover:bg-slate-50/50 transition-colors">
+          <td class="px-6 py-4">
+            <div class="flex flex-col">
+              <span class="text-sm font-semibold text-slate-700">{{ item.material }}</span>
+              <span class="text-[10px] text-slate-400 font-mono">Cód: {{ item.codigo }} | CA: {{ item.ca }}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg font-bold text-sm">{{ item.quantidade }}</span>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <button (click)="onRemover.emit(item.id)" class="text-slate-300 hover:text-red-500 p-1">
+              <i class="ph ph-trash text-xl"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="itens.length === 0">
+          <td colspan="3" class="px-6 py-20 text-center text-slate-300 italic text-sm">Não há materiais incluídos...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="p-6 bg-slate-50 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+    <p class="text-xs text-slate-500 italic">
+      {{ colaboradorFixado ? 'Entrega para: ' + colaboradorFixado : 'Selecione um colaborador para finalizar.' }}
+    </p>
+    <button (click)="onFinalizar.emit()" [disabled]="itens.length === 0" class="w-full md:w-auto px-12 py-3.5 bg-slate-900 hover:bg-black text-white font-bold rounded-xl transition-all shadow-xl disabled:bg-slate-300">
+      Finalizar e Gerar Protocolo
+    </button>
+  </div>
+</div>
