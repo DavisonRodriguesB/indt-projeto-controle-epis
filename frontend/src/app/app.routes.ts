@@ -55,13 +55,13 @@ export const routes: Routes = [
       {
         path: 'setores',
         loadComponent: () =>
-          import('./features/configuracoes/setores/pages/list/list').then((m) => m.List),
+          import('./features/configuracoes/setores/pages/list/list').then((m) => m.SetoresList),
       },
 
       {
         path: 'categorias',
         loadComponent: () =>
-          import('./features/configuracoes/categorias/pages/list/list').then((m) => m.CategoriasEpiComponent),
+          import('./features/configuracoes/categorias/pages/list/list').then((m) => m.CategoriasList),
       },
 
       {
