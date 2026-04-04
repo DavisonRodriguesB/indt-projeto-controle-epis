@@ -15,7 +15,7 @@ export class ColaboradorFormComponent implements OnInit {
   isEdicao = false;
   colaboradorId: string | null = null;
 
-  // Listas para alimentar os selects do HTML
+ 
   setores: any[] = [];
   cargos: any[] = [];
 

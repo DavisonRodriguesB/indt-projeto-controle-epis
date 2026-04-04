@@ -1,6 +1,8 @@
 <div *ngIf="isOpen" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
   <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in" (click)="onClose.emit()"></div>
+
   <div class="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in">
+    
     <div class="p-6 border-b flex justify-between items-center bg-emerald-50/30">
       <div class="flex items-center gap-3">
         <div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg"><i class="ph ph-plus-circle text-xl"></i></div>
@@ -8,6 +10,8 @@
       </div>
       <button (click)="onClose.emit()" class="text-slate-400 p-2"><i class="ph ph-x text-xl"></i></button>
     </div>
+
+
     <div class="p-6">
       <form [formGroup]="form" class="space-y-5">
         <div>
@@ -37,6 +41,7 @@
         </div>
       </form>
     </div>
+    
     <div class="p-4 bg-slate-50 border-t flex gap-3">
       <button (click)="onClose.emit()" class="flex-1 py-2.5 font-bold text-slate-500">Cancelar</button>
       <button (click)="onSalvar.emit()" [disabled]="form.invalid" class="flex-[2] py-2.5 bg-emerald-600 text-white font-bold rounded-xl shadow-lg">Confirmar Entrada</button>

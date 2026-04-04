@@ -15,9 +15,9 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-  
-      <div class="lg:col-span-1">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    
+      <div class="lg:col-span-4">
         <app-formulario-entrega 
           [form]="formSaidaEpi"
           [colaboradores]="colaboradores"
@@ -30,7 +30,7 @@
         </app-formulario-entrega>
       </div>
 
-      <div class="lg:col-span-3">
+      <div class="lg:col-span-8">
         <app-lista-resumo 
           [itens]="itensMovimentacao"
           [colaboradorFixado]="colaboradorFixado"
@@ -40,6 +40,7 @@
       </div>
 
     </div>
+  </div>
 
 <app-modal-entrada-saldo 
   [isOpen]="isModalSaldoOpen"
