@@ -46,10 +46,10 @@ export class Movimentacao implements OnInit {
 
   // Dados de Simulação (Mock)
   listaColaboradoresCompleta = [
-    { nome: 'João Silva', funcao: 'Eletricista de Manutenção', setor: 'Instalações' },
-    { nome: 'Maria Oliveira', funcao: 'Operadora de Máquina B', setor: 'Produção' },
-    { nome: 'Carlos Souza', funcao: 'Mecânico Industrial', setor: 'Oficina' },
-    { nome: 'Ana Costa', funcao: 'Técnica de Segurança', setor: 'SESMT' }
+    { nome: 'Bruce Wayne', funcao: 'Eletricista de Manutenção', setor: 'Instalações' },
+    { nome: 'Tony Stark', funcao: 'Operadora de Máquina B', setor: 'Produção' },
+    { nome: 'Steve Rogers', funcao: 'Mecânico Industrial', setor: 'Oficina' },
+    { nome: 'Natasha Romanoff', funcao: 'Técnica de Segurança', setor: 'SESMT' }
   ];
 
   colaboradores = this.listaColaboradoresCompleta.map(c => c.nome);
@@ -59,17 +59,18 @@ export class Movimentacao implements OnInit {
     { id: 2, codigo: 'EPI-002', material: 'Luva Nitrílica', ca: '67890', saldo: 4 },
     { id: 3, codigo: 'EPI-003', material: 'Óculos de Proteção', ca: '11223', saldo: 20 },
     { id: 4, codigo: 'EPI-004', material: 'Protetor Auricular', ca: '44556', saldo: 8 },
+    
   ];
 
   constructor(private fb: FormBuilder) {
-    // Inicialização do Formulário de Entrega
+   
     this.formSaidaEpi = this.fb.group({
       colaborador: ['', Validators.required],
       material: ['', Validators.required],
       quantidade: [1, [Validators.required, Validators.min(1)]]
     });
 
-    // Inicialização do Formulário de Entrada de Saldo
+ 
     this.formEntradaSaldo = this.fb.group({
       materialCodigo: ['', Validators.required],
       quantidade: [1, [Validators.required, Validators.min(1)]],
@@ -79,7 +80,7 @@ export class Movimentacao implements OnInit {
 
   ngOnInit(): void {}
 
-  // --- Lógica de Entrada de Saldo ---
+  
   salvarNovoSaldo() {
     const { materialCodigo, quantidade, observacao } = this.formEntradaSaldo.value;
     const item = this.estoque.find(i => i.codigo === materialCodigo);
@@ -98,7 +99,7 @@ export class Movimentacao implements OnInit {
     }
   }
 
-  // --- Lógica de Saída (Entrega de EPIs) ---
+
   incluirItemNaLista() {
     const { colaborador, material, quantidade } = this.formSaidaEpi.getRawValue();
     const codigoMaterial = material.split(' - ')[0].trim();

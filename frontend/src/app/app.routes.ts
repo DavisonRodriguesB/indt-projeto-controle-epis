@@ -71,6 +71,15 @@ export const routes: Routes = [
             (m) => m.Movimentacao
           ),
       },
+
+      {
+        path: 'consulta-entregas',
+        loadComponent: () =>
+          import('./features/consulta-entregas/consulta-entregas').then(
+            (m) => m.ConsultaEntregasComponent
+          ),
+      },
+      
       {
         path: 'usuarios',
         loadComponent: () =>

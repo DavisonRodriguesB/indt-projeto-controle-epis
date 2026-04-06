@@ -1,0 +1,51 @@
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col">
+    <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Consultar Entregas</h2>
+    <p class="text-slate-500 text-sm">Histórico detalhado de movimentações e protocolos de EPI.</p>
+  </div>
+
+  <app-filtro-consulta (onSearch)="executarBusca($event)"></app-filtro-consulta>
+
+  <app-tabela-consulta 
+    [entregas]="listaEntregas" 
+    (onView)="abrirRelatorio($event)">
+  </app-tabela-consulta>
+
+  <div *ngIf="exibirModal" 
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+    
+    <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in zoom-in-95 duration-300">
+      
+      <button (click)="exibirModal = false" 
+        class="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full z-10 transition-colors text-slate-400 hover:text-slate-800">
+        <i class="ph ph-x text-2xl"></i>
+      </button>
+      
+      <div class="p-4 md:p-10">
+        
+        <ng-container *ngIf="entregaSelecionada; else loadingState">
+          <app-relatorioepi [dados]="entregaSelecionada"></app-relatorioepi>
+          
+          <div class="mt-8 pt-6 border-t border-slate-100 flex justify-end gap-3 no-print">
+            <button (click)="exibirModal = false" 
+              class="px-6 py-2.5 border border-slate-200 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+              Fechar Consulta
+            </button>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-lg shadow-blue-100">
+              <i class="ph ph-printer text-xl"></i>
+              Imprimir Protocolo
+            </button>
+          </div>
+        </ng-container>
+
+        <ng-template #loadingState>
+          <div class="py-20 text-center flex flex-col items-center gap-4">
+            <div class="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-slate-400 font-medium">Carregando dados do registro...</p>
+          </div>
+        </ng-template>
+
+      </div>
+    </div>
+  </div>
+</div>

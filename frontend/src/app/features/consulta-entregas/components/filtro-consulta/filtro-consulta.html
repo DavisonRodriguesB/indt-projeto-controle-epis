@@ -1,0 +1,41 @@
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div>
+      <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Colaborador</label>
+      <div class="relative">
+        <i class="ph ph-user absolute left-3 top-2.5 text-slate-400"></i>
+        <input type="text" [(ngModel)]="filtros.colaborador" placeholder="Nome ou Matrícula" 
+          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Data da Entrega</label>
+      <div class="relative">
+        <i class="ph ph-calendar-blank absolute left-3 top-2.5 text-slate-400"></i>
+        <input type="date" [(ngModel)]="filtros.data" 
+          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Cód. Movimentação</label>
+      <div class="relative">
+        <i class="ph ph-hash absolute left-3 top-2.5 text-slate-400"></i>
+        <input type="text" [(ngModel)]="filtros.codigo"
+          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+      </div>
+    </div>
+
+    <div class="flex items-end">
+      <button 
+        type="button"
+        (click)="buscar()" 
+        class="w-full bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all active:scale-95">
+        <i class="ph ph-magnifying-glass text-lg"></i>
+        <span>Consultar</span>
+      </button>
+    </div>
+    
+  </div>
+</div>

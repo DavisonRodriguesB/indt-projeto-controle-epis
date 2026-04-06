@@ -1,36 +1,24 @@
-<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-end px-6">
   
-  <div class="relative w-96">
-    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-      <i class="ph ph-magnifying-glass"></i>
-    </span>
-    <input 
-      type="text" 
-      placeholder="Buscar registros ou colaboradores..." 
-      class="w-full h-10 pl-11 pr-4  bg-gray-50 border border-gray-200 
-      rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-    >
-  </div>
+  <div class="flex-1"></div>
 
   <div class="flex items-center gap-6">
-    <div class="flex items-center gap-3">
-      <button class="text-gray-500 hover:text-slate-800 relative p-1">
-        <i class="ph ph-bell text-2xl"></i>
-        <span class="absolute top-1 right-1 w-2 h-2 bg-blue-600 rounded-full border-2 border-white"></span>
-      </button>      
-    </div>
+    <button class="text-gray-500 hover:text-slate-800 relative p-1 transition-all active:scale-90">
+      <i class="ph ph-bell text-2xl"></i>
+      <span class="absolute top-1 right-1 w-2 h-2 bg-blue-600 rounded-full border-2 border-white shadow-sm"></span>
+    </button>      
 
     <div class="h-8 w-px bg-gray-200"></div>
 
     <div class="flex items-center gap-3 cursor-pointer group">
-      <div class="text-right hidden sm:block">
-        <p class="text-sm font-bold text-slate-800 leading-tight">Admin</p>
+      <div class="text-right hidden sm:block text-nowrap">
+        <p class="text-sm font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">Admin</p>
         <p class="text-[11px] text-gray-500 leading-tight">Gestor de Segurança</p>
       </div>
       <img 
         src="https://ui-avatars.com/api/?name=Admin+EpiPIM&background=475A83&color=fff" 
-        alt="Avatar do usuário" 
-        class="w-10 h-10 rounded-full border border-gray-100 group-hover:border-blue-400 transition-all"
+        alt="Avatar" 
+        class="w-10 h-10 rounded-full border border-gray-100 group-hover:border-blue-400 transition-all shadow-sm"
       >
     </div>
   </div>

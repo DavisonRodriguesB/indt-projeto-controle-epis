@@ -52,7 +52,15 @@
         <a [routerLink]="['/entregas']" routerLinkActive="bg-blue-50 text-blue-700 active-link"
           class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 transition-all">
           <i class="ph ph-clipboard-text text-xl shrink-0"></i>
-          <span *ngIf="!isCollapsed" class="animate-in slide-in-from-left-2">Registro de Entrega</span>
+          <span *ngIf="!isCollapsed" class="animate-in slide-in-from-left-2">Movimentação</span>
+        </a>
+      </li>
+
+      <li>
+        <a [routerLink]="['/consulta-entregas']" routerLinkActive="bg-blue-50 text-blue-700 active-link"
+          class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 transition-all">
+          <i class="ph ph-clipboard-text text-xl shrink-0"></i>
+          <span *ngIf="!isCollapsed" class="animate-in slide-in-from-left-2">Consultar Entregas</span>
         </a>
       </li>
 
