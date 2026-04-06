@@ -1,13 +1,13 @@
 <div class="flex flex-col gap-6">
   
-  <div class="flex justify-between items-end">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
     <div>
       <h2 class="text-2xl font-bold text-slate-800">Catálogo de EPIs</h2>
-      <p class="text-slate-500">Controle técnico de Certificados de Aprovação (CA) e categorias.</p>
+      <p class="text-slate-500 text-sm">Controle técnico de Certificados de Aprovação (CA) e categorias.</p>
     </div>
     <button 
       routerLink="/epis/novo"
-      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all shadow-lg shadow-blue-100">
+      class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-100">
       <i class="ph ph-package text-xl"></i>
       Novo EPI
     </button>
@@ -26,55 +26,73 @@
   </div>
 
   <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-    <table class="w-full text-left border-collapse">
-      <thead class="bg-slate-50 border-b border-slate-200">
-        <tr>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Equipamento</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Cód. Produto</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Nº CA</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Vida Útil</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Ações</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100">
-        <tr *ngFor="let item of episFiltrados" class="hover:bg-slate-50/50 transition-colors">
-          <td class="px-6 py-4">
-            <div class="flex flex-col">
-              <span class="font-semibold text-slate-800">{{ item.nome }}</span>
-              <span class="text-[10px] text-slate-400 uppercase tracking-wider">
-                {{ item.categoria }}
-              </span>
-            </div>
-          </td>
-          
-          <td class="px-6 py-4 text-center">
-            <span class="text-sm font-mono text-slate-600 font-medium">
-              {{ item.codigo || '---' }}
-            </span>
-          </td>
+    
+    <div class="hidden lg:block overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Equipamento</th>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Cód. Produto</th>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Nº CA</th>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Vida Útil</th>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let item of episFiltrados" class="hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex flex-col">
+                <span class="font-semibold text-slate-800">{{ item.nome }}</span>
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider">{{ item.categoria }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="text-sm font-mono text-slate-600 font-medium">{{ item.codigo || '---' }}</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-mono font-bold">{{ item.numero_ca }}</span>
+            </td>
+            <td class="px-6 py-4 text-center text-sm text-slate-600">{{ item.vida_util_dias }} dias</td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end gap-2">
+                <button class="text-slate-400 hover:text-blue-600 transition-colors"><i class="ph ph-pencil-simple text-xl"></i></button>
+                <button class="text-slate-400 hover:text-red-600 transition-colors"><i class="ph ph-trash text-xl"></i></button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-          <td class="px-6 py-4 text-center">
-            <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-mono font-bold">
-              {{ item.numero_ca }}
-            </span>
-          </td>
+    <div class="lg:hidden divide-y divide-slate-100">
+      <div *ngFor="let item of episFiltrados" class="p-4 space-y-4">
+        <div class="flex justify-between items-start">
+          <div class="flex flex-col">
+            <span class="font-bold text-slate-800">{{ item.nome }}</span>
+            <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">{{ item.categoria }}</span>
+          </div>
+          <div class="flex gap-2">
+            <button class="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg"><i class="ph ph-pencil-simple text-xl"></i></button>
+            <button class="p-2 text-slate-400 hover:text-red-600 bg-slate-50 rounded-lg"><i class="ph ph-trash text-xl"></i></button>
+          </div>
+        </div>
 
-          <td class="px-6 py-4 text-center text-sm text-slate-600">
-            {{ item.vida_util_dias }} dias
-          </td>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+            <p class="text-[9px] uppercase font-bold text-slate-400 mb-1">Cód. Prod.</p>
+            <p class="text-xs font-mono font-medium text-slate-600">{{ item.codigo || '---' }}</p>
+          </div>
+          <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+            <p class="text-[9px] uppercase font-bold text-slate-400 mb-1">Nº CA</p>
+            <p class="text-xs font-mono font-bold text-blue-600">{{ item.numero_ca }}</p>
+          </div>
+          <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+            <p class="text-[9px] uppercase font-bold text-slate-400 mb-1">Vida Útil</p>
+            <p class="text-xs text-slate-600">{{ item.vida_util_dias }} d</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-          <td class="px-6 py-4 text-right">
-            <div class="flex justify-end gap-2">
-              <button class="text-slate-400 hover:text-blue-600 transition-colors">
-                <i class="ph ph-pencil-simple text-xl"></i>
-              </button>
-              <button class="text-slate-400 hover:text-red-600 transition-colors">
-                <i class="ph ph-trash text-xl"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 </div>

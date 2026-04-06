@@ -1,20 +1,18 @@
 <div class="flex flex-col gap-6">
-  <div class="flex justify-between items-end">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
     <div>
       <h2 class="text-2xl font-bold text-slate-800">Colaboradores</h2>
-      <p class="text-slate-500">Controle de Funcionários</p>
+      <p class="text-slate-500 text-sm">Controle de Funcionários</p>
     </div>
     <button 
       routerLink="/colaboradores/novo"
-      class="bg-blue-600 hover:bg-blue-700 
-            text-white px-4 py-2 rounded-lg font-medium 
-            flex items-center gap-2 transition-all shadow-lg shadow-blue-100">
+      class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-100">
       <i class="ph ph-plus-circle text-xl"></i>
       Novo Colaborador
     </button>
   </div>
 
-  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex gap-4">
+  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4">
     <div class="relative flex-1">
       <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
       <input 
@@ -27,60 +25,100 @@
     
     <select 
       [(ngModel)]="selectedSetor"
-      class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none text-slate-600 cursor-pointer focus:ring-2 focus:ring-blue-500/20">
+      class="w-full md:w-48 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none text-slate-600 cursor-pointer focus:ring-2 focus:ring-blue-500/20">
       <option value="">Todos os Setores</option>
       <option *ngFor="let setor of setores" [value]="setor">{{ setor }}</option>
     </select>
   </div>
 
   <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-    <table class="w-full text-left">
-      <thead class="bg-slate-50 border-b border-slate-200">
-        <tr>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Colaborador</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Matrícula</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Cargo / Setor</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Status</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Ações</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100">
-        <tr *ngFor="let item of colaboradoresFiltrados" class="hover:bg-slate-50/50 transition-colors">
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs">
-                {{ item.nome | slice:0:1 }}
+    
+    <div class="hidden lg:block overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Colaborador</th>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Matrícula</th>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Cargo / Setor</th>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Status</th>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let item of colaboradoresFiltrados" class="hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs shrink-0">
+                  {{ item.nome | slice:0:1 }}
+                </div>
+                <span class="font-medium text-slate-800">{{ item.nome }}</span>
               </div>
-              <span class="font-medium text-slate-800">{{ item.nome }}</span>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-600 font-mono">{{ item.matricula }}</td>
+            <td class="px-6 py-4">
+              <p class="text-sm text-slate-800">{{ item.cargo }}</p>
+              <p class="text-xs text-slate-400">{{ item.setor }}</p>
+            </td>
+            <td class="px-6 py-4">
+              <span [class]="item.ativo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" 
+                    class="px-2 py-1 rounded-full text-[10px] font-bold uppercase whitespace-nowrap">
+                {{ item.ativo ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end gap-1">
+                <button [routerLink]="['/colaboradores/novo']" class="text-slate-400 hover:text-blue-600 p-1">
+                  <i class="ph ph-pencil-simple text-xl"></i>
+                </button>
+                <button (click)="confirmarExclusao(item.id, item.nome)" class="text-slate-400 hover:text-red-600 p-1">
+                  <i class="ph ph-trash text-xl"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="lg:hidden divide-y divide-slate-100">
+      <div *ngFor="let item of colaboradoresFiltrados" class="p-4 space-y-4">
+        <div class="flex justify-between items-start">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-sm">
+              {{ item.nome | slice:0:1 }}
             </div>
-          </td>
-          <td class="px-6 py-4 text-sm text-slate-600 font-mono">{{ item.matricula }}</td>
-          <td class="px-6 py-4">
-            <p class="text-sm text-slate-800">{{ item.cargo }}</p>
-            <p class="text-xs text-slate-400">{{ item.setor }}</p>
-          </td>
-          <td class="px-6 py-4">
-            <span [class]="item.ativo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" 
-                  class="px-2 py-1 rounded-full text-[10px] font-bold uppercase">
-              {{ item.ativo ? 'Ativo' : 'Inativo' }}
-            </span>
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button [routerLink]="['/colaboradores/novo']"
-            class="text-slate-400 hover:text-blue-600 p-1">
-            <i class="ph ph-pencil-simple text-xl"></i></button>
-            
-            <button (click)="confirmarExclusao(item.id, item.nome)"
-            class="text-slate-400 hover:text-red-600 p-1">
-            <i class="ph ph-trash text-xl"></i></button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <div class="flex flex-col">
+              <span class="font-bold text-slate-800">{{ item.nome }}</span>
+              <span class="text-xs font-mono text-slate-500">Mat: {{ item.matricula }}</span>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button [routerLink]="['/colaboradores/novo']" class="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg">
+              <i class="ph ph-pencil-simple text-xl"></i>
+            </button>
+            <button (click)="confirmarExclusao(item.id, item.nome)" class="p-2 text-slate-400 hover:text-red-600 bg-slate-50 rounded-lg">
+              <i class="ph ph-trash text-xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+          <div>
+            <p class="text-[10px] uppercase font-bold text-slate-400 leading-tight">Cargo / Setor</p>
+            <p class="text-xs font-semibold text-slate-700">{{ item.cargo }}</p>
+            <p class="text-[10px] text-slate-500">{{ item.setor }}</p>
+          </div>
+          <span [class]="item.ativo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" 
+                class="px-3 py-1 rounded-full text-[10px] font-bold uppercase">
+            {{ item.ativo ? 'Ativo' : 'Inativo' }}
+          </span>
+        </div>
+      </div>
+    </div>
 
     <div *ngIf="colaboradoresFiltrados.length === 0" class="p-12 text-center">
       <i class="ph ph-users-three text-4xl text-slate-300"></i>
-      <p class="text-slate-500 mt-2">Nenhum colaborador encontrado.</p>
+      <p class="text-slate-500 mt-2 font-medium">Nenhum colaborador encontrado.</p>
     </div>
   </div>
 </div>
