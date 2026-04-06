@@ -18,7 +18,7 @@ interface StatCard {
 })
 export class Home implements OnInit {
   
-  // Dados simulados conforme o PRD do INDT
+  // Dados simulados para os cards de estatísticas
   stats: StatCard[] = [
     { 
       label: 'EPIs Vencidos', 
@@ -49,11 +49,10 @@ export class Home implements OnInit {
   alertasVencimento = [
     { colaborador: 'Carlos Silva', epi: 'Protetor Auricular Plug', data: new Date('2026-04-10'), status: 'critico' },
     { colaborador: 'Ana Souza', epi: 'Capacete Classe B', data: new Date('2026-04-15'), status: 'alerta' },
-    { colaborador: 'Roberto Lima', epi: 'Luva Nitrílica', data: new Date('2026-04-18'), status: 'alerta' },
     { colaborador: 'Juliana Costa', epi: 'Bota de Segurança', data: new Date('2026-04-20'), status: 'normal' },
   ];
 
   ngOnInit(): void {
-    // Aqui no futuro chamaremos o backend para preencher os stats
+  
   }
 }

@@ -21,8 +21,8 @@ interface Colaborador {
 })
 export class List {
   colaboradores: Colaborador[] = [
-    { id: 1, nome: 'Davison Bentes', matricula: '202601', cargo: 'Operador de Máquina', setor: 'Produção', ativo: true },
-    { id: 2, nome: 'Denise Cibele', matricula: '202602', cargo: 'Técnico de Manutenção', setor: 'Engenharia', ativo: true },
+    { id: 1, nome: 'Tony Stark', matricula: '202601', cargo: 'Operador de Máquina', setor: 'Produção', ativo: true },
+    { id: 2, nome: 'Steve Rogers', matricula: '202602', cargo: 'Técnico de Manutenção', setor: 'Engenharia', ativo: true },
     { id: 3, nome: 'Bruce Wayne', matricula: '202603', cargo: 'Auxiliar de Logística', setor: 'Almoxarifado', ativo: false },
   ];
 
