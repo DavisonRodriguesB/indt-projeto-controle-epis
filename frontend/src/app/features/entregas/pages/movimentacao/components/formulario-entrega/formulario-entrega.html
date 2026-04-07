@@ -14,7 +14,7 @@
           <option value="">Selecione o funcionário...</option>
           <option *ngFor="let colab of colaboradores" [value]="colab">{{ colab }}</option>
         </select>
-        <button *ngIf="colaboradorFixado" (click)="onDesafixar.emit()" class="absolute right-3 top-2.5 text-blue-400 hover:text-red-500">
+        <button type="button" *ngIf="colaboradorFixado" (click)="onDesafixar.emit()" class="absolute right-3 top-2.5 text-blue-400 hover:text-red-500">
           <i class="ph ph-x-circle text-xl"></i>
         </button>
       </div>
@@ -22,9 +22,28 @@
 
     <div class="pt-2">
       <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Material (EPI)</label>
-      <input list="listaEpis" formControlName="material" (input)="onLimparErro.emit()" placeholder="Busque por nome ou CA..." 
-        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-600"
-        [class.border-red-400]="erroSaldo">
+      <div class="relative">
+        <input 
+          list="listaEpis" 
+          formControlName="material" 
+          (input)="verificarSelecao($event)" 
+          [readOnly]="!!materialFixado"
+          placeholder="Busque por nome ou CA..." 
+          class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-600"
+          [class.bg-blue-50]="materialFixado"
+          [class.border-red-400]="erroSaldo || erroDuplicidade"
+        >
+        
+        <button type="button" *ngIf="materialFixado" (click)="limparMaterial()" class="absolute right-3 top-2.5 text-blue-400 hover:text-red-500">
+          <i class="ph ph-x-circle text-xl"></i>
+        </button>
+      </div>
+
+      <div *ngIf="erroDuplicidade" class="mt-2 flex items-center gap-1.5 text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-100">
+        <i class="ph ph-warning text-lg"></i>
+        <span class="text-[10px] font-bold uppercase">{{ erroDuplicidade }}</span>
+      </div>
+
       <datalist id="listaEpis">
         <option *ngFor="let item of estoque" [value]="item.codigo + ' - ' + item.material + ' (CA: ' + item.ca + ')'">
           Saldo: {{ item.saldo }} unidades
@@ -34,15 +53,20 @@
 
     <div>
       <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Quantidade</label>
-      <input type="number" formControlName="quantidade" (input)="onLimparErro.emit()" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none" [class.border-red-400]="erroSaldo">
+      <input type="number" formControlName="quantidade" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+      
       <div *ngIf="erroSaldo" class="mt-2 flex items-center gap-1.5 text-red-500 bg-red-50 p-2 rounded-lg border border-red-100">
         <i class="ph ph-warning-circle text-lg"></i>
         <span class="text-[10px] font-bold uppercase">{{ erroSaldo }}</span>
       </div>
     </div>
-    <hr><br>
 
-    <button (click)="onIncluir.emit()" [disabled]="form.invalid" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100">
+    <hr class="border-slate-100">
+
+    <button type="button" 
+        (click)="executarInclusao()" 
+        [disabled]="form.invalid || !!erroDuplicidade" 
+        class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100">
       <i class="ph ph-plus-circle text-xl"></i> Incluir na Lista
     </button>
   </form>

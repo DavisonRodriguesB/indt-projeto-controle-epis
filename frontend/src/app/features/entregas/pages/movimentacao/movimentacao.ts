@@ -25,26 +25,26 @@ import { RelatorioEpiData } from '../../../../shared/components/relatorioepi/rel
 })
 export class Movimentacao implements OnInit {
   
-  // Controles de estado dos Modais
+  
   isModalVisualizarOpen = false;
   isModalReciboOpen = false;
   isModalSaldoOpen = false; 
 
-  // Formulários
+  
   formSaidaEpi: FormGroup;
   formEntradaSaldo: FormGroup; 
   
-  // Estado da Movimentação
+  
   colaboradorFixado: string | null = null;
   itensMovimentacao: any[] = [];
   erroSaldo: string | null = null;
   nomeArquivoAnexo: string | null = null;
 
-  // Dados para o Relatório (Shared Component)
+  
   dadosParaRelatorio!: RelatorioEpiData;
   usuarioLogado = "DAVISON BENTES"; 
 
-  // Dados de Simulação (Mock)
+  
   listaColaboradoresCompleta = [
     { nome: 'Bruce Wayne', funcao: 'Eletricista de Manutenção', setor: 'Instalações' },
     { nome: 'Tony Stark', funcao: 'Operadora de Máquina B', setor: 'Produção' },
@@ -59,18 +59,15 @@ export class Movimentacao implements OnInit {
     { id: 2, codigo: 'EPI-002', material: 'Luva Nitrílica', ca: '67890', saldo: 4 },
     { id: 3, codigo: 'EPI-003', material: 'Óculos de Proteção', ca: '11223', saldo: 20 },
     { id: 4, codigo: 'EPI-004', material: 'Protetor Auricular', ca: '44556', saldo: 8 },
-    
   ];
 
   constructor(private fb: FormBuilder) {
-   
     this.formSaidaEpi = this.fb.group({
       colaborador: ['', Validators.required],
       material: ['', Validators.required],
       quantidade: [1, [Validators.required, Validators.min(1)]]
     });
 
- 
     this.formEntradaSaldo = this.fb.group({
       materialCodigo: ['', Validators.required],
       quantidade: [1, [Validators.required, Validators.min(1)]],
@@ -80,9 +77,8 @@ export class Movimentacao implements OnInit {
 
   ngOnInit(): void {}
 
-  
   salvarNovoSaldo() {
-    const { materialCodigo, quantidade, observacao } = this.formEntradaSaldo.value;
+    const { materialCodigo, quantidade } = this.formEntradaSaldo.value;
     const item = this.estoque.find(i => i.codigo === materialCodigo);
 
     if (item) {
@@ -99,26 +95,32 @@ export class Movimentacao implements OnInit {
     }
   }
 
-
   incluirItemNaLista() {
     const { colaborador, material, quantidade } = this.formSaidaEpi.getRawValue();
+    
+    
     const codigoMaterial = material.split(' - ')[0].trim();
     const itemEstoque = this.estoque.find(i => i.codigo === codigoMaterial);
 
     if (itemEstoque) {
+      
       if (quantidade > itemEstoque.saldo) {
         this.erroSaldo = `Saldo insuficiente! Disponível: ${itemEstoque.saldo}`;
         return;
       }
       
-      this.itensMovimentacao.push({
+      const novoItem = {
         id: Date.now(),
         codigo: itemEstoque.codigo,
         material: itemEstoque.material,
         ca: itemEstoque.ca,
         quantidade: quantidade
-      });
+      };
 
+      
+      this.itensMovimentacao = [...this.itensMovimentacao, novoItem];
+
+      
       this.colaboradorFixado = colaborador;
       this.formSaidaEpi.get('colaborador')?.disable();
       this.formSaidaEpi.patchValue({ material: '', quantidade: 1 });
@@ -127,6 +129,7 @@ export class Movimentacao implements OnInit {
   }
 
   removerItemLista(id: number) {
+    
     this.itensMovimentacao = this.itensMovimentacao.filter(item => item.id !== id);
     if (this.itensMovimentacao.length === 0) {
       this.desafixarColaborador();
@@ -147,7 +150,11 @@ export class Movimentacao implements OnInit {
   finalizarMovimentacao() {
     const infoColaborador = this.listaColaboradoresCompleta.find(c => c.nome === this.colaboradorFixado);
     
+    // Simulando a geração de um protocolo baseado no ano + um número aleatório
+    const numeroProtocoloGerado = `2026${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+
     this.dadosParaRelatorio = {
+      protocolo: numeroProtocoloGerado,
       colaborador: this.colaboradorFixado || 'Não Informado',
       funcao: infoColaborador?.funcao || 'Operacional',
       setor: infoColaborador?.setor || 'Geral',
@@ -163,7 +170,7 @@ export class Movimentacao implements OnInit {
     window.print(); 
   }
 
-  // --- Controles de Interface (Modais) ---
+  
   openModalVisualizar() { this.isModalVisualizarOpen = true; }
   closeModalVisualizar() { this.isModalVisualizarOpen = false; }
   
