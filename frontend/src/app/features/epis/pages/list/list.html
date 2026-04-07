@@ -34,7 +34,7 @@
             <th class="px-6 py-4 text-sm font-semibold text-slate-700">Equipamento</th>
             <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Cód. Produto</th>
             <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Nº CA</th>
-            <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Vida Útil</th>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Status</th>
             <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Ações</th>
           </tr>
         </thead>
@@ -52,11 +52,26 @@
             <td class="px-6 py-4 text-center">
               <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-mono font-bold">{{ item.numero_ca }}</span>
             </td>
-            <td class="px-6 py-4 text-center text-sm text-slate-600">{{ item.vida_util_dias }} dias</td>
+            <td class="px-6 py-4 text-center">
+              <span [class]="item.ativo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" 
+                    class="px-2 py-1 rounded-full text-[10px] font-bold uppercase whitespace-nowrap">
+                {{ item.ativo ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
             <td class="px-6 py-4 text-right">
-              <div class="flex justify-end gap-2">
-                <button class="text-slate-400 hover:text-blue-600 transition-colors"><i class="ph ph-pencil-simple text-xl"></i></button>
-                <button class="text-slate-400 hover:text-red-600 transition-colors"><i class="ph ph-trash text-xl"></i></button>
+              <div class="flex justify-end items-center gap-2">
+                <button class="text-slate-400 hover:text-blue-600 transition-colors p-1">
+                  <i class="ph ph-pencil-simple text-2xl"></i>
+                </button>
+                
+                <button (click)="toggleStatus(item)" 
+                        class="transition-all active:scale-95" 
+                        [title]="item.ativo ? 'Inativar EPI' : 'Ativar EPI'">
+                  <i class="ph transition-colors" 
+                     [ngClass]="item.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" 
+                     style="font-size: 32px;">
+                  </i>
+                </button>
               </div>
             </td>
           </tr>
@@ -71,9 +86,16 @@
             <span class="font-bold text-slate-800">{{ item.nome }}</span>
             <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">{{ item.categoria }}</span>
           </div>
-          <div class="flex gap-2">
-            <button class="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg"><i class="ph ph-pencil-simple text-xl"></i></button>
-            <button class="p-2 text-slate-400 hover:text-red-600 bg-slate-50 rounded-lg"><i class="ph ph-trash text-xl"></i></button>
+          <div class="flex items-center gap-3">
+            <button class="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg">
+              <i class="ph ph-pencil-simple text-xl"></i>
+            </button>
+            <button (click)="toggleStatus(item)" class="transition-all active:scale-95">
+              <i class="ph" 
+                 [ngClass]="item.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" 
+                 style="font-size: 32px;">
+              </i>
+            </button>
           </div>
         </div>
 
@@ -86,13 +108,19 @@
             <p class="text-[9px] uppercase font-bold text-slate-400 mb-1">Nº CA</p>
             <p class="text-xs font-mono font-bold text-blue-600">{{ item.numero_ca }}</p>
           </div>
-          <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
-            <p class="text-[9px] uppercase font-bold text-slate-400 mb-1">Vida Útil</p>
-            <p class="text-xs text-slate-600">{{ item.vida_util_dias }} d</p>
+          <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 flex flex-col justify-between">
+            <p class="text-[9px] uppercase font-bold text-slate-400 mb-1">Status</p>
+            <span [class]="item.ativo ? 'text-green-600' : 'text-red-600'" class="text-[10px] font-bold uppercase">
+              {{ item.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
           </div>
         </div>
       </div>
     </div>
 
+    <div *ngIf="episFiltrados.length === 0" class="p-12 text-center">
+      <i class="ph ph-package text-4xl text-slate-300"></i>
+      <p class="text-slate-500 mt-2 font-medium">Nenhum EPI encontrado.</p>
+    </div>
   </div>
 </div>

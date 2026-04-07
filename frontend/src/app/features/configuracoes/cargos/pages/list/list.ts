@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModalCargo } from './components/modal-cargo/modal-cargo';
 
-
 interface Cargo {
   id: number;
   descricao: string;
+  ativo: boolean; 
 }
 
 @Component({
@@ -18,11 +18,10 @@ interface Cargo {
 export class List {
   isModalOpen = false;
 
-  // MOCK: Simulando dados que viriam do Banco de Dados
   cargos: Cargo[] = [
-    { id: 1, descricao: 'Técnico de Segurança' },
-    { id: 2, descricao: 'Almoxarife' },
-    { id: 3, descricao: 'Operador de Empilhadeira' }
+    { id: 1, descricao: 'Técnico de Segurança', ativo: true },
+    { id: 2, descricao: 'Almoxarife', ativo: true },
+    { id: 3, descricao: 'Operador de Empilhadeira', ativo: false }
   ];
 
   openModal() {
@@ -33,24 +32,20 @@ export class List {
     this.isModalOpen = false;
   }
 
- 
   salvarCargo(novaDescricao: string) {
-    
-    
     const novoCargo: Cargo = {
       id: Math.floor(Math.random() * 1000),
-      descricao: novaDescricao
+      descricao: novaDescricao,
+      ativo: true 
     };
 
     this.cargos.unshift(novoCargo);
-    console.log('Cargo cadastrado com sucesso:', novoCargo);
+    this.closeModal();
   }
 
   
-  excluirCargo(id: number) {
-    if (confirm('Deseja realmente excluir este cargo?')) {
-      this.cargos = this.cargos.filter(c => c.id !== id);
-      console.log('Cargo removido:', id);
-    }
+  toggleStatus(cargo: Cargo) {
+    cargo.ativo = !cargo.ativo;
+    console.log(`Cargo ${cargo.descricao} agora está: ${cargo.ativo ? 'Ativo' : 'Inativo'}`);
   }
 }

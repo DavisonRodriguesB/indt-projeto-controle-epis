@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-
 export interface Epi {
   id: number;
   nome: string;
@@ -24,7 +23,6 @@ export interface Epi {
   styleUrls: ['./list.css']
 })
 export class List {
-  // Dados Mockados para o Catálogo
   epis: Epi[] = [
     { id: 1, codigo: '102940', nome: 'Capacete de Segurança Classe A', numero_ca: '12345', categoria: 'Cabeça', vida_util_dias: 365, estoque_atual: 45, estoque_minimo: 10, ativo: true },
     { id: 2, codigo: '151234', nome: 'Luva Nitrílica G', numero_ca: '98765', categoria: 'Mãos', vida_util_dias: 30, estoque_atual: 8, estoque_minimo: 20, ativo: true },
@@ -36,19 +34,21 @@ export class List {
   searchTerm: string = '';
 
   get episFiltrados() {
-  const termo = this.searchTerm.toLowerCase().trim();
+    const termo = this.searchTerm.toLowerCase().trim();
+    if (!termo) return this.epis;
 
-  if (!termo) {
-    return this.epis;
+    return this.epis.filter(item => {
+      return (
+        item.nome.toLowerCase().includes(termo) ||
+        item.codigo.toLowerCase().includes(termo) ||
+        item.numero_ca.toLowerCase().includes(termo)
+      );
+    });
   }
 
-  return this.epis.filter(item => {
-    return (
-      item.nome.toLowerCase().includes(termo) ||
-      item.codigo.toLowerCase().includes(termo) ||
-      item.numero_ca.toLowerCase().includes(termo)
-    );
-  });
-
+  
+  toggleStatus(item: Epi) {
+    item.ativo = !item.ativo;
+    console.log(`EPI ${item.nome} alterado para: ${item.ativo ? 'Ativo' : 'Inativo'}`);
   }
 }

@@ -1,4 +1,5 @@
 export interface RelatorioEpiData {
+  protocolo: string;
   colaborador: string;
   funcao: string;
   setor: string;

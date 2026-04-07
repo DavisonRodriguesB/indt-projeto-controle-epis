@@ -29,28 +29,23 @@ export class List {
   searchTerm: string = '';
   selectedSetor: string = ''; 
 
-  // setores únicos da lista
   get setores(): string[] {
     return [...new Set(this.colaboradores.map(c => c.setor))].sort();
   }
 
-  // Filtro combinado: Busca por texto + Filtro por setor
   get colaboradoresFiltrados() {
     return this.colaboradores.filter(c => {
       const matchesSearch = c.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
-                           c.matricula.includes(this.searchTerm);
-      
+                            c.matricula.includes(this.searchTerm);
       const matchesSetor = this.selectedSetor === '' || c.setor === this.selectedSetor;
-
       return matchesSearch && matchesSetor;
     });
   }
 
-  confirmarExclusao(id: number, nome: string) {
-    const confirmou = confirm(`Deseja realmente excluir o colaborador ${nome}?`);
-    if (confirmou) {
-      console.log('Solicitando exclusão ao backend para o ID:', id);
-      alert('Colaborador excluído (Simulação)');
-    }
+
+  toggleStatus(item: Colaborador) {
+    item.ativo = !item.ativo;
+    console.log(`Status do colaborador ${item.nome} alterado para: ${item.ativo ? 'Ativo' : 'Inativo'}`);
+    
   }
 }

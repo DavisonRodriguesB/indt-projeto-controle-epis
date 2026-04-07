@@ -16,6 +16,7 @@
       <thead>
         <tr class="bg-slate-50 border-b border-slate-200">
           <th class="px-6 py-4 text-sm font-semibold text-slate-700">Descrição do Cargo</th>
+          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Status</th>
           <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Ações</th>
         </tr>
       </thead>
@@ -24,22 +25,38 @@
         <tr *ngFor="let cargo of cargos" class="hover:bg-slate-50/50 transition-colors">
           <td class="px-6 py-4 flex items-center gap-3">
             <i class="ph ph-identification-card text-slate-400 text-lg"></i>
-            <span class="font-medium text-slate-700">{{ cargo.descricao }}</span>
+            <span class="font-medium text-slate-700" [ngClass]="{'text-slate-400 italic': !cargo.ativo}">
+              {{ cargo.descricao }}
+            </span>
           </td>
+
+          <td class="px-6 py-4 text-center">
+            <span [class]="cargo.ativo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" 
+                  class="px-2 py-1 rounded-full text-[10px] font-bold uppercase whitespace-nowrap">
+              {{ cargo.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
+          </td>
+
           <td class="px-6 py-4 text-right">
-            <div class="flex justify-end gap-3">
+            <div class="flex justify-end items-center gap-2">
               <button class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Editar">
-                <i class="ph ph-pencil-simple text-xl"></i>
+                <i class="ph ph-pencil-simple text-2xl"></i>
               </button>
-              <button (click)="excluirCargo(cargo.id)" class="text-slate-400 hover:text-red-600 transition-colors p-1" title="Excluir">
-                <i class="ph ph-trash text-xl"></i>
+
+              <button (click)="toggleStatus(cargo)" 
+                      class="transition-all active:scale-95" 
+                      [title]="cargo.ativo ? 'Desativar Cargo' : 'Ativar Cargo'">
+                <i class="ph transition-colors" 
+                   [ngClass]="cargo.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" 
+                   style="font-size: 32px;">
+                </i>
               </button>
             </div>
           </td>
         </tr>
 
         <tr *ngIf="cargos.length === 0">
-          <td colspan="2" class="px-6 py-10 text-center text-slate-400 italic">
+          <td colspan="3" class="px-6 py-10 text-center text-slate-400 italic">
             Nenhum cargo cadastrado.
           </td>
         </tr>

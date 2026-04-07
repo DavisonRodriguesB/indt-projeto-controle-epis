@@ -5,6 +5,7 @@ import { ModalSetor } from './components/modal-setor/modal-setor';
 interface Setor {
   id: number;
   nomeSetor: string;
+  ativo: boolean;
 }
 
 @Component({
@@ -15,9 +16,10 @@ interface Setor {
 })
 export class SetoresList {
   isModalOpen = false;
+  
   setores: Setor[] = [
-    { id: 1, nomeSetor: 'Almoxarifado' },
-    { id: 2, nomeSetor: 'Produção' }
+    { id: 1, nomeSetor: 'Almoxarifado', ativo: true },
+    { id: 2, nomeSetor: 'Produção', ativo: true }
   ];
 
   openModal() { this.isModalOpen = true; }
@@ -26,14 +28,15 @@ export class SetoresList {
   salvarSetor(nome: string) {
     const novo: Setor = {
       id: Math.floor(Math.random() * 1000),
-      nomeSetor: nome
+      nomeSetor: nome,
+      ativo: true 
     };
     this.setores.unshift(novo);
+    this.closeModal();
   }
 
-  excluirSetor(id: number) {
-    if (confirm('Deseja excluir este setor?')) {
-      this.setores = this.setores.filter(s => s.id !== id);
-    }
+  toggleStatus(item: Setor) {
+    item.ativo = !item.ativo;
+    console.log(`Setor ${item.nomeSetor} alterado para: ${item.ativo ? 'Ativo' : 'Inativo'}`);
   }
 }
