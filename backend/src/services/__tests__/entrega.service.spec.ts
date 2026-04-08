@@ -1,14 +1,14 @@
 const transactionMock = jest.fn();
 const getRepositoryMock = jest.fn();
 
-jest.mock("../database/data-source", () => ({
+jest.mock("../../database/data-source", () => ({
   AppDataSource: {
     transaction: (...args: unknown[]) => transactionMock(...args),
     getRepository: (...args: unknown[]) => getRepositoryMock(...args)
   }
 }));
 
-import { createEntrega, listEntregas } from "./entrega.service";
+import { createEntrega, listEntregas } from "../entrega.service";
 
 describe("entrega service", () => {
   beforeEach(() => {

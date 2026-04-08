@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { z } from "zod";
-import { AppError, errorHandler } from "./error-handler";
+import { AppError, errorHandler } from "../error-handler";
 
 describe("errorHandler", () => {
   function createResponseMock() {

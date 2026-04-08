@@ -1,7 +1,7 @@
 import request from "supertest";
-import { app } from "./app";
-import { seedAdminUser } from "./database/seed";
-import { AppDataSource, initializeDataSource } from "./database/data-source";
+import { app } from "../app";
+import { seedAdminUser } from "../database/seed";
+import { AppDataSource, initializeDataSource } from "../database/data-source";
 
 describe("fluxos de endpoints (docker backend)", () => {
   const api = request(app);

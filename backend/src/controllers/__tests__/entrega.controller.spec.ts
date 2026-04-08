@@ -2,17 +2,17 @@ const listEntregasMock = jest.fn();
 const createEntregaMock = jest.fn();
 const sendSuccessMock = jest.fn();
 
-jest.mock("../services/entrega.service", () => ({
+jest.mock("../../services/entrega.service", () => ({
   listEntregas: (...args: unknown[]) => listEntregasMock(...args),
   createEntrega: (...args: unknown[]) => createEntregaMock(...args)
 }));
 
-jest.mock("../utiils/http-response", () => ({
+jest.mock("../../utiils/http-response", () => ({
   sendSuccess: (...args: unknown[]) => sendSuccessMock(...args)
 }));
 
 import { Request, Response } from "express";
-import { handleCreateEntrega, handleListEntregas } from "./entrega.controller";
+import { handleCreateEntrega, handleListEntregas } from "../entrega.controller";
 
 describe("entrega controller", () => {
   beforeEach(() => {

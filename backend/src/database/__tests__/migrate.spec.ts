@@ -1,7 +1,7 @@
 const initializeDataSourceMock = jest.fn();
 const seedAdminUserMock = jest.fn();
 
-jest.mock("./data-source", () => ({
+jest.mock("../data-source", () => ({
   initializeDataSource: () => initializeDataSourceMock(),
   AppDataSource: {
     isInitialized: false,
@@ -9,11 +9,11 @@ jest.mock("./data-source", () => ({
   }
 }));
 
-jest.mock("./seed", () => ({
+jest.mock("../seed", () => ({
   seedAdminUser: () => seedAdminUserMock()
 }));
 
-import { runMigrations } from "./migrate";
+import { runMigrations } from "../migrate";
 
 describe("runMigrations", () => {
   beforeEach(() => {

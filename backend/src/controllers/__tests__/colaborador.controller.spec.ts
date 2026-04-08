@@ -2,17 +2,17 @@ const listColaboradoresMock = jest.fn();
 const createColaboradorMock = jest.fn();
 const sendSuccessMock = jest.fn();
 
-jest.mock("../services/colaborador.service", () => ({
+jest.mock("../../services/colaborador.service", () => ({
   listColaboradores: (...args: unknown[]) => listColaboradoresMock(...args),
   createColaborador: (...args: unknown[]) => createColaboradorMock(...args)
 }));
 
-jest.mock("../utiils/http-response", () => ({
+jest.mock("../../utiils/http-response", () => ({
   sendSuccess: (...args: unknown[]) => sendSuccessMock(...args)
 }));
 
 import { Request, Response } from "express";
-import { handleCreateColaborador, handleListColaboradores } from "./colaborador.controller";
+import { handleCreateColaborador, handleListColaboradores } from "../colaborador.controller";
 
 describe("colaborador controller", () => {
   beforeEach(() => {

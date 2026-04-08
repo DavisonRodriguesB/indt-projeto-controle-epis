@@ -5,13 +5,13 @@ const repositoryMock = {
   save: jest.fn()
 };
 
-jest.mock("../database/data-source", () => ({
+jest.mock("../../database/data-source", () => ({
   AppDataSource: {
     getRepository: () => repositoryMock
   }
 }));
 
-import { createColaborador, listColaboradores } from "./colaborador.service";
+import { createColaborador, listColaboradores } from "../colaborador.service";
 
 describe("colaborador service", () => {
   beforeEach(() => {

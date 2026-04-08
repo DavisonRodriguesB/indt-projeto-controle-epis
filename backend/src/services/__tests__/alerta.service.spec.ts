@@ -1,12 +1,12 @@
 const queryMock = jest.fn();
 
-jest.mock("../database/data-source", () => ({
+jest.mock("../../database/data-source", () => ({
   AppDataSource: {
     query: (...args: unknown[]) => queryMock(...args)
   }
 }));
 
-import { listAlertas } from "./alerta.service";
+import { listAlertas } from "../alerta.service";
 
 describe("alerta service", () => {
   beforeEach(() => {

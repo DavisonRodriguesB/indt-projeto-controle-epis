@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { sendSuccess } from "./http-response";
+import { sendSuccess } from "../http-response";
 
 describe("sendSuccess", () => {
   function createResponseMock() {

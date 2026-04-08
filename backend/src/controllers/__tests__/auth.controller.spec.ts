@@ -2,17 +2,17 @@ const loginMock = jest.fn();
 const registerUserMock = jest.fn();
 const sendSuccessMock = jest.fn();
 
-jest.mock("../services/auth.service", () => ({
+jest.mock("../../services/auth.service", () => ({
   login: (...args: unknown[]) => loginMock(...args),
   registerUser: (...args: unknown[]) => registerUserMock(...args)
 }));
 
-jest.mock("../utiils/http-response", () => ({
+jest.mock("../../utiils/http-response", () => ({
   sendSuccess: (...args: unknown[]) => sendSuccessMock(...args)
 }));
 
 import { Request, Response } from "express";
-import { handleLogin, handleMe, handleRegisterUser } from "./auth.controller";
+import { handleLogin, handleMe, handleRegisterUser } from "../auth.controller";
 
 describe("auth controller", () => {
   beforeEach(() => {

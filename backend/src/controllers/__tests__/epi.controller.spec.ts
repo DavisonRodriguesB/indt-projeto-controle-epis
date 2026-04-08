@@ -5,7 +5,7 @@ const updateEpiMock = jest.fn();
 const deleteEpiMock = jest.fn();
 const sendSuccessMock = jest.fn();
 
-jest.mock("../services/epi.service", () => ({
+jest.mock("../../services/epi.service", () => ({
   listEpis: (...args: unknown[]) => listEpisMock(...args),
   getEpiById: (...args: unknown[]) => getEpiByIdMock(...args),
   createEpi: (...args: unknown[]) => createEpiMock(...args),
@@ -13,12 +13,12 @@ jest.mock("../services/epi.service", () => ({
   deleteEpi: (...args: unknown[]) => deleteEpiMock(...args)
 }));
 
-jest.mock("../utiils/http-response", () => ({
+jest.mock("../../utiils/http-response", () => ({
   sendSuccess: (...args: unknown[]) => sendSuccessMock(...args)
 }));
 
 import { Request, Response } from "express";
-import { handleCreateEpi, handleDeleteEpi, handleGetEpiById, handleListEpis, handleUpdateEpi } from "./epi.controller";
+import { handleCreateEpi, handleDeleteEpi, handleGetEpiById, handleListEpis, handleUpdateEpi } from "../epi.controller";
 
 describe("epi controller", () => {
   beforeEach(() => {

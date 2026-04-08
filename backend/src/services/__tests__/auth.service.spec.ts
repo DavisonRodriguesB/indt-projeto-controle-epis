@@ -6,7 +6,7 @@ const repositoryMock = {
   save: jest.fn()
 };
 
-jest.mock("../database/data-source", () => ({
+jest.mock("../../database/data-source", () => ({
   AppDataSource: {
     getRepository: () => repositoryMock
   }
@@ -21,7 +21,7 @@ jest.mock("jsonwebtoken", () => ({
   sign: jest.fn()
 }));
 
-import { login, registerUser } from "./auth.service";
+import { login, registerUser } from "../auth.service";
 
 describe("auth service", () => {
   beforeEach(() => {
