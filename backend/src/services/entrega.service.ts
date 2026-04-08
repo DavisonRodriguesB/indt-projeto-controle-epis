@@ -77,7 +77,8 @@ export async function listEntregas(): Promise<EntregaListItem[]> {
       id: entrega.colaborador.id,
       nome: entrega.colaborador.nome,
       matricula: entrega.colaborador.matricula,
-      setor: entrega.colaborador.setor
+      setor: (entrega.colaborador as unknown as { setor?: string }).setor ?? "",
+      setor_id: entrega.colaborador.setorId
     },
     epi: {
       id: entrega.epi.id,

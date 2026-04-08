@@ -1,16 +1,16 @@
 const listAlertasMock = jest.fn();
 const sendSuccessMock = jest.fn();
 
-jest.mock("../services/alerta.service", () => ({
+jest.mock("../../services/alerta.service", () => ({
   listAlertas: (...args: unknown[]) => listAlertasMock(...args)
 }));
 
-jest.mock("../utiils/http-response", () => ({
+jest.mock("../../utiils/http-response", () => ({
   sendSuccess: (...args: unknown[]) => sendSuccessMock(...args)
 }));
 
 import { Request, Response } from "express";
-import { handleListAlertas } from "./alerta.controller";
+import { handleListAlertas } from "../alerta.controller";
 
 describe("alerta controller", () => {
   beforeEach(() => {

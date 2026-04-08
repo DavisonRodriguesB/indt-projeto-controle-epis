@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { ensureAuthenticated, ensureRole } from "./auth";
-import { AppError } from "./error-handler";
+import { ensureAuthenticated, ensureRole } from "../auth";
+import { AppError } from "../error-handler";
 
 jest.mock("jsonwebtoken", () => ({
   verify: jest.fn()

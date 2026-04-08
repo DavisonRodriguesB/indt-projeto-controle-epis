@@ -1,7 +1,19 @@
 import request from "supertest";
-import { app } from "./app";
+import { app } from "../app";
+import { login } from "../services/auth.service";
+
+jest.mock("../services/auth.service", () => ({
+  login: jest.fn(),
+  registerUser: jest.fn()
+}));
 
 describe("app integration", () => {
+  const loginMock = login as jest.MockedFunction<typeof login>;
+
+  beforeEach(() => {
+    loginMock.mockReset();
+  });
+
   it("should return health status", async () => {
     const response = await request(app).get("/api/health");
 
@@ -28,5 +40,26 @@ describe("app integration", () => {
 
     expect(response.status).toBe(400);
     expect(response.body.code).toBe("VALIDATION_ERROR");
+  });
+
+  it("should return login payload from mocked service", async () => {
+    loginMock.mockResolvedValue({
+      token: "token-mock",
+      user: {
+        id: 1,
+        nome: "Admin Mock",
+        email: "admin.mock@controle-epis.local",
+        role: "admin"
+      }
+    });
+
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({ email: "admin.mock@controle-epis.local", senha: "admin123" });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.token).toBe("token-mock");
+    expect(response.body.data.user.email).toBe("admin.mock@controle-epis.local");
+    expect(loginMock).toHaveBeenCalledWith("admin.mock@controle-epis.local", "admin123");
   });
 });

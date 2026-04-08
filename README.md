@@ -76,13 +76,40 @@ O backend cria automaticamente um usuario admin na primeira execucao da migratio
 - `POST /api/auth/login`
 - `GET /api/auth/me` (autenticado)
 - `POST /api/auth/users` (admin)
-- `GET /api/epis`
+
+Cadastros base (`admin`/`almoxarife`):
+- `GET /api/cargos`
+- `POST /api/cargos`
+- `PUT /api/cargos/:id`
+- `GET /api/setores`
+- `POST /api/setores`
+- `PUT /api/setores/:id`
+- `GET /api/categorias`
+- `POST /api/categorias`
+- `PUT /api/categorias/:id`
+
+Catalogo de EPIs:
+- `GET /api/epis?page=1&pageSize=20`
 - `GET /api/epis/:id`
 - `POST /api/epis` (admin)
 - `PUT /api/epis/:id` (admin)
-- `DELETE /api/epis/:id` (admin)
+- `POST /api/epis/entrada-saldo` (admin/almoxarife)
+- `POST /api/epis/:id/entrada-saldo` (admin/almoxarife)
+
+Colaboradores:
 - `GET /api/colaboradores`
 - `POST /api/colaboradores` (admin/almoxarife)
+- `PUT /api/colaboradores/:id` (admin/almoxarife)
+- `DELETE /api/colaboradores/:id` (admin/almoxarife) - desativacao logica (`status=false`)
+
+Movimentacoes:
+- `POST /api/movimentacoes/entrega` (admin/almoxarife)
+- `POST /api/movimentacoes/entrada-saldo` (admin/almoxarife)
+
+Consultas:
+- `GET /api/consultas/entregas` (admin/almoxarife)
+
+Legado ainda disponivel:
 - `GET /api/entregas`
 - `POST /api/entregas` (admin/almoxarife)
 - `GET /api/alertas?diasValidade=30`
@@ -135,16 +162,69 @@ Response:
 
 Use o token em `Authorization: Bearer <jwt>`.
 
-### Exemplo de payload (POST/PUT)
+### Exemplo de payload (POST /api/epis e PUT /api/epis/:id)
 ```json
 {
+  "codigo": "CAP-001",
   "nome": "Capacete de Seguranca",
   "ca": "12345",
+  "categoriaId": 1,
+  "vidaUtilDias": 365,
+  "ativo": true,
   "validade": "2027-12-31",
   "estoqueAtual": 100,
   "estoqueMinimo": 20
 }
 ```
+
+### Exemplo de payload (POST /api/colaboradores)
+```json
+{
+  "nome": "Joao da Silva",
+  "matricula": "MAT-001",
+  "cargoId": 1,
+  "setorId": 1,
+  "status": true
+}
+```
+
+### Exemplo de payload (POST /api/movimentacoes/entrega)
+```json
+{
+  "colaboradorId": 1,
+  "itens": [
+    {
+      "epiId": 1,
+      "quantidade": 2
+    }
+  ],
+  "dataMovimentacao": "2026-04-07",
+  "observacao": "Entrega inicial"
+}
+```
+
+### Exemplo de payload (POST /api/movimentacoes/entrada-saldo)
+```json
+{
+  "itens": [
+    {
+      "epiId": 1,
+      "quantidade": 10
+    }
+  ],
+  "dataMovimentacao": "2026-04-07",
+  "observacao": "Reposicao"
+}
+```
+
+### Exemplo de filtros (GET /api/consultas/entregas)
+- `colaborador_id`
+- `matricula`
+- `epi_id`
+- `ca`
+- `data_inicio` e `data_fim` (obrigatoriamente juntos, intervalo maximo de 31 dias)
+- `mes` (`YYYY-MM`)
+- `usuario_id`
 
 ### Exemplo de resposta (GET /api/epis)
 ```json

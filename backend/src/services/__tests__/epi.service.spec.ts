@@ -6,17 +6,17 @@ const repositoryMock = {
   delete: jest.fn()
 };
 
-jest.mock("../database/data-source", () => ({
+jest.mock("../../database/data-source", () => ({
   AppDataSource: {
     getRepository: () => repositoryMock
   }
 }));
 
-import { createEpi, deleteEpi, getEpiById, listEpis, updateEpi } from "./epi.service";
+import { createEpi, deleteEpi, getEpiById, listEpis, updateEpi } from "../epi.service";
 
 describe("epi service", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   function makeEntity(id: number) {
@@ -54,6 +54,7 @@ describe("epi service", () => {
   });
 
   it("should create and return epi", async () => {
+    repositoryMock.findOne.mockResolvedValueOnce(makeEntity(2));
     repositoryMock.create.mockImplementation((input) => input);
     repositoryMock.save.mockResolvedValue(makeEntity(2));
 
@@ -70,7 +71,16 @@ describe("epi service", () => {
   });
 
   it("should update epi when found", async () => {
-    repositoryMock.findOne.mockResolvedValue(makeEntity(3));
+    repositoryMock.findOne
+      .mockResolvedValueOnce(makeEntity(3))
+      .mockResolvedValueOnce({
+        ...makeEntity(3),
+        nome: "Oculos",
+        ca: "888",
+        validade: "2029-02-02",
+        estoqueAtual: 30,
+        estoqueMinimo: 8
+      });
     repositoryMock.save.mockImplementation(async (entity) => entity);
 
     const result = await updateEpi(3, {

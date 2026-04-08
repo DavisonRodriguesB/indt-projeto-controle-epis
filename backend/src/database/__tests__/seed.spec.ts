@@ -6,7 +6,7 @@ const repositoryMock = {
   save: jest.fn()
 };
 
-jest.mock("./data-source", () => ({
+jest.mock("../data-source", () => ({
   AppDataSource: {
     getRepository: () => repositoryMock
   }
@@ -16,7 +16,7 @@ jest.mock("bcryptjs", () => ({
   hash: jest.fn()
 }));
 
-import { seedAdminUser } from "./seed";
+import { seedAdminUser } from "../seed";
 
 describe("seedAdminUser", () => {
   beforeEach(() => {
