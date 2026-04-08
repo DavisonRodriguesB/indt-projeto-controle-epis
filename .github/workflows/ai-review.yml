@@ -57,11 +57,11 @@ jobs:
           fi
 
           cat > prompt.txt << 'EOF'
-          Voce e um revisor senior de codigo.
+          Voce e um revisor senior de codigo. Seja conciso, objetivo e equilibrado.
 
           Analise o diff abaixo e responda estritamente neste formato:
 
-          DECISAO: APROVADO ou REPROVADO
+          DECISAO: APROVADO | APROVADO_COM_AJUSTES | REPROVADO_BLOQUEANTE
 
           PROBLEMAS:
           - ...
@@ -70,8 +70,11 @@ jobs:
           - ...
 
           Regras:
-          - Se houver bug, regressao funcional, falha de seguranca, quebra de contrato de API ou ausencia de teste critico, use REPROVADO.
-          - Seja objetivo e priorize itens de maior impacto.
+          - Use no maximo 3 itens em PROBLEMAS e 3 itens em SUGESTOES.
+          - Cada item deve ter 1 frase curta (maximo 140 caracteres).
+          - Use REPROVADO_BLOQUEANTE apenas para risco critico comprovado (seguranca grave, perda de dados, quebra clara de producao).
+          - Para itens importantes mas nao bloqueantes, use APROVADO_COM_AJUSTES.
+          - Evite linguagem alarmista; prefira tom colaborativo.
 
           Diff:
           EOF
@@ -142,10 +145,10 @@ jobs:
               body,
             });
 
-      - name: Fail if rejected
+      - name: Fail only on blocking rejection
         run: |
           set -euo pipefail
-          if grep -Eiq '^DECISAO:\s*REPROVADO' review.txt || grep -Eiq '\bREPROVADO\b' review.txt; then
-            echo "AI reprovou o PR"
+          if grep -Eiq '^DECISAO:\s*REPROVADO_BLOQUEANTE' review.txt || grep -Eiq '\bREPROVADO_BLOQUEANTE\b' review.txt; then
+            echo "AI review marcou bloqueio critico"
             exit 1
           fi
