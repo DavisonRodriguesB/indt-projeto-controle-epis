@@ -10,8 +10,12 @@ const categoriaRepository = AppDataSource.getRepository(CategoriaEntity);
 const entregaRepository = AppDataSource.getRepository(EntregaEntity);
 
 async function mapEntityToEpi(entity: EpiEntity): Promise<Epi> {
-  const countFn = (entregaRepository as unknown as { count?: (input: unknown) => Promise<number> }).count;
-  const entregaCount = countFn ? await countFn({ where: { epiId: entity.id } }) : 0;
+  let entregaCount = 0;
+  try {
+    entregaCount = await entregaRepository.count({ where: { epiId: entity.id } });
+  } catch {
+    entregaCount = 0;
+  }
 
   return {
     id: entity.id,
@@ -86,7 +90,13 @@ export async function createEpi(input: CreateEpiInput): Promise<Epi> {
   });
 
   const saved = await epiRepository.save(entity);
-  return mapEntityToEpi(saved);
+  const reloaded = await epiRepository.findOne({ where: { id: saved.id } });
+
+  if (!reloaded) {
+    throw new AppError(500, "Falha ao recarregar EPI criado.", "EPI_RELOAD_FAILED");
+  }
+
+  return mapEntityToEpi(reloaded);
 }
 
 export async function updateEpi(id: number, input: UpdateEpiInput): Promise<Epi | null> {
@@ -120,8 +130,13 @@ export async function updateEpi(id: number, input: UpdateEpiInput): Promise<Epi 
   entity.estoqueMinimo = input.estoqueMinimo;
 
   const updated = await epiRepository.save(entity);
+  const reloaded = await epiRepository.findOne({ where: { id: updated.id } });
 
-  return mapEntityToEpi(updated);
+  if (!reloaded) {
+    throw new AppError(500, "Falha ao recarregar EPI atualizado.", "EPI_RELOAD_FAILED");
+  }
+
+  return mapEntityToEpi(reloaded);
 }
 
 export async function entradaSaldoEpi(id: number, quantidade: number): Promise<Epi | null> {
@@ -132,7 +147,13 @@ export async function entradaSaldoEpi(id: number, quantidade: number): Promise<E
 
   entity.estoqueAtual = entity.estoqueAtual + quantidade;
   const updated = await epiRepository.save(entity);
-  return mapEntityToEpi(updated);
+  const reloaded = await epiRepository.findOne({ where: { id: updated.id } });
+
+  if (!reloaded) {
+    throw new AppError(500, "Falha ao recarregar EPI apos entrada de saldo.", "EPI_RELOAD_FAILED");
+  }
+
+  return mapEntityToEpi(reloaded);
 }
 
 export async function deleteEpi(id: number): Promise<boolean> {
