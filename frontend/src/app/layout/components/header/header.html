@@ -1,25 +1,65 @@
-<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-end px-6">
+<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm sticky top-0 z-40">
   
-  <div class="flex-1"></div>
+  <div class="flex items-center gap-4">
+    <h1 class="text-base font-semibold text-slate-800">
+      Controle de EPIs
+    </h1>
+  </div>
 
   <div class="flex items-center gap-6">
-    <button class="text-gray-500 hover:text-slate-800 relative p-1 transition-all active:scale-90">
+    
+    <button class="relative p-2 text-slate-500 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-all active:scale-95">
       <i class="ph ph-bell text-2xl"></i>
-      <span class="absolute top-1 right-1 w-2 h-2 bg-blue-600 rounded-full border-2 border-white shadow-sm"></span>
-    </button>      
+      <span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 border-2 border-white rounded-full"></span>
+    </button>
 
-    <div class="h-8 w-px bg-gray-200"></div>
+    <div class="h-8 w-px bg-gray-100"></div>
 
-    <div class="flex items-center gap-3 cursor-pointer group">
-      <div class="text-right hidden sm:block text-nowrap">
-        <p class="text-sm font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">Admin</p>
-        <p class="text-[11px] text-gray-500 leading-tight">Gestor de Segurança</p>
-      </div>
-      <img 
-        src="https://ui-avatars.com/api/?name=Admin+EpiPIM&background=475A83&color=fff" 
-        alt="Avatar" 
-        class="w-10 h-10 rounded-full border border-gray-100 group-hover:border-blue-400 transition-all shadow-sm"
+    <div class="relative">
+      <button 
+        (click)="toggleMenu()" 
+        class="flex items-center gap-3 p-1.5 pl-3 rounded-xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-200"
       >
+        <div class="text-right hidden sm:block">
+          <p class="text-sm font-bold text-slate-800 leading-tight">Administrador</p>
+          <p class="text-xs font-normal text-slate-500 leading-tight">
+            Admin
+          </p>
+        </div>
+        
+        <div class="w-9 h-9 bg-blue-100 border border-blue-200 rounded-xl flex items-center justify-center text-blue-700 font-bold shadow-sm">
+          A
+        </div>
+      </button>
+
+      @if (menuOpen) {
+        <div
+          class="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden py-2 animate-in fade-in zoom-in duration-150"
+        >
+          <div class="px-4 py-3 border-b border-gray-50 mb-1">
+            <p class="text-sm font-semibold text-slate-900">Administrador</p>
+            <p class="text-xs font-normal text-slate-500 truncate">admin@epipim.com.br</p>
+          </div>
+
+          <button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-normal text-slate-600 hover:bg-slate-50 transition-colors text-left group">
+            <i class="ph ph-user-circle text-xl text-slate-400 group-hover:text-blue-600 transition-colors"></i>
+            Meu Perfil
+          </button>
+
+          <button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-normal text-slate-600 hover:bg-slate-50 transition-colors text-left group">
+            <i class="ph ph-gear text-xl text-slate-400 group-hover:text-blue-600 transition-colors"></i>
+            Configurações
+          </button>
+
+          <button
+            (click)="logout()"
+            class="w-full flex items-center gap-3 px-4 py-2.5 mt-1 border-t border-gray-50 text-sm font-medium text-red-600 hover:bg-red-50 transition-all"
+          >
+            <i class="ph ph-sign-out text-xl text-red-500"></i>
+            Sair do sistema
+          </button>
+        </div>
+      }
     </div>
   </div>
 </header>

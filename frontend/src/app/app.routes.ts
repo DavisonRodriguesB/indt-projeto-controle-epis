@@ -84,7 +84,7 @@ export const routes: Routes = [
         path: 'usuarios',
         loadComponent: () =>
           import('./features/usuarios/pages/list/list').then(
-            (m) => m.List
+            (m) => m.UsuarioListComponent
           ),
       },
     ],

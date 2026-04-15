@@ -1,1 +1,94 @@
-<p>Usuários</p>
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-800">Usuários</h2>
+      <p class="text-slate-500 text-sm">Gestão de acesso ao sistema</p>
+    </div>
+    <button 
+      (click)="openModal()"
+      class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-100">
+      <i class="ph ph-user-plus text-xl"></i>
+      Novo Usuário
+    </button>
+  </div>
+
+  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4">
+    <div class="relative flex-1">
+      <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm"
+        placeholder="Buscar por nome ou e-mail" 
+        class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20"
+      >
+    </div>
+    
+    <select 
+      [(ngModel)]="selectedRole"
+      class="w-full md:w-48 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none text-slate-600 cursor-pointer focus:ring-2 focus:ring-blue-500/20">
+      <option value="">Todos os Perfis</option>
+      <option value="Admin">Administrador</option>
+      <option value="Almoxarife">Almoxarife</option>
+    </select>
+  </div>
+
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <table class="w-full text-left">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Usuário</th>
+          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Perfil</th>
+          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Status</th>
+          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr *ngFor="let user of usuariosFiltrados" class="hover:bg-slate-50/50 transition-colors">
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
+                {{ user.nome | slice:0:1 }}
+              </div>
+              <div>
+                <p class="font-medium text-slate-800 leading-none">{{ user.nome }}</p>
+                <p class="text-xs text-slate-400 mt-1">{{ user.email }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm text-slate-600">
+            <span class="flex items-center gap-1.5">
+              <i class="ph" [ngClass]="user.perfil === 'Admin' ? 'ph-shield-check text-orange-500' : 'ph-user text-blue-500'"></i>
+              {{ user.perfil }}
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <span [class]="user.ativo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" 
+                  class="px-2 py-1 rounded-full text-[10px] font-bold uppercase whitespace-nowrap">
+              {{ user.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <div class="flex justify-end items-center gap-2">
+              <button (click)="editUser(user)" class="text-slate-400 hover:text-blue-600 p-1 transition-colors">
+                <i class="ph ph-pencil-simple text-2xl"></i>
+              </button>
+              <button (click)="toggleStatus(user)" class="transition-all active:scale-95">
+                <i class="ph" 
+                   [ngClass]="user.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" 
+                   style="font-size: 32px;">
+                </i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<app-user-form 
+  *ngIf="isModalOpen" 
+  [userData]="selectedUser"
+  (onClose)="closeModal()"
+  (onSave)="saveUser($event)">
+</app-user-form>
