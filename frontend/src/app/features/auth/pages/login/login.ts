@@ -1,24 +1,25 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/auth/auth.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  
   imports: [ReactiveFormsModule],
   templateUrl: './login.html'
 })
 export class LoginComponent {
-  form: FormGroup;
-  error: string | null = null;
-  loading = false;
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private auth = inject(AuthService);
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router
-  ) {
-    
+  form: FormGroup;
+  error = signal<string | null>(null);
+  loading = signal(false);
+
+  constructor() {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -26,26 +27,25 @@ export class LoginComponent {
   }
 
   entrar() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (this.form.invalid) return;
 
-    this.loading = true;
-    this.error = null;
-
-    const { email, password } = this.form.value;
+    this.loading.set(true);
+    this.error.set(null);
 
     
-    console.log('Tentando acesso com:', email);
+    const email = this.form.get('email')?.value;
+    const password = this.form.get('password')?.value;
 
-    if (email === 'admin@epipim.com.br' && password === '123456') {
+    this.auth.login(email, password).subscribe({
+      next: () => {
+        this.router.navigate(['/dashboard']); 
+      },
       
-      this.router.navigate(['/dashboard']);
-    } else {
-      
-      this.error = 'E-mail ou senha incorretos. Verifique suas credenciais.';
-      this.loading = false;
-    }
+      error: (err: HttpErrorResponse) => {
+        this.loading.set(false);
+        const msg = err?.error?.message || 'Falha na autenticação. Verifique suas credenciais.';
+        this.error.set(msg);
+      }
+    });
   }
 }

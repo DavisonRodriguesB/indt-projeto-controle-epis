@@ -1,12 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModalSetor } from './components/modal-setor/modal-setor';
-
-interface Setor {
-  id: number;
-  nomeSetor: string;
-  ativo: boolean;
-}
+import { BaseService } from '../../../../../core/services/base.service';
+import { BaseItem } from '../../../../../core/models/base-item.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-setores-list',
@@ -14,29 +11,61 @@ interface Setor {
   imports: [CommonModule, ModalSetor],
   templateUrl: './list.html'
 })
-export class SetoresList {
+export class SetoresList implements OnInit {
   isModalOpen = false;
-  
-  setores: Setor[] = [
-    { id: 1, nomeSetor: 'Almoxarifado', ativo: true },
-    { id: 2, nomeSetor: 'Produção', ativo: true }
-  ];
+  setores: BaseItem[] = [];
 
-  openModal() { this.isModalOpen = true; }
-  closeModal() { this.isModalOpen = false; }
+  private baseService = inject(BaseService);
 
-  salvarSetor(nome: string) {
-    const novo: Setor = {
-      id: Math.floor(Math.random() * 1000),
-      nomeSetor: nome,
-      ativo: true 
-    };
-    this.setores.unshift(novo);
-    this.closeModal();
+  ngOnInit() {
+    this.carregarSetores();
   }
 
-  toggleStatus(item: Setor) {
-    item.ativo = !item.ativo;
-    console.log(`Setor ${item.nomeSetor} alterado para: ${item.ativo ? 'Ativo' : 'Inativo'}`);
+  carregarSetores() {
+    this.baseService.listar('setores').subscribe({
+      next: (res) => {
+        
+        this.setores = res.data || res;
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erro ao carregar setores:', err.message);
+      }
+    });
+  }
+
+  openModal() { 
+    this.isModalOpen = true; 
+  }
+
+  closeModal() { 
+    this.isModalOpen = false; 
+  }
+
+  salvarSetor(descricao: string) {
+    const novoSetor = { descricao };
+
+    this.baseService.salvar('setores', novoSetor).subscribe({
+      next: () => {
+        this.carregarSetores();
+        this.closeModal();
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erro ao salvar setor. Verifique se o Login é necessário:', err.message);
+      }
+    });
+  }
+
+  toggleStatus(item: BaseItem) {
+    if (!item.id) return;
+    
+    const novoStatus = !item.ativo;
+    this.baseService.alterarStatus('setores', item.id, item.descricao, novoStatus).subscribe({
+      next: () => {
+        item.ativo = novoStatus;
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erro ao alterar status:', err.message);
+      }
+    });
   }
 }

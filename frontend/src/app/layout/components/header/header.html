@@ -21,35 +21,28 @@
         class="flex items-center gap-3 p-1.5 pl-3 rounded-xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-200"
       >
         <div class="text-right hidden sm:block">
-          <p class="text-sm font-bold text-slate-800 leading-tight">Administrador</p>
-          <p class="text-xs font-normal text-slate-500 leading-tight">
-            Admin
+          <p class="text-sm font-bold text-slate-800 leading-tight">
+            {{ user()?.nome }}
+          </p>
+          <p class="text-xs font-normal text-slate-500 leading-tight capitalize">
+            {{ user()?.perfil }}
           </p>
         </div>
         
         <div class="w-9 h-9 bg-blue-100 border border-blue-200 rounded-xl flex items-center justify-center text-blue-700 font-bold shadow-sm">
-          A
+          {{ getInitial() }}
         </div>
       </button>
 
       @if (menuOpen) {
         <div
+          (clickOutside)="menuOpen = false"
           class="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden py-2 animate-in fade-in zoom-in duration-150"
         >
           <div class="px-4 py-3 border-b border-gray-50 mb-1">
-            <p class="text-sm font-semibold text-slate-900">Administrador</p>
-            <p class="text-xs font-normal text-slate-500 truncate">admin@epipim.com.br</p>
+            <p class="text-sm font-semibold text-slate-900">{{ user()?.nome }}</p>
+            <p class="text-xs font-normal text-slate-500 truncate">{{ user()?.email }}</p>
           </div>
-
-          <button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-normal text-slate-600 hover:bg-slate-50 transition-colors text-left group">
-            <i class="ph ph-user-circle text-xl text-slate-400 group-hover:text-blue-600 transition-colors"></i>
-            Meu Perfil
-          </button>
-
-          <button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-normal text-slate-600 hover:bg-slate-50 transition-colors text-left group">
-            <i class="ph ph-gear text-xl text-slate-400 group-hover:text-blue-600 transition-colors"></i>
-            Configurações
-          </button>
 
           <button
             (click)="logout()"

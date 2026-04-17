@@ -26,7 +26,7 @@
           <td class="px-6 py-4 flex items-center gap-3">
             <i class="ph ph-tree-structure text-slate-400 text-lg"></i>
             <span class="font-medium text-slate-700" [ngClass]="{'text-slate-400 italic line-through': !setor.ativo}">
-              {{ setor.nomeSetor }}
+              {{ setor.descricao }}
             </span>
           </td>
 
@@ -68,6 +68,6 @@
 
 <app-modal-setor 
   [isOpen]="isModalOpen" 
-  (onClose)="closeModal()" 
-  (onSave)="salvarSetor($event)">
+  (close)="closeModal()" 
+  (confirm)="salvarSetor($event)">
 </app-modal-setor>
