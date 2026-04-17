@@ -19,7 +19,7 @@ routes.get("/health", (_request, response) => {
 routes.use("/auth", authRoutes);
 
 routes.use(ensureAuthenticated);
-routes.use(cadastrosBaseRoutes);
+routes.use("/cadastro",cadastrosBaseRoutes);
 routes.use("/epis", epiRoutes);
 routes.use("/colaboradores", colaboradorRoutes);
 routes.use("/entregas", entregaRoutes);

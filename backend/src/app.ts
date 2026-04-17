@@ -14,6 +14,7 @@ app.use(morgan("dev"));
 app.use("/api", routes);
 
 app.use((request: Request, _response: Response, next: NextFunction) => {
+console.log("oi");
   next(new AppError(404, `Rota nao encontrada: ${request.method} ${request.path}`, "ROUTE_NOT_FOUND"));
 });
 
