@@ -21,11 +21,13 @@ cadastrosBaseRoutes.put("/cargos/:id", ensureRole(["admin", "almoxarife"]), (req
   return handleUpdateBaseItem(req, res).catch(next);
 });
 
+
 cadastrosBaseRoutes.get("/setores", (req, res, next) => {
   (req.params as { entity?: string }).entity = "setores";
   return handleListBaseItems(req, res).catch(next);
 });
 cadastrosBaseRoutes.post("/setores", ensureRole(["admin", "almoxarife"]), (req, res, next) => {
+  console.log("chegou na rota");
   (req.params as { entity?: string }).entity = "setores";
   return handleCreateBaseItem(req, res).catch(next);
 });
@@ -33,6 +35,8 @@ cadastrosBaseRoutes.put("/setores/:id", ensureRole(["admin", "almoxarife"]), (re
   (req.params as { entity?: string }).entity = "setores";
   return handleUpdateBaseItem(req, res).catch(next);
 });
+
+
 
 cadastrosBaseRoutes.get("/categorias", (req, res, next) => {
   (req.params as { entity?: string }).entity = "categorias";
