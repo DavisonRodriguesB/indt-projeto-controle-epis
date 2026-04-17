@@ -113,10 +113,12 @@
     </ul>
 
     <div class="border-t border-gray-100 pt-4 pb-8">      
-      <a [routerLink]="['/login']" class="flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all">
+      <button 
+        (click)="sair()" 
+        class="w-full flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all focus:outline-none">
         <i class="ph ph-sign-out text-xl shrink-0"></i>
         <span *ngIf="!isCollapsed" class="animate-in slide-in-from-left-2">Sair</span>
-      </a>
+      </button>
     </div>
   </nav>
   

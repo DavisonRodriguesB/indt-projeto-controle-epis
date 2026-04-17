@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core'; 
 import { CommonModule } from '@angular/common'; 
 import { RouterModule, NavigationEnd, Router } from '@angular/router'; 
 import { filter } from 'rxjs/operators';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -11,12 +12,14 @@ import { filter } from 'rxjs/operators';
   styleUrls: ['./sidebar.css']
 })
 export class SidebarComponent {
-  isCadastroBaseOpen = false;
-  isCollapsed = false; // Controle Desktop
-  isMobileOpen = false; // Controle Mobile
+  private authService = inject(AuthService); 
+  private router = inject(Router);
 
-  constructor(private router: Router) {
-    // Fecha o menu mobile automaticamente ao clicar em um link
+  isCadastroBaseOpen = false;
+  isCollapsed = false; 
+  isMobileOpen = false; 
+
+  constructor() {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
@@ -34,5 +37,10 @@ export class SidebarComponent {
 
   toggleMobile() {
     this.isMobileOpen = !this.isMobileOpen;
+  }
+
+  
+  sair() {
+    this.authService.logout();
   }
 }
