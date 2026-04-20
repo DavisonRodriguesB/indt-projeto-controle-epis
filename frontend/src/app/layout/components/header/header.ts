@@ -1,17 +1,39 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { of, Subject, timer } from 'rxjs';
 import { catchError, switchMap, takeUntil } from 'rxjs/operators';
+
 import { HeaderNotificationsService, MovimentacaoNotificacao } from './header-notifications.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-header',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './header.html',
-  styleUrls: ['./header.css'],
-  standalone: true
+  styleUrls: ['./header.css']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+
+  // ===== AUTH / USER =====
+  private authService = inject(AuthService);
+  user = this.authService.currentUser;
+  menuOpen = false;
+
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  logout() {
+    this.menuOpen = false;
+    this.authService.logout();
+  }
+
+  getInitial(): string {
+    return this.user()?.nome?.charAt(0).toUpperCase() || 'U';
+  }
+
+  // ===== NOTIFICATIONS =====
   isNotificationsOpen = false;
   isLoadingNotifications = false;
   notificationError: string | null = null;
@@ -59,9 +81,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.isNotificationsOpen) {
-      return;
-    }
+    if (!this.isNotificationsOpen) return;
 
     const targetNode = event.target as Node | null;
     if (targetNode && !this.elementRef.nativeElement.contains(targetNode)) {
@@ -87,7 +107,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (error instanceof Error) {
       return error.message;
     }
-
-    return 'Nao foi possivel carregar as notificacoes.';
+    return 'Não foi possível carregar as notificações.';
   }
 }

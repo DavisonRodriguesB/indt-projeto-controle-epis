@@ -59,22 +59,28 @@
       <li>
         <a [routerLink]="['/consulta-entregas']" routerLinkActive="bg-blue-50 text-blue-700 active-link"
           class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 transition-all">
-          <i class="ph ph-clipboard-text text-xl shrink-0"></i>
+          <i class="ph ph-file-search text-xl shrink-0"></i>
           <span *ngIf="!isCollapsed" class="animate-in slide-in-from-left-2">Consultar Entregas</span>
         </a>
       </li>
 
       <li class="pt-4">
-        <p *ngIf="!isCollapsed" class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 animate-in fade-in">Configurações</p>
+        <p *ngIf="!isCollapsed" class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 animate-in fade-in">
+          Configurações
+        </p>
+        
+        <a [routerLink]="['/usuarios']" routerLinkActive="bg-blue-50 text-blue-700 active-link" 
+          class="group flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-slate-50 transition-all mb-1">
+          <i class="ph ph-user-gear text-xl shrink-0"></i>
+          <span *ngIf="!isCollapsed" class="animate-in slide-in-from-left-2">Usuários</span>
+        </a>
 
         <button (click)="toggleCadastroBase()"
           class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-all group focus:outline-none">
-          
           <div class="flex items-center gap-3">
             <i class="ph ph-database text-xl text-slate-600 shrink-0"></i>
             <span *ngIf="!isCollapsed" class="animate-in slide-in-from-left-2">Cadastros Base</span>
           </div>
-
           <i *ngIf="!isCollapsed" class="ph ph-caret-down text-xs transition-transform duration-300" 
              [class.rotate-180]="isCadastroBaseOpen"></i>
         </button>
@@ -107,10 +113,13 @@
     </ul>
 
     <div class="border-t border-gray-100 pt-4 pb-8">      
-      <a [routerLink]="['/login']" class="flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all">
+      <button 
+        (click)="sair()" 
+        class="w-full flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all focus:outline-none">
         <i class="ph ph-sign-out text-xl shrink-0"></i>
         <span *ngIf="!isCollapsed" class="animate-in slide-in-from-left-2">Sair</span>
-      </a>
+      </button>
     </div>
   </nav>
+  
 </aside>

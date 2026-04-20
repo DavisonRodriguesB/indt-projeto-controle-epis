@@ -1,16 +1,20 @@
 import { Routes } from '@angular/router';
 import { ColaboradorFormComponent } from './features/colaboradores/pages/form/form';
 import { EpiFormComponent } from './features/epis/pages/form/form';
+import { authGuard } from './core/auth/auth.guard';
+import { roleGuard } from './core/auth/role.guard';
+import { Perfil } from './core/models/auth.model';
 
 export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./features/auth/pages/login/login').then((m) => m.Login),
+      import('./features/auth/pages/login/login').then((m) => m.LoginComponent),
   },
 
   {
     path: '',
+    canActivate: [authGuard], 
     loadComponent: () =>
       import('./layout/main-layout/main-layout').then(
         (m) => m.MainLayoutComponent
@@ -32,6 +36,7 @@ export const routes: Routes = [
       },
       { 
         path: 'epis/novo', 
+        canActivate: [roleGuard(Perfil.ADMIN, Perfil.ALMOXARIFE)], 
         component: EpiFormComponent
       },
       {
@@ -43,27 +48,24 @@ export const routes: Routes = [
       },
       { 
         path: 'colaboradores/novo', 
+        canActivate: [roleGuard(Perfil.ADMIN)],
         component: ColaboradorFormComponent 
       },
-
       {
         path: 'cargos',
         loadComponent: () =>
           import('./features/configuracoes/cargos/pages/list/list').then((m) => m.List),
       },
-      
       {
         path: 'setores',
         loadComponent: () =>
           import('./features/configuracoes/setores/pages/list/list').then((m) => m.SetoresList),
       },
-
       {
         path: 'categorias',
         loadComponent: () =>
           import('./features/configuracoes/categorias/pages/list/list').then((m) => m.CategoriasList),
       },
-
       {
         path: 'entregas',
         loadComponent: () =>
@@ -71,7 +73,6 @@ export const routes: Routes = [
             (m) => m.Movimentacao
           ),
       },
-
       {
         path: 'consulta-entregas',
         loadComponent: () =>
@@ -79,14 +80,19 @@ export const routes: Routes = [
             (m) => m.ConsultaEntregasComponent
           ),
       },
-      
       {
         path: 'usuarios',
+        canActivate: [roleGuard(Perfil.ADMIN)],
         loadComponent: () =>
           import('./features/usuarios/pages/list/list').then(
-            (m) => m.List
+            (m) => m.UsuarioListComponent
           ),
       },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      }
     ],
   },
 
