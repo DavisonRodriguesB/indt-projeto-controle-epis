@@ -28,8 +28,12 @@ export class AuthService {
     this.init();
   }
 
+  getAuthToken(): string | null {
+    return this.state().accessToken ?? this.getStoredToken();
+  }
+
   private init(): void {
-    const rt = localStorage.getItem(REFRESH_TOKEN_KEY);
+    const rt = this.getStoredToken();
     if (rt) {
       this.refresh().subscribe({
         error: () => this.clearSession()
@@ -61,7 +65,7 @@ export class AuthService {
   }
 
   refresh(): Observable<any> {
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) ?? '';
+    const refreshToken = this.getStoredToken() ?? '';
 
     return this.http
       .post<any>(`${environment.apiUrl}/auth/refresh`, { refreshToken })
@@ -93,6 +97,10 @@ export class AuthService {
   clearSession(): void {
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     this.state.set({ usuario: null, accessToken: null });
+  }
+
+  private getStoredToken(): string | null {
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
   }
 
   hasRole(perfis: string[]): boolean {

@@ -134,7 +134,7 @@ describe("fluxos de endpoints (contrato de rota sem banco)", () => {
   });
 
   it("deve exigir token quando ausente", async () => {
-    const response = await api.post("/api/cargos").send({ descricao: "Cargo Teste" });
+    const response = await api.post("/api/cadastro/cargos").send({ descricao: "Cargo Teste" });
 
     expect(response.status).toBe(401);
     expect(response.body.code).toBe("AUTH_TOKEN_MISSING");
@@ -143,7 +143,7 @@ describe("fluxos de endpoints (contrato de rota sem banco)", () => {
   it("deve criar cargo com dados mockados", async () => {
     createBaseItemMock.mockResolvedValue(baseItemMock);
 
-    const response = await api.post("/api/cargos").set(getAuthHeader()).send({ descricao: "Cargo Mock" });
+    const response = await api.post("/api/cadastro/cargos").set(getAuthHeader()).send({ descricao: "Cargo Mock" });
 
     expect(response.status).toBe(201);
     expect(response.body.data).toEqual(baseItemMock);

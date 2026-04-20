@@ -27,7 +27,6 @@ cadastrosBaseRoutes.get("/setores", (req, res, next) => {
   return handleListBaseItems(req, res).catch(next);
 });
 cadastrosBaseRoutes.post("/setores", ensureRole(["admin", "almoxarife"]), (req, res, next) => {
-  console.log("chegou na rota");
   (req.params as { entity?: string }).entity = "setores";
   return handleCreateBaseItem(req, res).catch(next);
 });
