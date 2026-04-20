@@ -25,6 +25,7 @@ interface AlertasResult {
 
 interface AlertaMovimentacao {
   id: number;
+  protocolo: string;
   tipo: "entrega" | "entrada_saldo";
   dataMovimentacao: string;
   observacao: string | null;
@@ -34,6 +35,22 @@ interface AlertaMovimentacao {
   colaboradorNome: string | null;
   totalItens: number;
   totalQuantidade: number;
+}
+
+function getProtocolYear(dataMovimentacao: unknown): string {
+  if (typeof dataMovimentacao === "string") {
+    const isoYear = dataMovimentacao.match(/^(\d{4})/);
+    if (isoYear) {
+      return isoYear[1];
+    }
+  }
+
+  const parsed = new Date(String(dataMovimentacao));
+  if (!Number.isNaN(parsed.getTime())) {
+    return String(parsed.getUTCFullYear());
+  }
+
+  return String(new Date().getUTCFullYear());
 }
 
 export async function listAlertas(diasValidade = 30): Promise<AlertasResult> {
@@ -119,6 +136,7 @@ export async function listMovimentacoesRecentes(
 
   return rows.map((row: Record<string, unknown>) => ({
     id: Number(row.id),
+    protocolo: `MOV-${getProtocolYear(row.data_movimentacao)}-${String(row.id).padStart(6, "0")}`,
     tipo: String(row.tipo) as "entrega" | "entrada_saldo",
     dataMovimentacao: String(row.data_movimentacao),
     observacao: row.observacao ? String(row.observacao) : null,

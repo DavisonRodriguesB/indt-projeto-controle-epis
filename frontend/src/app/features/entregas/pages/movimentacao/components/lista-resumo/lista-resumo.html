@@ -41,8 +41,8 @@
     <p class="text-xs text-slate-500 italic">
       {{ colaboradorFixado ? 'Entrega para: ' + colaboradorFixado : 'Selecione um colaborador para finalizar.' }}
     </p>
-    <button (click)="onFinalizar.emit()" [disabled]="itens.length === 0" class="w-full md:w-auto px-12 py-3.5 bg-slate-900 hover:bg-black text-white font-bold rounded-xl transition-all shadow-xl disabled:bg-slate-300">
-      Finalizar e Gerar Protocolo
+    <button (click)="onFinalizar.emit()" [disabled]="itens.length === 0 || enviando" class="w-full md:w-auto px-12 py-3.5 bg-slate-900 hover:bg-black text-white font-bold rounded-xl transition-all shadow-xl disabled:bg-slate-300">
+      {{ enviando ? 'Enviando...' : 'Finalizar e Gerar Protocolo' }}
     </button>
   </div>
 </div>

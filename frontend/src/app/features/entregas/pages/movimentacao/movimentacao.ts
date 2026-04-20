@@ -1,10 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 
 import { FormularioEntrega } from './components/formulario-entrega/formulario-entrega';
 import { ListaResumo } from './components/lista-resumo/lista-resumo';
 import { ModalEntradaSaldo } from './components/modal-entrada-saldo/modal-entrada-saldo';
+import {
+  ColaboradorApi,
+  EpiApi,
+  MovimentacaoApiService,
+} from './movimentacao-api.service';
+import { MovimentacaoQueryService, MovimentacaoRecente } from '../../../../core/services/movimentacao-query.service';
 
 import { RelatorioepiComponent } from '../../../../shared/components/relatorioepi/relatorioepi';
 import { RelatorioEpiData } from '../../../../shared/components/relatorioepi/relatorio-epi.model';
@@ -39,29 +46,31 @@ export class Movimentacao implements OnInit {
   itensMovimentacao: any[] = [];
   erroSaldo: string | null = null;
   nomeArquivoAnexo: string | null = null;
+  erroApi: string | null = null;
+  enviandoMovimentacao = false;
 
   
   dadosParaRelatorio!: RelatorioEpiData;
-  usuarioLogado = "DAVISON BENTES"; 
+  usuarioLogado = 'Sistema';
+
+  movimentacoesRecentes: MovimentacaoRecente[] = [];
+
+  private colaboradoresApi: ColaboradorApi[] = [];
+  private episApi: EpiApi[] = [];
 
   
-  listaColaboradoresCompleta = [
-    { nome: 'Bruce Wayne', funcao: 'Eletricista de Manutenção', setor: 'Instalações' },
-    { nome: 'Tony Stark', funcao: 'Operadora de Máquina B', setor: 'Produção' },
-    { nome: 'Steve Rogers', funcao: 'Mecânico Industrial', setor: 'Oficina' },
-    { nome: 'Natasha Romanoff', funcao: 'Técnica de Segurança', setor: 'SESMT' }
-  ];
+  listaColaboradoresCompleta = [] as Array<{ nome: string; funcao: string; setor: string }>;
 
   colaboradores = this.listaColaboradoresCompleta.map(c => c.nome);
   
-  estoque = [
-    { id: 1, codigo: 'EPI-001', material: 'Capacete de Segurança', ca: '12345', saldo: 15 },
-    { id: 2, codigo: 'EPI-002', material: 'Luva Nitrílica', ca: '67890', saldo: 4 },
-    { id: 3, codigo: 'EPI-003', material: 'Óculos de Proteção', ca: '11223', saldo: 20 },
-    { id: 4, codigo: 'EPI-004', material: 'Protetor Auricular', ca: '44556', saldo: 8 },
-  ];
+  estoque: Array<{ id: number; codigo: string; material: string; ca: string; saldo: number }> = [];
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private movimentacaoApi: MovimentacaoApiService,
+    private movimentacaoQuery: MovimentacaoQueryService,
+    private cdr: ChangeDetectorRef,
+  ) {
     this.formSaidaEpi = this.fb.group({
       colaborador: ['', Validators.required],
       material: ['', Validators.required],
@@ -75,17 +84,156 @@ export class Movimentacao implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.carregarDadosIniciais();
+  }
+
+  private carregarDadosIniciais(): void {
+    this.erroApi = null;
+
+    this.movimentacaoApi.listColaboradores().subscribe({
+      next: (rows) => {
+        this.colaboradoresApi = rows;
+        this.listaColaboradoresCompleta = rows.map((colab) => ({
+          nome: colab.nome,
+          funcao: 'Nao informado',
+          setor: colab.setor ?? 'Nao informado',
+        }));
+        this.colaboradores = this.listaColaboradoresCompleta.map((c) => c.nome);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.erroApi = 'Falha ao carregar colaboradores.';
+        this.cdr.detectChanges();
+      },
+    });
+
+    this.recarregarEpis();
+    this.recarregarMovimentacoesRecentes();
+  }
+
+  private recarregarEpis(): void {
+    this.movimentacaoApi.listEpis().subscribe({
+      next: (rows) => {
+        this.episApi = rows;
+        this.estoque = rows.map((epi) => ({
+          id: epi.id,
+          codigo: epi.codigo,
+          material: epi.nome,
+          ca: epi.ca,
+          saldo: epi.estoque_atual,
+        }));
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.erroApi = 'Falha ao carregar EPIs.';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private recarregarMovimentacoesRecentes(): void {
+    this.movimentacaoQuery.listRecentMovements(10).subscribe({
+      next: (rows) => {
+        this.movimentacoesRecentes = rows;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.erroApi = 'Falha ao carregar movimentacoes recentes.';
+        this.cdr.detectChanges();
+      },
+    });
+  }
 
   salvarNovoSaldo() {
-    const { materialCodigo, quantidade } = this.formEntradaSaldo.value;
-    const item = this.estoque.find(i => i.codigo === materialCodigo);
+    const { materialCodigo, quantidade, observacao } = this.formEntradaSaldo.value;
+    const item = this.estoque.find((i) => i.codigo === materialCodigo);
 
-    if (item) {
-      item.saldo += quantidade;
-      alert(`Saldo de ${item.material} atualizado com sucesso!`);
-      this.closeModalSaldo();
+    if (!item || quantidade <= 0) {
+      return;
     }
+
+    this.erroApi = null;
+    this.enviandoMovimentacao = true;
+
+    this.movimentacaoApi
+      .createEntradaSaldo([{ epiId: item.id, quantidade }], observacao)
+      .pipe(finalize(() => {
+        this.enviandoMovimentacao = false;
+      }))
+      .subscribe({
+        next: () => {
+          alert(`Entrada de saldo para ${item.material} registrada com sucesso!`);
+          this.closeModalSaldo();
+          this.recarregarEpis();
+          this.recarregarMovimentacoesRecentes();
+        },
+        error: () => {
+          this.erroApi = 'Nao foi possivel registrar a entrada de saldo.';
+        },
+      });
+  }
+
+  private getColaboradorIdByNome(nome: string | null): number | null {
+    if (!nome) {
+      return null;
+    }
+
+    const colaborador = this.colaboradoresApi.find((row) => row.nome === nome);
+    return colaborador?.id ?? null;
+  }
+
+  private getEpiIdByCodigo(codigo: string): number | null {
+    const epi = this.episApi.find((row) => row.codigo === codigo);
+    return epi?.id ?? null;
+  }
+
+  private getSelectedEpi(materialInput: string | null): {
+    id: number;
+    codigo: string;
+    material: string;
+    ca: string;
+    saldo: number;
+  } | null {
+    if (!materialInput) {
+      return null;
+    }
+
+    const value = materialInput.trim();
+    if (!value) {
+      return null;
+    }
+
+    const normalized = value.toLowerCase();
+
+    const byFormattedLabel = this.estoque.find(
+      (item) => `${item.codigo} - ${item.material} (CA: ${item.ca})`.toLowerCase() === normalized,
+    );
+
+    if (byFormattedLabel) {
+      return byFormattedLabel;
+    }
+
+    const byCodePrefix = value.match(/^([^\s-]+)\s*-/)?.[1]?.trim();
+    if (byCodePrefix) {
+      const byCode = this.estoque.find((item) => item.codigo === byCodePrefix);
+      if (byCode) {
+        return byCode;
+      }
+    }
+
+    const matches = this.estoque.filter(
+      (item) =>
+        item.codigo.toLowerCase() === normalized ||
+        item.material.toLowerCase() === normalized ||
+        item.ca.toLowerCase() === normalized,
+    );
+
+    if (matches.length === 1) {
+      return matches[0];
+    }
+
+    return null;
   }
 
   onFileSelected(event: any) {
@@ -97,35 +245,32 @@ export class Movimentacao implements OnInit {
 
   incluirItemNaLista() {
     const { colaborador, material, quantidade } = this.formSaidaEpi.getRawValue();
-    
-    
-    const codigoMaterial = material.split(' - ')[0].trim();
-    const itemEstoque = this.estoque.find(i => i.codigo === codigoMaterial);
+    const itemEstoque = this.getSelectedEpi(material);
 
-    if (itemEstoque) {
-      
-      if (quantidade > itemEstoque.saldo) {
-        this.erroSaldo = `Saldo insuficiente! Disponível: ${itemEstoque.saldo}`;
-        return;
-      }
-      
-      const novoItem = {
-        id: Date.now(),
-        codigo: itemEstoque.codigo,
-        material: itemEstoque.material,
-        ca: itemEstoque.ca,
-        quantidade: quantidade
-      };
-
-      
-      this.itensMovimentacao = [...this.itensMovimentacao, novoItem];
-
-      
-      this.colaboradorFixado = colaborador;
-      this.formSaidaEpi.get('colaborador')?.disable();
-      this.formSaidaEpi.patchValue({ material: '', quantidade: 1 });
-      this.erroSaldo = null;
+    if (!itemEstoque) {
+      this.erroSaldo = 'Selecione um EPI válido da lista (código, nome ou CA).';
+      return;
     }
+
+    if (quantidade > itemEstoque.saldo) {
+      this.erroSaldo = `Saldo insuficiente! Disponível: ${itemEstoque.saldo}`;
+      return;
+    }
+
+    const novoItem = {
+      id: Date.now(),
+      codigo: itemEstoque.codigo,
+      material: itemEstoque.material,
+      ca: itemEstoque.ca,
+      quantidade: quantidade
+    };
+
+    this.itensMovimentacao = [...this.itensMovimentacao, novoItem];
+
+    this.colaboradorFixado = colaborador;
+    this.formSaidaEpi.get('colaborador')?.disable();
+    this.formSaidaEpi.patchValue({ material: '', quantidade: 1 });
+    this.erroSaldo = null;
   }
 
   removerItemLista(id: number) {
@@ -148,22 +293,66 @@ export class Movimentacao implements OnInit {
   }
 
   finalizarMovimentacao() {
-    const infoColaborador = this.listaColaboradoresCompleta.find(c => c.nome === this.colaboradorFixado);
-    
-    // Simulando a geração de um protocolo baseado no ano + um número aleatório
-    const numeroProtocoloGerado = `2026${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+    const colaboradorId = this.getColaboradorIdByNome(this.colaboradorFixado);
+    if (!colaboradorId) {
+      this.erroApi = 'Colaborador invalido para finalizar movimentacao.';
+      return;
+    }
 
-    this.dadosParaRelatorio = {
-      protocolo: numeroProtocoloGerado,
-      colaborador: this.colaboradorFixado || 'Não Informado',
-      funcao: infoColaborador?.funcao || 'Operacional',
-      setor: infoColaborador?.setor || 'Geral',
-      dataEntrega: new Date(),
-      usuarioSistema: this.usuarioLogado,
-      itens: [...this.itensMovimentacao]
-    };
-    
-    this.isModalReciboOpen = true;
+    const itensPayload = this.itensMovimentacao
+      .map((item) => ({
+        epiId: this.getEpiIdByCodigo(item.codigo),
+        quantidade: Number(item.quantidade),
+      }))
+      .filter((item): item is { epiId: number; quantidade: number } => !!item.epiId && item.quantidade > 0);
+
+    if (itensPayload.length !== this.itensMovimentacao.length) {
+      this.erroApi = 'Existem itens invalidos na lista de entrega.';
+      return;
+    }
+
+    this.erroApi = null;
+    this.enviandoMovimentacao = true;
+
+    this.movimentacaoApi
+      .createEntrega(colaboradorId, itensPayload)
+      .pipe(finalize(() => {
+        this.enviandoMovimentacao = false;
+      }))
+      .subscribe({
+        next: (created) => {
+          const infoColaborador = this.listaColaboradoresCompleta.find(c => c.nome === this.colaboradorFixado);
+          const anoAtual = new Date().getFullYear();
+          const numeroProtocoloGerado = `MOV-${anoAtual}-${String(created.id).padStart(6, '0')}`;
+
+          this.dadosParaRelatorio = {
+            protocolo: numeroProtocoloGerado,
+            colaborador: this.colaboradorFixado || 'Nao Informado',
+            funcao: infoColaborador?.funcao || 'Operacional',
+            setor: infoColaborador?.setor || 'Geral',
+            dataEntrega: new Date(),
+            usuarioSistema: this.usuarioLogado,
+            itens: [...this.itensMovimentacao]
+          };
+
+          this.isModalReciboOpen = true;
+          this.desafixarColaborador();
+          this.formSaidaEpi.patchValue({ material: '', quantidade: 1 });
+          this.recarregarEpis();
+          this.recarregarMovimentacoesRecentes();
+        },
+        error: () => {
+          this.erroApi = 'Nao foi possivel finalizar a movimentacao de entrega.';
+        },
+      });
+  }
+
+  formatarData(valor: string): string {
+    return new Date(valor).toLocaleDateString('pt-BR');
+  }
+
+  tipoMovimentacaoLabel(tipo: 'entrega' | 'entrada_saldo'): string {
+    return tipo === 'entrega' ? 'Entrega' : 'Entrada de Saldo';
   }
 
   imprimirRecibo() { 
