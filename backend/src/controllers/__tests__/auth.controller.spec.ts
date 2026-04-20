@@ -1,10 +1,12 @@
 const loginMock = jest.fn();
 const registerUserMock = jest.fn();
+const refreshSessionMock = jest.fn();
 const sendSuccessMock = jest.fn();
 
 jest.mock("../../services/auth.service", () => ({
   login: (...args: unknown[]) => loginMock(...args),
-  registerUser: (...args: unknown[]) => registerUserMock(...args)
+  registerUser: (...args: unknown[]) => registerUserMock(...args),
+  refreshSession: (...args: unknown[]) => refreshSessionMock(...args)
 }));
 
 jest.mock("../../utiils/http-response", () => ({
@@ -12,7 +14,7 @@ jest.mock("../../utiils/http-response", () => ({
 }));
 
 import { Request, Response } from "express";
-import { handleLogin, handleMe, handleRegisterUser } from "../auth.controller";
+import { handleLogin, handleMe, handleRefresh, handleRegisterUser } from "../auth.controller";
 
 describe("auth controller", () => {
   beforeEach(() => {
@@ -51,6 +53,21 @@ describe("auth controller", () => {
 
     expect(registerUserMock).toHaveBeenCalled();
     expect(sendSuccessMock).toHaveBeenCalledWith(expect.anything(), 201, { id: 10, role: "almoxarife" });
+  });
+
+  it("should refresh token and return success payload", async () => {
+    refreshSessionMock.mockResolvedValue({ token: "new-jwt", user: { id: 1 } });
+
+    await handleRefresh(
+      { body: { refreshToken: "old-jwt" } } as Request,
+      {} as Response
+    );
+
+    expect(refreshSessionMock).toHaveBeenCalledWith("old-jwt");
+    expect(sendSuccessMock).toHaveBeenCalledWith(expect.anything(), 200, {
+      token: "new-jwt",
+      user: { id: 1 }
+    });
   });
 
   it("should return current auth user on /me", async () => {
