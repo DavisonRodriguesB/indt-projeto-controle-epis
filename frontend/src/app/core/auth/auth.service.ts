@@ -10,7 +10,7 @@ interface AuthState {
   accessToken: string | null;
 }
 
-const REFRESH_TOKEN_KEY = 'refreshToken';
+const TOKEN_KEY = 'token';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -28,16 +28,32 @@ export class AuthService {
     this.init();
   }
 
-  getAuthToken(): string | null {
-    return this.state().accessToken ?? this.getStoredToken();
+  private init(): void {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      const userData = this.decodeToken(token);
+      if (userData) {
+        this.state.set({
+          usuario: userData,
+          accessToken: token
+        });
+      } else {
+        this.clearSession();
+      }
+    }
   }
 
-  private init(): void {
-    const rt = this.getStoredToken();
-    if (rt) {
-      this.refresh().subscribe({
-        error: () => this.clearSession()
-      });
+  private decodeToken(token: string): Usuario | null {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return {
+        id: payload.sub,
+        nome: payload.nome,
+        email: payload.email,
+        perfil: payload.role
+      };
+    } catch {
+      return null;
     }
   }
 
@@ -46,11 +62,8 @@ export class AuthService {
       .post<any>(`${environment.apiUrl}/auth/login`, { email, senha })
       .pipe(
         tap((res) => {
-        
           const { token, user } = res.data;
-
-          localStorage.setItem(REFRESH_TOKEN_KEY, token);
-
+          localStorage.setItem(TOKEN_KEY, token);
           this.state.set({
             usuario: {
               id: user.id,
@@ -65,42 +78,34 @@ export class AuthService {
   }
 
   refresh(): Observable<any> {
-    const refreshToken = this.getStoredToken() ?? '';
+    const refreshToken = localStorage.getItem(TOKEN_KEY);
+    if (!refreshToken) return new Observable(sub => sub.error('No token'));
 
     return this.http
       .post<any>(`${environment.apiUrl}/auth/refresh`, { refreshToken })
       .pipe(
         tap((res) => {
-          
-          const newToken = res.data?.token || refreshToken;
-          localStorage.setItem(REFRESH_TOKEN_KEY, newToken);
-          
-          if (res.data?.user) {
-            this.state.set({
-              usuario: {
-                ...res.data.user,
-                perfil: res.data.user.role
-              },
-              accessToken: newToken
-            });
+          const newToken = res.data?.token;
+          if (newToken) {
+            localStorage.setItem(TOKEN_KEY, newToken);
+            this.state.update(s => ({ ...s, accessToken: newToken }));
           }
         }),
       );
   }
 
   logout(): void {
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-    this.state.set({ usuario: null, accessToken: null });
+    this.clearSession();
     this.router.navigate(['/login']);
   }
 
   clearSession(): void {
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(TOKEN_KEY);
     this.state.set({ usuario: null, accessToken: null });
   }
 
-  private getStoredToken(): string | null {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
+  getAuthToken(): string | null {
+    return this.state().accessToken ?? localStorage.getItem(TOKEN_KEY);
   }
 
   hasRole(perfis: string[]): boolean {
