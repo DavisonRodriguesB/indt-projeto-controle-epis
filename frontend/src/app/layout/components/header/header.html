@@ -3,10 +3,65 @@
   <div class="flex-1"></div>
 
   <div class="flex items-center gap-6">
-    <button class="text-gray-500 hover:text-slate-800 relative p-1 transition-all active:scale-90">
-      <i class="ph ph-bell text-2xl"></i>
-      <span class="absolute top-1 right-1 w-2 h-2 bg-blue-600 rounded-full border-2 border-white shadow-sm"></span>
-    </button>      
+    <div class="relative">
+      <button
+        (click)="toggleNotifications()"
+        class="text-gray-500 hover:text-slate-800 relative p-1 transition-all active:scale-90"
+        aria-label="Abrir notificacoes"
+      >
+        <i class="ph ph-bell text-2xl"></i>
+        <span
+          *ngIf="notificationCount > 0"
+          class="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-blue-600 text-white rounded-full border-2 border-white shadow-sm text-[10px] font-bold flex items-center justify-center"
+        >
+          {{ notificationCount > 9 ? '9+' : notificationCount }}
+        </span>
+      </button>
+
+      <div
+        *ngIf="isNotificationsOpen"
+        class="absolute right-0 mt-3 w-96 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50"
+      >
+        <div class="px-4 py-3 border-b border-slate-100 bg-slate-50">
+          <h3 class="text-sm font-bold text-slate-800">Ultimas movimentacoes</h3>
+          <p class="text-xs text-slate-500">Atualiza automaticamente a cada 60 segundos</p>
+        </div>
+
+        <div *ngIf="isLoadingNotifications" class="p-4 text-sm text-slate-500">Carregando notificacoes...</div>
+
+        <div *ngIf="!isLoadingNotifications && notificationError" class="p-4 text-sm text-red-600">
+          {{ notificationError }}
+        </div>
+
+        <ul *ngIf="!isLoadingNotifications && !notificationError && notificationCount > 0" class="max-h-96 overflow-y-auto divide-y divide-slate-100">
+          <li *ngFor="let item of notifications" class="px-4 py-3 hover:bg-slate-50 transition-colors">
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-slate-700 truncate">{{ getNotificationTitle(item) }}</p>
+                <p class="text-xs text-slate-500 truncate">{{ getNotificationDescription(item) }}</p>
+              </div>
+              <span
+                class="text-[10px] font-semibold px-2 py-1 rounded-full"
+                [ngClass]="{
+                  'bg-blue-50 text-blue-700': item.tipo === 'entrega',
+                  'bg-emerald-50 text-emerald-700': item.tipo === 'entrada_saldo'
+                }"
+              >
+                {{ item.tipo === 'entrega' ? 'ENTREGA' : 'ENTRADA' }}
+              </span>
+            </div>
+            <p class="mt-1 text-[11px] text-slate-400">
+              {{ item.dataMovimentacao | date:'dd/MM/yyyy' }}
+              <span *ngIf="item.observacao"> - {{ item.observacao }}</span>
+            </p>
+          </li>
+        </ul>
+
+        <div *ngIf="!isLoadingNotifications && !notificationError && notificationCount === 0" class="p-4 text-sm text-slate-500">
+          Nenhuma movimentacao recente encontrada.
+        </div>
+      </div>
+    </div>
 
     <div class="h-8 w-px bg-gray-200"></div>
 
