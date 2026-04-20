@@ -9,18 +9,18 @@ export class BaseService {
   private http = inject(HttpClient);
   
   
-  private readonly API_URL = 'http://localhost:3333/api'; 
+  private readonly API_URL = 'http://localhost:3333/api/cadastro';
 
   listar(endpoint: string): Observable<any> {
-    return this.http.get<any>(`${this.API_URL}/${endpoint}`);
+    return this.http.get<any>(`${this.API_URL}/setores`);
   }
 
   salvar(endpoint: string, dados: any): Observable<any> {
-    return this.http.post<any>(`${this.API_URL}/${endpoint}`, dados);
+    return this.http.post<any>(`${this.API_URL}/setores`, dados);
   }
 
   alterarStatus(endpoint: string, id: number, descricao: string, ativo: boolean): Observable<any> {
     
-    return this.http.put<any>(`${this.API_URL}/${endpoint}/${id}`, { descricao, ativo });
+    return this.http.put<any>(`${this.API_URL}/setores/${id}`, { descricao, ativo });
   }
 }

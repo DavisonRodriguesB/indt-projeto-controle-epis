@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModalSetor } from './components/modal-setor/modal-setor';
 import { BaseService } from '../../../../../core/services/base.service';
@@ -13,7 +13,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class SetoresList implements OnInit {
   isModalOpen = false;
-  setores: BaseItem[] = [];
+  setores = signal<BaseItem[]>([]);
 
   private baseService = inject(BaseService);
 
@@ -24,8 +24,8 @@ export class SetoresList implements OnInit {
   carregarSetores() {
     this.baseService.listar('setores').subscribe({
       next: (res) => {
-        
-        this.setores = res.data || res;
+        console.log('Setores carregados:', res);
+        this.setores.set(res.data);
       },
       error: (err: HttpErrorResponse) => {
         console.error('Erro ao carregar setores:', err.message);
