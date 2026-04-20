@@ -9,7 +9,7 @@ let isRefreshing = false;
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  const token = auth.accessToken();
+  const token = auth.getAuthToken();
 
   const authReq = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
@@ -23,11 +23,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         isRefreshing = true;
 
         return auth.refresh().pipe(
-          switchMap((res) => {
+          switchMap(() => {
             isRefreshing = false;
-            const retried = req.clone({
-              setHeaders: { Authorization: `Bearer ${res.accessToken}` },
-            });
+            const refreshedToken = auth.getAuthToken();
+            const retried = refreshedToken
+              ? req.clone({ setHeaders: { Authorization: `Bearer ${refreshedToken}` } })
+              : req;
             return next(retried);
           }),
           catchError((refreshErr) => {

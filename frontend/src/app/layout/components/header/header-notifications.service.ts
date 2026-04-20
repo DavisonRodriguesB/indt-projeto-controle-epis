@@ -1,6 +1,8 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
+import { environment } from '../../../../environments/environments';
+import { AuthService } from '../../../core/auth/auth.service';
 
 interface ApiResponse<T> {
   data: T;
@@ -22,13 +24,15 @@ export interface MovimentacaoNotificacao {
 
 @Injectable({ providedIn: 'root' })
 export class HeaderNotificationsService {
-  private readonly apiBaseUrl = 'http://localhost:3333/api';
-  private readonly tokenKeys = ['token', 'auth_token', 'access_token', 'jwt', 'jwt_token'];
+  private readonly apiBaseUrl = environment.apiUrl;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly authService: AuthService,
+  ) {}
 
   listRecentMovements(limit = 8): Observable<MovimentacaoNotificacao[]> {
-    const token = this.getStoredToken();
+    const token = this.authService.getAuthToken();
     if (!token) {
       return new Observable<MovimentacaoNotificacao[]>((subscriber) => {
         subscriber.error(new Error('Token nao encontrado. Faca login para ver notificacoes.'));
@@ -41,26 +45,5 @@ export class HeaderNotificationsService {
     return this.http
       .get<ApiResponse<MovimentacaoNotificacao[]>>(`${this.apiBaseUrl}/alertas/movimentacoes`, { headers, params })
       .pipe(map((response) => response.data ?? []));
-  }
-
-  private getStoredToken(): string | null {
-    for (const key of this.tokenKeys) {
-      const value = localStorage.getItem(key);
-      if (value) {
-        return value;
-      }
-    }
-
-    const authRaw = localStorage.getItem('auth');
-    if (!authRaw) {
-      return null;
-    }
-
-    try {
-      const authObject = JSON.parse(authRaw) as { token?: string };
-      return authObject.token ?? null;
-    } catch {
-      return null;
-    }
   }
 }
