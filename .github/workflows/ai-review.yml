@@ -92,7 +92,7 @@ jobs:
             exit 1
           fi
 
-          jq -Rs '{contents:[{parts:[{text:.}]}]}' prompt.txt > payload.json
+          jq -Rs '{contents:[{role:"user",parts:[{text:.}]}]}' prompt.txt > payload.json
 
           curl -sS \
             -X POST \
@@ -104,7 +104,26 @@ jobs:
       - name: Extract review
         run: |
           set -euo pipefail
-          jq -r '.candidates[0].content.parts[0].text // "ERRO: resposta vazia"' response.json > review.txt
+
+          if jq -e '.error' response.json > /dev/null; then
+            jq -r '"ERRO: Gemini API retornou erro: " + (.error.message // "sem mensagem")' response.json > review.txt
+            cat review.txt
+            exit 0
+          fi
+
+          review_text="$(jq -r '[.candidates[]?.content?.parts[]?.text] | map(select(. != null and . != "")) | join("\n")' response.json)"
+
+          if [ -z "$review_text" ]; then
+            block_reason="$(jq -r '.promptFeedback?.blockReason // empty' response.json)"
+            if [ -n "$block_reason" ]; then
+              echo "ERRO: resposta bloqueada pelo Gemini (blockReason: $block_reason)." > review.txt
+            else
+              echo "ERRO: resposta vazia (sem candidates.text no JSON)." > review.txt
+            fi
+          else
+            printf '%s\n' "$review_text" > review.txt
+          fi
+
           cat review.txt
 
       - name: Comment on PR
