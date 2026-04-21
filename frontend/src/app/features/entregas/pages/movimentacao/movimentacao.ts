@@ -11,7 +11,6 @@ import {
   EpiApi,
   MovimentacaoApiService,
 } from './movimentacao-api.service';
-import { MovimentacaoQueryService, MovimentacaoRecente } from '../../../../core/services/movimentacao-query.service';
 
 import { RelatorioepiComponent } from '../../../../shared/components/relatorioepi/relatorioepi';
 import { RelatorioEpiData } from '../../../../shared/components/relatorioepi/relatorio-epi.model';
@@ -53,8 +52,6 @@ export class Movimentacao implements OnInit {
   dadosParaRelatorio!: RelatorioEpiData;
   usuarioLogado = 'Sistema';
 
-  movimentacoesRecentes: MovimentacaoRecente[] = [];
-
   private colaboradoresApi: ColaboradorApi[] = [];
   private episApi: EpiApi[] = [];
 
@@ -68,7 +65,6 @@ export class Movimentacao implements OnInit {
   constructor(
     private fb: FormBuilder,
     private movimentacaoApi: MovimentacaoApiService,
-    private movimentacaoQuery: MovimentacaoQueryService,
     private cdr: ChangeDetectorRef,
   ) {
     this.formSaidaEpi = this.fb.group({
@@ -109,7 +105,6 @@ export class Movimentacao implements OnInit {
     });
 
     this.recarregarEpis();
-    this.recarregarMovimentacoesRecentes();
   }
 
   private recarregarEpis(): void {
@@ -127,19 +122,6 @@ export class Movimentacao implements OnInit {
       },
       error: () => {
         this.erroApi = 'Falha ao carregar EPIs.';
-        this.cdr.detectChanges();
-      },
-    });
-  }
-
-  private recarregarMovimentacoesRecentes(): void {
-    this.movimentacaoQuery.listRecentMovements(10).subscribe({
-      next: (rows) => {
-        this.movimentacoesRecentes = rows;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.erroApi = 'Falha ao carregar movimentacoes recentes.';
         this.cdr.detectChanges();
       },
     });
@@ -166,7 +148,6 @@ export class Movimentacao implements OnInit {
           alert(`Entrada de saldo para ${item.material} registrada com sucesso!`);
           this.closeModalSaldo();
           this.recarregarEpis();
-          this.recarregarMovimentacoesRecentes();
         },
         error: () => {
           this.erroApi = 'Nao foi possivel registrar a entrada de saldo.';
@@ -339,20 +320,11 @@ export class Movimentacao implements OnInit {
           this.desafixarColaborador();
           this.formSaidaEpi.patchValue({ material: '', quantidade: 1 });
           this.recarregarEpis();
-          this.recarregarMovimentacoesRecentes();
         },
         error: () => {
           this.erroApi = 'Nao foi possivel finalizar a movimentacao de entrega.';
         },
       });
-  }
-
-  formatarData(valor: string): string {
-    return new Date(valor).toLocaleDateString('pt-BR');
-  }
-
-  tipoMovimentacaoLabel(tipo: 'entrega' | 'entrada_saldo'): string {
-    return tipo === 'entrega' ? 'Entrega' : 'Entrada de Saldo';
   }
 
   imprimirRecibo() { 

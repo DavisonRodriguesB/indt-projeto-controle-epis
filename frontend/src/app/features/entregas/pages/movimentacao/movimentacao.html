@@ -46,43 +46,6 @@
       </div>
 
     </div>
-
-  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-    <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-      <span class="font-bold text-slate-700 uppercase text-xs tracking-wider">Ultimas Movimentacoes</span>
-      <span class="bg-slate-100 text-slate-700 text-[10px] px-3 py-1 rounded-full font-bold">{{ movimentacoesRecentes.length }} REGISTROS</span>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="text-[10px] text-slate-400 uppercase bg-white border-b">
-            <th class="px-6 py-4 font-bold">Protocolo</th>
-            <th class="px-6 py-4 font-bold">Data</th>
-            <th class="px-6 py-4 font-bold">Tipo</th>
-            <th class="px-6 py-4 font-bold">Colaborador</th>
-            <th class="px-6 py-4 text-center font-bold">Itens</th>
-            <th class="px-6 py-4 text-center font-bold">Qtd Total</th>
-            <th class="px-6 py-4 font-bold">Usuario</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-50">
-          <tr *ngFor="let mov of movimentacoesRecentes" class="hover:bg-slate-50/60">
-            <td class="px-6 py-4 text-xs font-mono text-slate-700">{{ mov.protocolo }}</td>
-            <td class="px-6 py-4 text-sm font-medium text-slate-700">{{ formatarData(mov.dataMovimentacao) }}</td>
-            <td class="px-6 py-4 text-sm text-slate-700">{{ tipoMovimentacaoLabel(mov.tipo) }}</td>
-            <td class="px-6 py-4 text-sm text-slate-700">{{ mov.colaboradorNome || '-' }}</td>
-            <td class="px-6 py-4 text-center text-sm font-semibold text-slate-700">{{ mov.totalItens }}</td>
-            <td class="px-6 py-4 text-center text-sm font-semibold text-slate-700">{{ mov.totalQuantidade }}</td>
-            <td class="px-6 py-4 text-sm text-slate-600">{{ mov.usuarioNome }}</td>
-          </tr>
-          <tr *ngIf="movimentacoesRecentes.length === 0">
-            <td colspan="7" class="px-6 py-10 text-center text-slate-400 italic text-sm">Sem movimentacoes recentes.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
   </div>
 
 <app-modal-entrada-saldo 
