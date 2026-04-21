@@ -34,7 +34,7 @@ describe("cadastros-base service", () => {
       where: { ativo: true },
       order: { id: "ASC" },
       skip: 0,
-      take: 1000
+      take: 100
     });
     expect(result).toEqual([
       { id: 1, descricao: "Cargo A", ativo: true },
