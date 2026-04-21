@@ -6,7 +6,7 @@ jest.mock("../../database/data-source", () => ({
   }
 }));
 
-import { listAlertas, listMovimentacoesRecentes } from "../alerta.service";
+import { listAlertas, listEventosRecentes, listMovimentacoesRecentes } from "../alerta.service";
 
 describe("alerta service", () => {
   beforeEach(() => {
@@ -97,5 +97,49 @@ describe("alerta service", () => {
     );
 
     expect(result[0].protocolo).toBe("MOV-2026-000025");
+  });
+
+  it("should merge movement, collaborator and EPI events", async () => {
+    queryMock
+      .mockResolvedValueOnce([
+        {
+          id: 30,
+          tipo: "entrada_saldo",
+          created_at: "2026-04-20T11:00:00.000Z",
+          usuario_id: 1,
+          usuario_nome: "Administrador",
+          colaborador_nome: null,
+          total_itens: 1,
+          total_quantidade: 2
+        }
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 15,
+          nome: "Tony Stark",
+          matricula: "202601",
+          created_at: "2026-04-20T11:02:00.000Z"
+        }
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 7,
+          nome: "Capacete X",
+          codigo: "102940",
+          created_at: "2026-04-20T11:01:00.000Z"
+        }
+      ]);
+
+    const result = await listEventosRecentes(
+      { id: 1, nome: "Admin", email: "admin@teste.com", role: "admin" },
+      8
+    );
+
+    expect(result.map((item) => item.eventType)).toEqual([
+      "novo_colaborador",
+      "novo_epi",
+      "movimentacao_entrada_saldo"
+    ]);
+    expect(result[0].title).toBe("Novo colaborador");
   });
 });
