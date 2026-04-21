@@ -1,5 +1,6 @@
 const repositoryMock = {
   find: jest.fn(),
+  findAndCount: jest.fn(),
   findOne: jest.fn(),
   create: jest.fn(),
   save: jest.fn()
@@ -11,7 +12,7 @@ jest.mock("../../database/data-source", () => ({
   }
 }));
 
-import { createBaseItem, listBaseItems, updateBaseItem } from "../cadastros-base.service";
+import { createBaseItem, listBaseItems, listBaseItemsPaginated, updateBaseItem } from "../cadastros-base.service";
 
 describe("cadastros-base service", () => {
   beforeEach(() => {
@@ -19,18 +20,56 @@ describe("cadastros-base service", () => {
   });
 
   it("should list active base items mapped to API shape", async () => {
-    repositoryMock.find.mockResolvedValue([
-      { id: 1, descricao: "Cargo A", ativo: true },
-      { id: 2, descricao: "Cargo B", ativo: true }
+    repositoryMock.findAndCount.mockResolvedValue([
+      [
+        { id: 1, descricao: "Cargo A", ativo: true },
+        { id: 2, descricao: "Cargo B", ativo: true }
+      ],
+      2
     ]);
 
     const result = await listBaseItems("cargos");
 
-    expect(repositoryMock.find).toHaveBeenCalledWith({ where: { ativo: true }, order: { id: "ASC" } });
+    expect(repositoryMock.findAndCount).toHaveBeenCalledWith({
+      where: { ativo: true },
+      order: { id: "ASC" },
+      skip: 0,
+      take: 1000
+    });
     expect(result).toEqual([
       { id: 1, descricao: "Cargo A", ativo: true },
       { id: 2, descricao: "Cargo B", ativo: true }
     ]);
+  });
+
+  it("should list paginated items including active and inactive when status is todos", async () => {
+    repositoryMock.findAndCount.mockResolvedValue([
+      [
+        { id: 1, descricao: "Ativo", ativo: true },
+        { id: 2, descricao: "Inativo", ativo: false }
+      ],
+      2
+    ]);
+
+    const result = await listBaseItemsPaginated("setores", {
+      page: 1,
+      pageSize: 20,
+      status: undefined
+    });
+
+    expect(repositoryMock.findAndCount).toHaveBeenCalledWith({
+      where: {},
+      order: { id: "ASC" },
+      skip: 0,
+      take: 20
+    });
+    expect(result).toEqual({
+      data: [
+        { id: 1, descricao: "Ativo", ativo: true },
+        { id: 2, descricao: "Inativo", ativo: false }
+      ],
+      total: 2
+    });
   });
 
   it("should throw BASE_ITEM_ALREADY_EXISTS when creating duplicated descricao", async () => {
