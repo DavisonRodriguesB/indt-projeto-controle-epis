@@ -12,6 +12,10 @@ const movimentacoesQuerySchema = z.object({
   limite: z.coerce.number().int().positive().max(50).optional()
 });
 
+const eventosQuerySchema = z.object({
+  limite: z.coerce.number().int().positive().max(50).optional()
+});
+
 export async function handleListAlertas(request: Request, response: Response): Promise<void> {
   const query = querySchema.parse(request.query);
   const diasValidade = query.diasValidade ?? 30;
@@ -45,7 +49,7 @@ export async function handleListAlertasEventos(request: Request, response: Respo
     throw new AppError(401, "Usuario nao autenticado.", "AUTH_REQUIRED");
   }
 
-  const query = movimentacoesQuerySchema.parse(request.query);
+  const query = eventosQuerySchema.parse(request.query);
   const limite = query.limite ?? 8;
   const eventos = await listEventosRecentes(request.authUser, limite);
 

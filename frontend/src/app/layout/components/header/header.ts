@@ -5,6 +5,7 @@ import { catchError, finalize, map, switchMap, takeUntil, timeout } from 'rxjs/o
 
 import { HeaderNotificationEvent, HeaderNotificationsService } from './header-notifications.service';
 import { AuthService } from '../../../core/auth/auth.service';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-header',
@@ -40,13 +41,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   notifications: HeaderNotificationEvent[] = [];
   private hasLoadedNotifications = false;
   unreadNotificationCount = 0;
-  toasts: Array<{ id: number; title: string; description: string }> = [];
 
   private readonly seenStorageKey = 'header.notifications.lastSeenAt';
-  private readonly pollingIntervalMs = 15000;
-  private hasInitializedNotifications = false;
+  private readonly pollingIntervalMs = this.resolvePollingInterval();
   private lastSeenNotificationAt = 0;
-  private toastIdSequence = 0;
 
   private readonly destroy$ = new Subject<void>();
 
@@ -94,10 +92,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.applyNotifications(items);
       }
     });
-  }
-
-  dismissToast(toastId: number): void {
-    this.toasts = this.toasts.filter((toast) => toast.id !== toastId);
   }
 
   @HostListener('document:click', ['$event'])
@@ -168,20 +162,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   private applyNotifications(items: HeaderNotificationEvent[]): void {
-    const previousIds = new Set(this.notifications.map((item) => item.eventId));
     this.notifications = items;
     this.hasLoadedNotifications = true;
 
     this.normalizeLastSeenIfAhead();
-
-    const newItems = items.filter((item) => !previousIds.has(item.eventId));
-
-    if (this.hasInitializedNotifications) {
-      const unseenNewItems = newItems.filter((item) => this.getEventTimestamp(item) > this.lastSeenNotificationAt);
-      unseenNewItems.forEach((item) => this.pushToast(item));
-    } else {
-      this.hasInitializedNotifications = true;
-    }
 
     this.recalculateUnreadCount();
 
@@ -224,18 +208,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  private pushToast(item: HeaderNotificationEvent): void {
-    const id = ++this.toastIdSequence;
-    const toast = {
-      id,
-      title: this.getNotificationTitle(item),
-      description: this.getNotificationDescription(item)
-    };
-
-    this.toasts = [toast, ...this.toasts].slice(0, 4);
-    setTimeout(() => this.dismissToast(id), 4500);
-  }
-
   private loadNotifications(showLoading = true) {
     if (this.isLoadingNotifications) {
       return of<HeaderNotificationEvent[] | null>(null);
@@ -261,5 +233,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private getEventTimestamp(item: HeaderNotificationEvent): number {
     const ts = new Date(item.eventAt).getTime();
     return Number.isFinite(ts) ? ts : 0;
+  }
+
+  private resolvePollingInterval(): number {
+    const configured = Number(environment.notificationsPollingMs);
+    if (!Number.isFinite(configured) || configured < 5000) {
+      return 15000;
+    }
+    return configured;
   }
 }
