@@ -34,7 +34,7 @@ function getRepository(entity: BaseEntityName) {
 export async function listBaseItems(entity: BaseEntityName): Promise<BaseItem[]> {
   const result = await listBaseItemsPaginated(entity, {
     page: 1,
-    pageSize: 1000,
+    pageSize: 100,
     status: true
   });
 
