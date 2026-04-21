@@ -2,7 +2,7 @@
   <div class="flex justify-between items-center mb-6">
     <div>
       <h1 class="text-2xl font-bold text-slate-800">Categorias de EPI</h1>
-      <p class="text-sm text-slate-500">Gerencie as classificações dos equipamentos (Ex: Proteção Auditiva, Cabeça)</p>
+      <p class="text-sm text-slate-500">Gerencie as categorias de equipamentos (Ex: Proteção Auditiva, Visual)</p>
     </div>
     
     <button (click)="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-200">
@@ -15,52 +15,41 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 border-b border-slate-200">
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Nome da Categoria</th>
+          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Descrição da Categoria</th>
           <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Status</th>
           <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Ações</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
-        
-        <tr *ngFor="let cat of categorias" class="hover:bg-slate-50/50 transition-colors">
-          <td class="px-6 py-4 flex items-center gap-3">
-            <i class="ph ph-tag text-slate-400 text-lg"></i>
-            <span class="font-medium text-slate-700" [ngClass]="{'text-slate-400 italic': !cat.ativo}">
-              {{ cat.nome }}
-            </span>
-          </td>
+        @for (cat of categorias(); track cat.id) {
+          <tr class="hover:bg-slate-50/50 transition-colors" [ngClass]="{'bg-slate-50/30': !cat.ativo}">
+            <td class="px-6 py-4 flex items-center gap-3">
+              <i class="ph ph-tag text-lg" [ngClass]="cat.ativo ? 'text-slate-400' : 'text-slate-300'"></i>
+              <span class="font-medium" [ngClass]="cat.ativo ? 'text-slate-700' : 'text-slate-400 italic line-through'">
+                {{ cat.descricao }}
+              </span>
+            </td>
 
-          <td class="px-6 py-4 text-center">
-            <span [class]="cat.ativo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" 
-                  class="px-2 py-1 rounded-full text-[10px] font-bold uppercase whitespace-nowrap">
-              {{ cat.ativo ? 'Ativo' : 'Inativo' }}
-            </span>
-          </td>
-          
-          <td class="px-6 py-4 text-right">
-            <div class="flex justify-end items-center gap-2">
-              <button class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Editar">
-                <i class="ph ph-pencil-simple text-2xl"></i>
-              </button>
-              
-              <button (click)="toggleStatus(cat)" 
-                      class="transition-all active:scale-95" 
-                      [title]="cat.ativo ? 'Desativar Categoria' : 'Ativar Categoria'">
-                <i class="ph transition-colors" 
-                   [ngClass]="cat.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" 
-                   style="font-size: 32px;">
-                </i>
-              </button>
-            </div>
-          </td>
-        </tr>
-
-        <tr *ngIf="categorias.length === 0">
-          <td colspan="3" class="px-6 py-10 text-center text-slate-400 italic">
-            Nenhuma categoria cadastrada.
-          </td>
-        </tr>
-
+            <td class="px-6 py-4 text-center">
+              <span [class]="cat.ativo ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'" 
+                    class="px-2 py-1 rounded-full text-[10px] font-bold uppercase whitespace-nowrap">
+                {{ cat.ativo ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+            
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end items-center gap-2">
+                <button (click)="openModal(cat)" class="text-slate-400 hover:text-blue-600 p-1" title="Editar">
+                  <i class="ph ph-pencil-simple text-2xl"></i>
+                </button>
+                
+                <button (click)="toggleStatus(cat)" class="transition-all active:scale-95">
+                  <i class="ph" [ngClass]="cat.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-slate-300'" style="font-size: 32px;"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>
@@ -68,6 +57,7 @@
 
 <app-modal-categoria 
   [isOpen]="isModalOpen" 
+  [categoriaParaEdicao]="categoriaSelecionada()"
   (onClose)="closeModal()" 
   (onSave)="salvarCategoria($event)">
 </app-modal-categoria>
