@@ -69,7 +69,7 @@ export class Movimentacao implements OnInit {
   ) {
     this.formSaidaEpi = this.fb.group({
       colaborador: ['', Validators.required],
-      material: ['', Validators.required],
+      epiId: ['', Validators.required],
       quantidade: [1, [Validators.required, Validators.min(1)]]
     });
 
@@ -164,59 +164,6 @@ export class Movimentacao implements OnInit {
     return colaborador?.id ?? null;
   }
 
-  private getEpiIdByCodigo(codigo: string): number | null {
-    const epi = this.episApi.find((row) => row.codigo === codigo);
-    return epi?.id ?? null;
-  }
-
-  private getSelectedEpi(materialInput: string | null): {
-    id: number;
-    codigo: string;
-    material: string;
-    ca: string;
-    saldo: number;
-  } | null {
-    if (!materialInput) {
-      return null;
-    }
-
-    const value = materialInput.trim();
-    if (!value) {
-      return null;
-    }
-
-    const normalized = value.toLowerCase();
-
-    const byFormattedLabel = this.estoque.find(
-      (item) => `${item.codigo} - ${item.material} (CA: ${item.ca})`.toLowerCase() === normalized,
-    );
-
-    if (byFormattedLabel) {
-      return byFormattedLabel;
-    }
-
-    const byCodePrefix = value.match(/^([^\s-]+)\s*-/)?.[1]?.trim();
-    if (byCodePrefix) {
-      const byCode = this.estoque.find((item) => item.codigo === byCodePrefix);
-      if (byCode) {
-        return byCode;
-      }
-    }
-
-    const matches = this.estoque.filter(
-      (item) =>
-        item.codigo.toLowerCase() === normalized ||
-        item.material.toLowerCase() === normalized ||
-        item.ca.toLowerCase() === normalized,
-    );
-
-    if (matches.length === 1) {
-      return matches[0];
-    }
-
-    return null;
-  }
-
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -225,11 +172,12 @@ export class Movimentacao implements OnInit {
   }
 
   incluirItemNaLista() {
-    const { colaborador, material, quantidade } = this.formSaidaEpi.getRawValue();
-    const itemEstoque = this.getSelectedEpi(material);
+    const { colaborador, epiId, quantidade } = this.formSaidaEpi.getRawValue();
+    const selectedEpiId = Number(epiId);
+    const itemEstoque = this.estoque.find((item) => item.id === selectedEpiId) ?? null;
 
     if (!itemEstoque) {
-      this.erroSaldo = 'Selecione um EPI válido da lista (código, nome ou CA).';
+      this.erroSaldo = 'Selecione um EPI valido da lista.';
       return;
     }
 
@@ -240,6 +188,7 @@ export class Movimentacao implements OnInit {
 
     const novoItem = {
       id: Date.now(),
+      epiId: itemEstoque.id,
       codigo: itemEstoque.codigo,
       material: itemEstoque.material,
       ca: itemEstoque.ca,
@@ -250,7 +199,7 @@ export class Movimentacao implements OnInit {
 
     this.colaboradorFixado = colaborador;
     this.formSaidaEpi.get('colaborador')?.disable();
-    this.formSaidaEpi.patchValue({ material: '', quantidade: 1 });
+    this.formSaidaEpi.patchValue({ epiId: '', quantidade: 1 });
     this.erroSaldo = null;
   }
 
@@ -282,7 +231,7 @@ export class Movimentacao implements OnInit {
 
     const itensPayload = this.itensMovimentacao
       .map((item) => ({
-        epiId: this.getEpiIdByCodigo(item.codigo),
+        epiId: Number(item.epiId),
         quantidade: Number(item.quantidade),
       }))
       .filter((item): item is { epiId: number; quantidade: number } => !!item.epiId && item.quantidade > 0);
@@ -318,7 +267,7 @@ export class Movimentacao implements OnInit {
 
           this.isModalReciboOpen = true;
           this.desafixarColaborador();
-          this.formSaidaEpi.patchValue({ material: '', quantidade: 1 });
+          this.formSaidaEpi.patchValue({ epiId: '', quantidade: 1 });
           this.recarregarEpis();
         },
         error: () => {

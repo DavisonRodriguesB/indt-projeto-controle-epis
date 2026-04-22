@@ -1,16 +1,42 @@
 const transactionMock = jest.fn();
+const queryMock = jest.fn();
 
 jest.mock("../../database/data-source", () => ({
   AppDataSource: {
-    transaction: (...args: unknown[]) => transactionMock(...args)
+    transaction: (...args: unknown[]) => transactionMock(...args),
+    query: (...args: unknown[]) => queryMock(...args)
   }
 }));
 
-import { createEntradaSaldoMovimentacao, createEntregaMovimentacao } from "../movimentacao.service";
+import { createEntradaSaldoMovimentacao, createEntregaMovimentacao, listMovimentacoesRecentes } from "../movimentacao.service";
 
 describe("movimentacao service", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("should build protocol with numeric year for recent movements", async () => {
+    queryMock.mockResolvedValueOnce([
+      {
+        id: 25,
+        tipo: "entrada_saldo",
+        data_movimentacao: "Mon Apr 19 2026 00:00:00 GMT-0300",
+        observacao: null,
+        usuario_id: 1,
+        usuario_nome: "Sistema",
+        colaborador_id: null,
+        colaborador_nome: null,
+        total_itens: 1,
+        total_quantidade: 2
+      }
+    ]);
+
+    const result = await listMovimentacoesRecentes(
+      { id: 1, nome: "Admin", email: "admin@teste.com", role: "admin" },
+      8
+    );
+
+    expect(result[0].protocolo).toBe("MOV-2026-000025");
   });
 
   it("should throw MOVIMENTACAO_DUPLICATE_EPI on duplicated epi for entrega", async () => {

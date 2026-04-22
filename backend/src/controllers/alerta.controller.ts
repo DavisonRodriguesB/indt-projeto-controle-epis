@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { sendSuccess } from "../utiils/http-response";
-import { listAlertas, listEventosRecentes, listMovimentacoesRecentes } from "../services/alerta.service";
+import { listAlertas, listEventosRecentes } from "../services/alerta.service";
 import { AppError } from "../middlewares/error-handler";
+import { listMovimentacoesRecentes } from "../services/movimentacao.service";
 
 const querySchema = z.object({
   diasValidade: z.coerce.number().int().positive().max(365).optional()

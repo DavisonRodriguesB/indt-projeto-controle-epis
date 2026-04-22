@@ -6,7 +6,7 @@ jest.mock("../../database/data-source", () => ({
   }
 }));
 
-import { listAlertas, listEventosRecentes, listMovimentacoesRecentes } from "../alerta.service";
+import { listAlertas, listEventosRecentes } from "../alerta.service";
 
 describe("alerta service", () => {
   beforeEach(() => {
@@ -73,30 +73,6 @@ describe("alerta service", () => {
 
     expect(queryMock).toHaveBeenCalledTimes(2);
     expect(queryMock).toHaveBeenNthCalledWith(1, expect.stringContaining("WHERE validade <= CURRENT_DATE"), [15]);
-  });
-
-  it("should build protocol with numeric year for recent movements", async () => {
-    queryMock.mockResolvedValueOnce([
-      {
-        id: 25,
-        tipo: "entrada_saldo",
-        data_movimentacao: "Mon Apr 19 2026 00:00:00 GMT-0300",
-        observacao: null,
-        usuario_id: 1,
-        usuario_nome: "Sistema",
-        colaborador_id: null,
-        colaborador_nome: null,
-        total_itens: 1,
-        total_quantidade: 2
-      }
-    ]);
-
-    const result = await listMovimentacoesRecentes(
-      { id: 1, nome: "Admin", email: "admin@teste.com", role: "admin" },
-      8
-    );
-
-    expect(result[0].protocolo).toBe("MOV-2026-000025");
   });
 
   it("should merge movement, collaborator and EPI events", async () => {

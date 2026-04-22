@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { AppError } from "../middlewares/error-handler";
-import { listMovimentacoesRecentes } from "../services/alerta.service";
 import {
   createEntradaSaldoMovimentacao,
-  createEntregaMovimentacao
+  createEntregaMovimentacao,
+  listMovimentacoesRecentes
 } from "../services/movimentacao.service";
 import { sendSuccess } from "../utiils/http-response";
 
