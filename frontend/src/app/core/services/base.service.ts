@@ -11,6 +11,10 @@ export class BaseService {
     return this.http.get<any>(`${this.API_URL}/${endpoint}`);
   }
 
+  listarTodos(endpoint: string): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/${endpoint}/todos`);
+  }
+
   salvar(endpoint: string, dados: any): Observable<any> {
     return this.http.post<any>(`${this.API_URL}/${endpoint}`, dados);
   }
