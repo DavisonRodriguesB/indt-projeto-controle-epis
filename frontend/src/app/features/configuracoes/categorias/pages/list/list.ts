@@ -23,9 +23,17 @@ export class CategoriasList implements OnInit {
   }
 
   carregarCategorias() {
-    this.baseService.listar('categorias').subscribe({
+    this.baseService.listarTodos('categorias').subscribe({
       next: (res) => this.categorias.set(res.data),
-      error: (err: HttpErrorResponse) => console.error('Erro ao carregar categorias:', err.message)
+      error: (err) => console.error('Erro ao carregar categorias:', err.message)
+    });
+  }
+
+  toggleStatus(item: BaseItem) {
+    if (!item.id) return;
+    const novoStatus = !item.ativo;
+    this.baseService.alterarStatus('categorias', item.id, item.descricao, novoStatus).subscribe({
+      next: () => this.carregarCategorias()
     });
   }
 
@@ -56,17 +64,5 @@ export class CategoriasList implements OnInit {
         }
       });
     }
-  }
-
-  toggleStatus(item: BaseItem) {
-    if (!item.id) return;
-    const novoStatus = !item.ativo;
-    this.baseService.alterarStatus('categorias', item.id, item.descricao, novoStatus).subscribe({
-      next: () => {
-        this.categorias.update(lista => 
-          lista.map(c => c.id === item.id ? { ...c, ativo: novoStatus } : c)
-        );
-      }
-    });
   }
 }
