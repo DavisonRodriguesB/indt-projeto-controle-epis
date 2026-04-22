@@ -30,11 +30,15 @@
           [class.border-red-400]="erroSaldo || erroDuplicidade"
         >
           <option value="">Selecione o EPI...</option>
-          <option *ngFor="let item of estoque" [value]="item.id">
-            {{ item.codigo }} - {{ item.material }} (CA: {{ item.ca }}) | Saldo: {{ item.saldo }}
+          <option *ngFor="let item of estoque" [value]="item.id" [disabled]="item.saldo <= 0">
+            {{ item.codigo }} - {{ item.material }} (CA: {{ item.ca }}) | {{ item.saldo > 0 ? 'Saldo: ' + item.saldo : 'Sem saldo' }}
           </option>
         </select>
       </div>
+
+      <p class="mt-2 text-[11px] font-semibold text-slate-500">
+        Itens sem saldo aparecem como indisponiveis no seletor.
+      </p>
 
       <div *ngIf="erroDuplicidade" class="mt-2 flex items-center gap-1.5 text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-100">
         <i class="ph ph-warning text-lg"></i>

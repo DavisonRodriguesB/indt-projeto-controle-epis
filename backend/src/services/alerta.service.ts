@@ -92,7 +92,7 @@ export async function listEventosRecentes(
       SELECT
         m.id,
         m.tipo,
-        m.created_at,
+        COALESCE(m.data_movimentacao::timestamp, m.created_at) AS event_at,
         m.usuario_id,
         u.nome AS usuario_nome,
         c.nome AS colaborador_nome,
@@ -104,7 +104,7 @@ export async function listEventosRecentes(
       LEFT JOIN movimentacao_itens mi ON mi.movimentacao_id = m.id
       ${whereRole}
       GROUP BY m.id, u.nome, c.nome
-      ORDER BY m.created_at DESC, m.id DESC
+      ORDER BY COALESCE(m.data_movimentacao::timestamp, m.created_at) DESC, m.id DESC
       LIMIT $1
     `,
     movementParams
@@ -142,7 +142,7 @@ export async function listEventosRecentes(
       eventType: tipo === "entrega" ? "movimentacao_entrega" : "movimentacao_entrada_saldo",
       title: tipo === "entrega" ? "Entrega de EPI" : "Entrada de saldo",
       description: `${String(row.usuario_nome)}${destino} (${totalItens} ${totalItensLabel}, qtd ${totalQuantidade})`,
-      eventAt: new Date(String(row.created_at)).toISOString()
+      eventAt: new Date(String(row.event_at)).toISOString()
     };
   });
 

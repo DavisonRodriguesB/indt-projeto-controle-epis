@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
+import { ApiErrorService } from '../../../../core/http/api-error.service';
 
 import { FormularioEntrega } from './components/formulario-entrega/formulario-entrega';
 import { ListaResumo } from './components/lista-resumo/lista-resumo';
@@ -66,6 +67,7 @@ export class Movimentacao implements OnInit {
     private fb: FormBuilder,
     private movimentacaoApi: MovimentacaoApiService,
     private cdr: ChangeDetectorRef,
+    private apiErrorService: ApiErrorService,
   ) {
     this.formSaidaEpi = this.fb.group({
       colaborador: ['', Validators.required],
@@ -98,8 +100,8 @@ export class Movimentacao implements OnInit {
         this.colaboradores = this.listaColaboradoresCompleta.map((c) => c.nome);
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.erroApi = 'Falha ao carregar colaboradores.';
+      error: (error: unknown) => {
+        this.erroApi = this.apiErrorService.getMessage(error, 'Falha ao carregar colaboradores.');
         this.cdr.detectChanges();
       },
     });
@@ -120,8 +122,8 @@ export class Movimentacao implements OnInit {
         }));
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.erroApi = 'Falha ao carregar EPIs.';
+      error: (error: unknown) => {
+        this.erroApi = this.apiErrorService.getMessage(error, 'Falha ao carregar EPIs.');
         this.cdr.detectChanges();
       },
     });
@@ -149,8 +151,8 @@ export class Movimentacao implements OnInit {
           this.closeModalSaldo();
           this.recarregarEpis();
         },
-        error: () => {
-          this.erroApi = 'Nao foi possivel registrar a entrada de saldo.';
+        error: (error) => {
+          this.erroApi = this.apiErrorService.getMessage(error, 'Nao foi possivel registrar a entrada de saldo.');
         },
       });
   }
@@ -270,8 +272,8 @@ export class Movimentacao implements OnInit {
           this.formSaidaEpi.patchValue({ epiId: '', quantidade: 1 });
           this.recarregarEpis();
         },
-        error: () => {
-          this.erroApi = 'Nao foi possivel finalizar a movimentacao de entrega.';
+        error: (error) => {
+          this.erroApi = this.apiErrorService.getMessage(error, 'Nao foi possivel finalizar a movimentacao de entrega.');
         },
       });
   }

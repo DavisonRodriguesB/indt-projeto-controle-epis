@@ -5,6 +5,7 @@ import { catchError, finalize, map, switchMap, takeUntil, timeout } from 'rxjs/o
 
 import { HeaderNotificationEvent, HeaderNotificationsService } from './header-notifications.service';
 import { AuthService } from '../../../core/auth/auth.service';
+import { ApiErrorService } from '../../../core/http/api-error.service';
 import { environment } from '../../../../environments/environments';
 
 @Component({
@@ -47,6 +48,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private lastSeenNotificationAt = 0;
 
   private readonly destroy$ = new Subject<void>();
+  private readonly apiErrorService = inject(ApiErrorService);
 
   constructor(
     private readonly notificationsService: HeaderNotificationsService,
@@ -59,7 +61,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     timer(0, this.pollingIntervalMs)
       .pipe(
         takeUntil(this.destroy$),
-        switchMap(() => this.loadNotifications(false))
+        switchMap(() => {
+          if (document.hidden) {
+            return of<HeaderNotificationEvent[] | null>(null);
+          }
+          return this.loadNotifications(false);
+        })
       )
       .subscribe((items) => {
         if (items) {
@@ -154,13 +161,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     return 'EPI';
   }
 
-  private getFriendlyError(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    return 'Não foi possível carregar as notificações.';
-  }
-
   private applyNotifications(items: HeaderNotificationEvent[]): void {
     this.notifications = items;
     this.hasLoadedNotifications = true;
@@ -220,7 +220,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       timeout(12000),
       map((items) => items ?? []),
       catchError((error: unknown) => {
-        this.notificationError = this.getFriendlyError(error);
+        this.notificationError = this.apiErrorService.getMessage(error, 'Nao foi possivel carregar as notificacoes.');
         return of<HeaderNotificationEvent[]>([]);
       }),
       finalize(() => {
@@ -237,9 +237,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private resolvePollingInterval(): number {
     const configured = Number(environment.notificationsPollingMs);
-    if (!Number.isFinite(configured) || configured < 5000) {
-      return 15000;
+    const base = Number.isFinite(configured) && configured >= 5000 ? configured : 15000;
+
+    // Add up to 20% jitter so clients spread requests instead of hitting backend simultaneously.
+    const jitterRatio = (Math.random() * 0.4) - 0.2;
+    const withJitter = Math.round(base * (1 + jitterRatio));
+    if (withJitter < 5000) {
+      return 5000;
     }
-    return configured;
+
+    return withJitter;
   }
 }

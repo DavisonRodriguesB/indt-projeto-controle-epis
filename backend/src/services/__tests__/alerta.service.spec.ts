@@ -81,7 +81,7 @@ describe("alerta service", () => {
         {
           id: 30,
           tipo: "entrada_saldo",
-          created_at: "2026-04-20T11:00:00.000Z",
+          event_at: "2026-04-20T11:00:00.000Z",
           usuario_id: 1,
           usuario_nome: "Administrador",
           colaborador_nome: null,
