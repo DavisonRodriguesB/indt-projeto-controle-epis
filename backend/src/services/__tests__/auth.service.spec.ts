@@ -18,10 +18,11 @@ jest.mock("bcryptjs", () => ({
 }));
 
 jest.mock("jsonwebtoken", () => ({
-  sign: jest.fn()
+  sign: jest.fn(),
+  verify: jest.fn()
 }));
 
-import { login, registerUser } from "../auth.service";
+import { login, refreshSession, registerUser } from "../auth.service";
 
 describe("auth service", () => {
   beforeEach(() => {
@@ -97,6 +98,40 @@ describe("auth service", () => {
       nome: "Usuario",
       email: "usuario@teste.com",
       role: "almoxarife"
+    });
+  });
+
+  it("should throw AUTH_TOKEN_INVALID when refresh token is invalid", async () => {
+    (jwt.verify as jest.MockedFunction<typeof jwt.verify>).mockImplementation(() => {
+      throw new Error("invalid");
+    });
+
+    await expect(refreshSession("invalid-token")).rejects.toMatchObject({
+      code: "AUTH_TOKEN_INVALID"
+    });
+  });
+
+  it("should return token and user when refresh succeeds", async () => {
+    (jwt.verify as jest.MockedFunction<typeof jwt.verify>).mockReturnValue({ sub: "1" } as never);
+    repositoryMock.findOne.mockResolvedValue({
+      id: 1,
+      nome: "Admin",
+      email: "admin@teste.com",
+      senhaHash: "hash",
+      role: "admin"
+    });
+    (jwt.sign as jest.MockedFunction<typeof jwt.sign>).mockReturnValue("new-jwt-token" as never);
+
+    const result = await refreshSession("valid-token");
+
+    expect(result).toEqual({
+      token: "new-jwt-token",
+      user: {
+        id: 1,
+        nome: "Admin",
+        email: "admin@teste.com",
+        role: "admin"
+      }
     });
   });
 });

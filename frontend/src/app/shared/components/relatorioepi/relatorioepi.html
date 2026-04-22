@@ -31,7 +31,7 @@
     </div>
     <div class="space-y-1.5 text-right">
       <p class="text-[9px] uppercase font-bold text-slate-400">Registro da Entrega</p>
-      <p class="text-sm font-bold text-slate-800">{{ dados.dataEntrega | date:'dd/MM/yyyy - HH:mm' }}</p>
+      <p class="text-sm font-bold text-slate-800">{{ dados.dataEntrega | date:"d 'de' MMMM 'de' y 'as' HH:mm" }}</p>
       <p class="text-[10px] text-slate-500 uppercase">Emitido por: <span class="font-semibold">{{ dados.usuarioSistema }}</span></p>
     </div>
   </div>

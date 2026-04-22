@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { AppError } from "../middlewares/error-handler";
 import { sendSuccess } from "../utiils/http-response";
-import { createBaseItem, listBaseItems, updateBaseItem } from "../services/cadastros-base.service";
+import { createBaseItem, listBaseItemsPaginated, updateBaseItem } from "../services/cadastros-base.service";
 
 const paramsEntitySchema = z.object({
   entity: z.enum(["cargos", "setores", "categorias"])
@@ -21,10 +21,52 @@ const updateBodySchema = z.object({
   ativo: z.boolean().optional()
 });
 
+const listQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+  status: z.preprocess(
+    (value) => {
+      if (value === "true" || value === true) {
+        return true;
+      }
+      if (value === "false" || value === false) {
+        return false;
+      }
+      return undefined;
+    },
+    z.boolean().optional()
+  )
+});
+
+const listAllQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20)
+});
+
 export async function handleListBaseItems(request: Request, response: Response): Promise<void> {
   const { entity } = paramsEntitySchema.parse(request.params);
-  const rows = await listBaseItems(entity);
-  sendSuccess(response, 200, rows, { total: rows.length });
+  const { page, pageSize, status } = listQuerySchema.parse(request.query ?? {});
+  const result = await listBaseItemsPaginated(entity, { page, pageSize, status });
+
+  sendSuccess(response, 200, result.data, {
+    total: result.total,
+    page,
+    pageSize,
+    status: typeof status === "boolean" ? status : "all"
+  });
+}
+
+export async function handleListAllBaseItems(request: Request, response: Response): Promise<void> {
+  const { entity } = paramsEntitySchema.parse(request.params);
+  const { page, pageSize } = listAllQuerySchema.parse(request.query ?? {});
+  const result = await listBaseItemsPaginated(entity, { page, pageSize });
+
+  sendSuccess(response, 200, result.data, {
+    total: result.total,
+    page,
+    pageSize,
+    status: "todos"
+  });
 }
 
 export async function handleCreateBaseItem(request: Request, response: Response): Promise<void> {

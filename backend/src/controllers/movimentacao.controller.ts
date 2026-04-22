@@ -3,7 +3,8 @@ import { z } from "zod";
 import { AppError } from "../middlewares/error-handler";
 import {
   createEntradaSaldoMovimentacao,
-  createEntregaMovimentacao
+  createEntregaMovimentacao,
+  listMovimentacoesRecentes
 } from "../services/movimentacao.service";
 import { sendSuccess } from "../utiils/http-response";
 
@@ -24,6 +25,26 @@ const entradaSchema = z.object({
   dataMovimentacao: z.string().date().optional(),
   observacao: z.string().max(500).optional()
 });
+
+const movimentacoesQuerySchema = z.object({
+  limite: z.coerce.number().int().positive().max(50).optional()
+});
+
+export async function handleListMovimentacoesRecentes(request: Request, response: Response): Promise<void> {
+  if (!request.authUser) {
+    throw new AppError(401, "Usuario nao autenticado.", "AUTH_REQUIRED");
+  }
+
+  const query = movimentacoesQuerySchema.parse(request.query);
+  const limite = query.limite ?? 8;
+  const movimentacoes = await listMovimentacoesRecentes(request.authUser, limite);
+
+  sendSuccess(response, 200, movimentacoes, {
+    limite,
+    total: movimentacoes.length,
+    role: request.authUser.role
+  });
+}
 
 export async function handleCreateMovimentacaoEntrega(request: Request, response: Response): Promise<void> {
   if (!request.authUser) {

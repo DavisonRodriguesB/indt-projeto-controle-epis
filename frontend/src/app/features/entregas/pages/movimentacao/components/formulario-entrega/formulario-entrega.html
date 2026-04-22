@@ -23,32 +23,28 @@
     <div class="pt-2">
       <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Material (EPI)</label>
       <div class="relative">
-        <input 
-          list="listaEpis" 
-          formControlName="material" 
-          (input)="verificarSelecao($event)" 
-          [readOnly]="!!materialFixado"
-          placeholder="Busque por nome ou CA..." 
+        <select
+          formControlName="epiId"
+          (change)="onEpiChange($event)"
           class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-600"
-          [class.bg-blue-50]="materialFixado"
           [class.border-red-400]="erroSaldo || erroDuplicidade"
         >
-        
-        <button type="button" *ngIf="materialFixado" (click)="limparMaterial()" class="absolute right-3 top-2.5 text-blue-400 hover:text-red-500">
-          <i class="ph ph-x-circle text-xl"></i>
-        </button>
+          <option value="">Selecione o EPI...</option>
+          <option *ngFor="let item of estoque" [value]="item.id" [disabled]="item.saldo <= 0">
+            {{ item.codigo }} - {{ item.material }} (CA: {{ item.ca }}) | {{ item.saldo > 0 ? 'Saldo: ' + item.saldo : 'Sem saldo' }}
+          </option>
+        </select>
       </div>
+
+      <p class="mt-2 text-[11px] font-semibold text-slate-500">
+        Itens sem saldo aparecem como indisponiveis no seletor.
+      </p>
 
       <div *ngIf="erroDuplicidade" class="mt-2 flex items-center gap-1.5 text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-100">
         <i class="ph ph-warning text-lg"></i>
         <span class="text-[10px] font-bold uppercase">{{ erroDuplicidade }}</span>
       </div>
 
-      <datalist id="listaEpis">
-        <option *ngFor="let item of estoque" [value]="item.codigo + ' - ' + item.material + ' (CA: ' + item.ca + ')'">
-          Saldo: {{ item.saldo }} unidades
-        </option>
-      </datalist>
     </div>
 
     <div>

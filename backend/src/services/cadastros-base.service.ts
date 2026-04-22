@@ -6,6 +6,12 @@ import { AppError } from "../middlewares/error-handler";
 
 type BaseEntityName = "cargos" | "setores" | "categorias";
 
+type ListBaseItemsInput = {
+  page: number;
+  pageSize: number;
+  status?: boolean;
+};
+
 type BaseItem = {
   id: number;
   descricao: string;
@@ -26,14 +32,37 @@ function getRepository(entity: BaseEntityName) {
 }
 
 export async function listBaseItems(entity: BaseEntityName): Promise<BaseItem[]> {
-  const repository = getRepository(entity);
-  const rows = await repository.find({ where: { ativo: true }, order: { id: "ASC" } });
+  const result = await listBaseItemsPaginated(entity, {
+    page: 1,
+    pageSize: 100,
+    status: true
+  });
 
-  return rows.map((row) => ({
-    id: row.id,
-    descricao: row.descricao,
-    ativo: row.ativo
-  }));
+  return result.data;
+}
+
+export async function listBaseItemsPaginated(
+  entity: BaseEntityName,
+  input: ListBaseItemsInput
+): Promise<{ data: BaseItem[]; total: number }> {
+  const repository = getRepository(entity);
+  const where = typeof input.status === "boolean" ? { ativo: input.status } : {};
+
+  const [rows, total] = await repository.findAndCount({
+    where,
+    order: { id: "ASC" },
+    skip: (input.page - 1) * input.pageSize,
+    take: input.pageSize
+  });
+
+  return {
+    data: rows.map((row) => ({
+      id: row.id,
+      descricao: row.descricao,
+      ativo: row.ativo
+    })),
+    total
+  };
 }
 
 export async function createBaseItem(entity: BaseEntityName, descricao: string): Promise<BaseItem> {

@@ -4,7 +4,7 @@ import { env } from "../config/env";
 import { AppDataSource } from "../database/data-source";
 import { UserEntity } from "../entities/user.entity";
 import { AppError } from "../middlewares/error-handler";
-import { AuthUser, UserRole } from "../types/auth";
+import { AuthUser, JwtPayload, UserRole } from "../types/auth";
 
 const userRepository = AppDataSource.getRepository(UserEntity);
 
@@ -40,6 +40,52 @@ export async function login(email: string, senha: string): Promise<LoginResult> 
 
   if (!isPasswordValid) {
     throw new AppError(401, "Email ou senha invalidos.", "AUTH_INVALID_CREDENTIALS");
+  }
+
+  const authUser = mapToAuthUser(user);
+  const expiresIn = env.JWT_EXPIRES_IN as jwt.SignOptions["expiresIn"];
+  const token = jwt.sign(
+    {
+      role: authUser.role,
+      nome: authUser.nome,
+      email: authUser.email
+    },
+    env.JWT_SECRET,
+    {
+      subject: String(authUser.id),
+      expiresIn
+    }
+  );
+
+  return {
+    token,
+    user: authUser
+  };
+}
+
+export async function refreshSession(refreshToken: string): Promise<LoginResult> {
+  if (!refreshToken) {
+    throw new AppError(401, "Token invalido ou expirado.", "AUTH_TOKEN_INVALID");
+  }
+
+  let payload: JwtPayload;
+
+  try {
+    payload = jwt.verify(refreshToken, env.JWT_SECRET) as JwtPayload;
+  } catch (_error) {
+    throw new AppError(401, "Token invalido ou expirado.", "AUTH_TOKEN_INVALID");
+  }
+
+  const userId = Number(payload.sub);
+
+  if (!Number.isFinite(userId)) {
+    throw new AppError(401, "Token invalido ou expirado.", "AUTH_TOKEN_INVALID");
+  }
+
+  const user = await userRepository.findOne({ where: { id: userId } });
+
+  if (!user) {
+    throw new AppError(401, "Token invalido ou expirado.", "AUTH_TOKEN_INVALID");
   }
 
   const authUser = mapToAuthUser(user);

@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { of, Subject, timer } from 'rxjs';
-import { catchError, switchMap, takeUntil } from 'rxjs/operators';
+import { catchError, finalize, map, switchMap, takeUntil, timeout } from 'rxjs/operators';
 
-import { HeaderNotificationsService, MovimentacaoNotificacao } from './header-notifications.service';
+import { HeaderNotificationEvent, HeaderNotificationsService } from './header-notifications.service';
 import { AuthService } from '../../../core/auth/auth.service';
+import { ApiErrorService } from '../../../core/http/api-error.service';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-header',
@@ -37,9 +39,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isNotificationsOpen = false;
   isLoadingNotifications = false;
   notificationError: string | null = null;
-  notifications: MovimentacaoNotificacao[] = [];
+  notifications: HeaderNotificationEvent[] = [];
+  private hasLoadedNotifications = false;
+  unreadNotificationCount = 0;
+
+  private readonly seenStorageKey = 'header.notifications.lastSeenAt';
+  private readonly pollingIntervalMs = this.resolvePollingInterval();
+  private lastSeenNotificationAt = 0;
 
   private readonly destroy$ = new Subject<void>();
+  private readonly apiErrorService = inject(ApiErrorService);
 
   constructor(
     private readonly notificationsService: HeaderNotificationsService,
@@ -47,26 +56,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    timer(0, 60000)
+    this.loadLastSeenNotificationId();
+
+    timer(0, this.pollingIntervalMs)
       .pipe(
         takeUntil(this.destroy$),
         switchMap(() => {
-          this.isLoadingNotifications = true;
-          this.notificationError = null;
-
-          return this.notificationsService.listRecentMovements(8).pipe(
-            catchError((error: unknown) => {
-              this.notifications = [];
-              this.notificationError = this.getFriendlyError(error);
-              this.isLoadingNotifications = false;
-              return of<MovimentacaoNotificacao[]>([]);
-            })
-          );
+          if (document.hidden) {
+            return of<HeaderNotificationEvent[] | null>(null);
+          }
+          return this.loadNotifications(false);
         })
       )
       .subscribe((items) => {
-        this.notifications = items;
-        this.isLoadingNotifications = false;
+        if (items) {
+          this.applyNotifications(items);
+        }
       });
   }
 
@@ -77,6 +82,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   toggleNotifications(): void {
     this.isNotificationsOpen = !this.isNotificationsOpen;
+
+    if (this.isNotificationsOpen && (!this.hasLoadedNotifications || this.notificationError)) {
+      this.refreshNotifications();
+      return;
+    }
+
+    if (this.isNotificationsOpen) {
+      this.markNotificationsAsRead();
+    }
+  }
+
+  refreshNotifications(): void {
+    this.loadNotifications(true).subscribe((items) => {
+      if (items) {
+        this.applyNotifications(items);
+      }
+    });
   }
 
   @HostListener('document:click', ['$event'])
@@ -89,24 +111,141 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    this.isNotificationsOpen = false;
+    this.menuOpen = false;
+  }
+
   get notificationCount(): number {
     return this.notifications.length;
   }
 
-  getNotificationTitle(item: MovimentacaoNotificacao): string {
-    return item.tipo === 'entrega' ? 'Entrega de EPI' : 'Entrada de saldo';
+  getNotificationTitle(item: HeaderNotificationEvent): string {
+    return item.title;
   }
 
-  getNotificationDescription(item: MovimentacaoNotificacao): string {
-    const destino = item.colaboradorNome ? ` para ${item.colaboradorNome}` : '';
-    const totalItensLabel = item.totalItens === 1 ? 'item' : 'itens';
-    return `${item.usuarioNome}${destino} (${item.totalItens} ${totalItensLabel}, qtd ${item.totalQuantidade})`;
+  getNotificationDescription(item: HeaderNotificationEvent): string {
+    return item.description;
   }
 
-  private getFriendlyError(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
+  getNotificationBadgeClass(item: HeaderNotificationEvent): string {
+    if (item.eventType === 'movimentacao_entrega') {
+      return 'bg-blue-50 text-blue-700';
     }
-    return 'Não foi possível carregar as notificações.';
+
+    if (item.eventType === 'movimentacao_entrada_saldo') {
+      return 'bg-emerald-50 text-emerald-700';
+    }
+
+    if (item.eventType === 'novo_colaborador') {
+      return 'bg-amber-50 text-amber-700';
+    }
+
+    return 'bg-violet-50 text-violet-700';
+  }
+
+  getNotificationBadgeLabel(item: HeaderNotificationEvent): string {
+    if (item.eventType === 'movimentacao_entrega') {
+      return 'ENTREGA';
+    }
+
+    if (item.eventType === 'movimentacao_entrada_saldo') {
+      return 'ENTRADA';
+    }
+
+    if (item.eventType === 'novo_colaborador') {
+      return 'COLAB';
+    }
+
+    return 'EPI';
+  }
+
+  private applyNotifications(items: HeaderNotificationEvent[]): void {
+    this.notifications = items;
+    this.hasLoadedNotifications = true;
+
+    this.normalizeLastSeenIfAhead();
+
+    this.recalculateUnreadCount();
+
+    if (this.isNotificationsOpen) {
+      this.markNotificationsAsRead();
+    }
+  }
+
+  private recalculateUnreadCount(): void {
+    this.unreadNotificationCount = this.notifications.filter(
+      (item) => this.getEventTimestamp(item) > this.lastSeenNotificationAt,
+    ).length;
+  }
+
+  private markNotificationsAsRead(): void {
+    const maxTimestamp = this.notifications.reduce(
+      (acc, item) => Math.max(acc, this.getEventTimestamp(item)),
+      this.lastSeenNotificationAt,
+    );
+    this.lastSeenNotificationAt = maxTimestamp;
+    localStorage.setItem(this.seenStorageKey, String(this.lastSeenNotificationAt));
+    this.unreadNotificationCount = 0;
+  }
+
+  private loadLastSeenNotificationId(): void {
+    const rawValue = localStorage.getItem(this.seenStorageKey);
+    const parsed = rawValue ? Number(rawValue) : 0;
+    this.lastSeenNotificationAt = Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  private normalizeLastSeenIfAhead(): void {
+    const maxCurrentTimestamp = this.notifications.reduce(
+      (acc, item) => Math.max(acc, this.getEventTimestamp(item)),
+      0,
+    );
+
+    if (this.lastSeenNotificationAt > maxCurrentTimestamp) {
+      this.lastSeenNotificationAt = maxCurrentTimestamp;
+      localStorage.setItem(this.seenStorageKey, String(this.lastSeenNotificationAt));
+    }
+  }
+
+  private loadNotifications(showLoading = true) {
+    if (this.isLoadingNotifications) {
+      return of<HeaderNotificationEvent[] | null>(null);
+    }
+
+    this.isLoadingNotifications = true;
+    this.notificationError = null;
+
+    return this.notificationsService.listRecentEvents(12).pipe(
+      timeout(12000),
+      map((items) => items ?? []),
+      catchError((error: unknown) => {
+        this.notificationError = this.apiErrorService.getMessage(error, 'Nao foi possivel carregar as notificacoes.');
+        return of<HeaderNotificationEvent[]>([]);
+      }),
+      finalize(() => {
+        this.isLoadingNotifications = false;
+      }),
+      map((items) => items as HeaderNotificationEvent[] | null)
+    );
+  }
+
+  private getEventTimestamp(item: HeaderNotificationEvent): number {
+    const ts = new Date(item.eventAt).getTime();
+    return Number.isFinite(ts) ? ts : 0;
+  }
+
+  private resolvePollingInterval(): number {
+    const configured = Number(environment.notificationsPollingMs);
+    const base = Number.isFinite(configured) && configured >= 5000 ? configured : 15000;
+
+    // Add up to 20% jitter so clients spread requests instead of hitting backend simultaneously.
+    const jitterRatio = (Math.random() * 0.4) - 0.2;
+    const withJitter = Math.round(base * (1 + jitterRatio));
+    if (withJitter < 5000) {
+      return 5000;
+    }
+
+    return withJitter;
   }
 }

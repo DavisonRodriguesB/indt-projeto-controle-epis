@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 export class ListaResumo { 
   @Input() itens: any[] = [];
   @Input() colaboradorFixado: string | null = null;
+  @Input() enviando = false;
   
   @Output() onRemover = new EventEmitter<number>();
   @Output() onFinalizar = new EventEmitter<void>();

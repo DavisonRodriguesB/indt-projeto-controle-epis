@@ -1,14 +1,19 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { sendSuccess } from "../utiils/http-response";
-import { listAlertas, listMovimentacoesRecentes } from "../services/alerta.service";
+import { listAlertas, listEventosRecentes } from "../services/alerta.service";
 import { AppError } from "../middlewares/error-handler";
+import { listMovimentacoesRecentes } from "../services/movimentacao.service";
 
 const querySchema = z.object({
   diasValidade: z.coerce.number().int().positive().max(365).optional()
 });
 
 const movimentacoesQuerySchema = z.object({
+  limite: z.coerce.number().int().positive().max(50).optional()
+});
+
+const eventosQuerySchema = z.object({
   limite: z.coerce.number().int().positive().max(50).optional()
 });
 
@@ -36,6 +41,22 @@ export async function handleListAlertasMovimentacao(request: Request, response: 
   sendSuccess(response, 200, movimentacoes, {
     limite,
     total: movimentacoes.length,
+    role: request.authUser.role
+  });
+}
+
+export async function handleListAlertasEventos(request: Request, response: Response): Promise<void> {
+  if (!request.authUser) {
+    throw new AppError(401, "Usuario nao autenticado.", "AUTH_REQUIRED");
+  }
+
+  const query = eventosQuerySchema.parse(request.query);
+  const limite = query.limite ?? 8;
+  const eventos = await listEventosRecentes(request.authUser, limite);
+
+  sendSuccess(response, 200, eventos, {
+    limite,
+    total: eventos.length,
     role: request.authUser.role
   });
 }
