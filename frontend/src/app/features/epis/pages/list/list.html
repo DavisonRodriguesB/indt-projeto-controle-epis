@@ -1,5 +1,4 @@
 <div class="flex flex-col gap-6">
-  
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
     <div>
       <h2 class="text-2xl font-bold text-slate-800">Catálogo de EPIs</h2>
@@ -13,7 +12,7 @@
     </button>
   </div>
 
-  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex gap-4">
+  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4">
     <div class="relative flex-1">
       <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
       <input 
@@ -23,10 +22,15 @@
         class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20"
       >
     </div>
+    <select 
+      [(ngModel)]="selectedCategoriaId"
+      class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-600">
+      <option value="">Todas as Categorias</option>
+      <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.descricao }}</option>
+    </select>
   </div>
 
   <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-    
     <div class="hidden lg:block overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead class="bg-slate-50 border-b border-slate-200">
@@ -34,6 +38,7 @@
             <th class="px-6 py-4 text-sm font-semibold text-slate-700">Equipamento</th>
             <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Cód. Produto</th>
             <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Nº CA</th>
+            <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Estoque</th>
             <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Status</th>
             <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Ações</th>
           </tr>
@@ -43,14 +48,19 @@
             <td class="px-6 py-4">
               <div class="flex flex-col">
                 <span class="font-semibold text-slate-800">{{ item.nome }}</span>
-                <span class="text-[10px] text-slate-400 uppercase tracking-wider">{{ item.categoria }}</span>
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">{{ item.categoria?.descricao || 'Sem Categoria' }}</span>
               </div>
             </td>
             <td class="px-6 py-4 text-center">
               <span class="text-sm font-mono text-slate-600 font-medium">{{ item.codigo || '---' }}</span>
             </td>
             <td class="px-6 py-4 text-center">
-              <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-mono font-bold">{{ item.numero_ca }}</span>
+              <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-mono font-bold">{{ item.ca }}</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="text-sm font-semibold" [class.text-rose-500]="item.estoque_atual <= item.estoque_minimo">
+                {{ item.estoque_atual }}
+              </span>
             </td>
             <td class="px-6 py-4 text-center">
               <span [class]="item.ativo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" 
@@ -60,14 +70,11 @@
             </td>
             <td class="px-6 py-4 text-right">
               <div class="flex justify-end items-center gap-2">
-                <button class="text-slate-400 hover:text-blue-600 transition-colors p-1">
+                <button [routerLink]="['/epis/editar', item.id]" class="text-slate-400 hover:text-blue-600 transition-colors p-1">
                   <i class="ph ph-pencil-simple text-2xl"></i>
                 </button>
-                
-                <button (click)="toggleStatus(item)" 
-                        class="transition-all active:scale-95" 
-                        [title]="item.ativo ? 'Inativar EPI' : 'Ativar EPI'">
-                  <i class="ph transition-colors" 
+                <button (click)="toggleStatus(item)" class="transition-all active:scale-95">
+                  <i class="ph" 
                      [ngClass]="item.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" 
                      style="font-size: 32px;">
                   </i>
@@ -84,35 +91,29 @@
         <div class="flex justify-between items-start">
           <div class="flex flex-col">
             <span class="font-bold text-slate-800">{{ item.nome }}</span>
-            <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">{{ item.categoria }}</span>
+            <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">{{ item.categoria?.descricao }}</span>
           </div>
           <div class="flex items-center gap-3">
-            <button class="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg">
+            <button [routerLink]="['/epis/editar', item.id]" class="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg">
               <i class="ph ph-pencil-simple text-xl"></i>
             </button>
             <button (click)="toggleStatus(item)" class="transition-all active:scale-95">
-              <i class="ph" 
-                 [ngClass]="item.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" 
-                 style="font-size: 32px;">
-              </i>
+              <i class="ph" [ngClass]="item.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" style="font-size: 32px;"></i>
             </button>
           </div>
         </div>
-
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-3 gap-2 text-center">
           <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
-            <p class="text-[9px] uppercase font-bold text-slate-400 mb-1">Cód. Prod.</p>
-            <p class="text-xs font-mono font-medium text-slate-600">{{ item.codigo || '---' }}</p>
+            <p class="text-[9px] uppercase font-bold text-slate-400">Estoque</p>
+            <p class="text-xs font-bold" [class.text-rose-500]="item.estoque_atual <= item.estoque_minimo">{{ item.estoque_atual }}</p>
           </div>
           <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
-            <p class="text-[9px] uppercase font-bold text-slate-400 mb-1">Nº CA</p>
-            <p class="text-xs font-mono font-bold text-blue-600">{{ item.numero_ca }}</p>
+            <p class="text-[9px] uppercase font-bold text-slate-400">Nº CA</p>
+            <p class="text-xs font-mono font-bold text-blue-600">{{ item.ca }}</p>
           </div>
-          <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 flex flex-col justify-between">
-            <p class="text-[9px] uppercase font-bold text-slate-400 mb-1">Status</p>
-            <span [class]="item.ativo ? 'text-green-600' : 'text-red-600'" class="text-[10px] font-bold uppercase">
-              {{ item.ativo ? 'Ativo' : 'Inativo' }}
-            </span>
+          <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+            <p class="text-[9px] uppercase font-bold text-slate-400">Vida Útil</p>
+            <p class="text-xs font-medium text-slate-600">{{ item.vida_util_dias }}d</p>
           </div>
         </div>
       </div>

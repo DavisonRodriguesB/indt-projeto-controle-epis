@@ -1,6 +1,4 @@
 import { Routes } from '@angular/router';
-import { ColaboradorFormComponent } from './features/colaboradores/pages/form/form';
-import { EpiFormComponent } from './features/epis/pages/form/form';
 import { authGuard } from './core/auth/auth.guard';
 import { roleGuard } from './core/auth/role.guard';
 import { Perfil } from './core/models/auth.model';
@@ -14,7 +12,7 @@ export const routes: Routes = [
 
   {
     path: '',
-    canActivate: [authGuard], 
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./layout/main-layout/main-layout').then(
         (m) => m.MainLayoutComponent
@@ -27,6 +25,8 @@ export const routes: Routes = [
             (m) => m.Home
           ),
       },
+
+
       {
         path: 'epis',
         loadComponent: () =>
@@ -37,8 +37,17 @@ export const routes: Routes = [
       { 
         path: 'epis/novo', 
         canActivate: [roleGuard(Perfil.ADMIN, Perfil.ALMOXARIFE)], 
-        component: EpiFormComponent
+        loadComponent: () => 
+          import('./features/epis/pages/form/form').then(m => m.EpiFormComponent)
       },
+      { 
+        path: 'epis/editar/:id', 
+        canActivate: [roleGuard(Perfil.ADMIN, Perfil.ALMOXARIFE)], 
+        loadComponent: () => 
+          import('./features/epis/pages/form/form').then(m => m.EpiFormComponent)
+      },
+
+
       {
         path: 'colaboradores',
         loadComponent: () =>
@@ -49,8 +58,17 @@ export const routes: Routes = [
       { 
         path: 'colaboradores/novo', 
         canActivate: [roleGuard(Perfil.ADMIN)],
-        component: ColaboradorFormComponent 
+        loadComponent: () => 
+          import('./features/colaboradores/pages/form/form').then(m => m.ColaboradorFormComponent)
       },
+      { 
+        path: 'colaboradores/editar/:id', 
+        canActivate: [roleGuard(Perfil.ADMIN)],
+        loadComponent: () => 
+          import('./features/colaboradores/pages/form/form').then(m => m.ColaboradorFormComponent)
+      },
+
+
       {
         path: 'cargos',
         loadComponent: () =>
@@ -66,6 +84,8 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/configuracoes/categorias/pages/list/list').then((m) => m.CategoriasList),
       },
+
+
       {
         path: 'entregas',
         loadComponent: () =>
@@ -80,6 +100,7 @@ export const routes: Routes = [
             (m) => m.ConsultaEntregasComponent
           ),
       },
+
       {
         path: 'usuarios',
         canActivate: [roleGuard(Perfil.ADMIN)],
@@ -88,6 +109,7 @@ export const routes: Routes = [
             (m) => m.UsuarioListComponent
           ),
       },
+
       {
         path: '',
         redirectTo: 'dashboard',

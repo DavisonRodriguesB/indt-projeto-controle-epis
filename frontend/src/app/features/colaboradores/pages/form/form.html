@@ -5,13 +5,13 @@
       <i class="ph ph-arrow-left text-2xl"></i>
     </button>
     <div>
-      <h2 class="text-2xl font-bold text-slate-800">Novo Colaborador</h2>
+      <h2 class="text-2xl font-bold text-slate-800">{{ isEdicao ? 'Editar Colaborador' : 'Novo Colaborador' }}</h2>
       <p class="text-slate-500">Registre os dados para controle de entrega de EPIs.</p>
     </div>
   </div>
 
   <form [formGroup]="colaboradorForm" (ngSubmit)="onSubmit()" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8 space-y-6">
-   
+    
     <div>
       <label class="block text-sm font-semibold text-slate-700 mb-2">Nome Completo</label>
       <input 
@@ -43,13 +43,13 @@
         <label class="block text-sm font-semibold text-slate-700 mb-2">Cargo / Função</label>
         <div class="relative">
           <select 
-            formControlName="cargo"
+            formControlName="cargoId"
             class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer appearance-none text-slate-600"
-            [class.border-red-400]="colaboradorForm.get('cargo')?.invalid && colaboradorForm.get('cargo')?.touched"
+            [class.border-red-400]="colaboradorForm.get('cargoId')?.invalid && colaboradorForm.get('cargoId')?.touched"
           >
-            <option value="" disabled selected>Selecione o cargo...</option>
-            <option *ngFor="let cargo of cargos" [value]="cargo.nome">
-              {{ cargo.nome }}
+            <option [ngValue]="null" disabled>Selecione o cargo...</option>
+            <option *ngFor="let cargo of cargos" [ngValue]="cargo.id">
+              {{ cargo.descricao }}
             </option>
           </select>
           <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
@@ -62,13 +62,13 @@
         <label class="block text-sm font-semibold text-slate-700 mb-2">Setor / Departamento</label>
         <div class="relative">
           <select 
-            formControlName="setor"
+            formControlName="setorId"
             class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer appearance-none text-slate-600"
-            [class.border-red-400]="colaboradorForm.get('setor')?.invalid && colaboradorForm.get('setor')?.touched"
+            [class.border-red-400]="colaboradorForm.get('setorId')?.invalid && colaboradorForm.get('setorId')?.touched"
           >
-            <option value="" disabled selected>Selecione o setor...</option>
-            <option *ngFor="let setor of setores" [value]="setor.nome">
-              {{ setor.nome }}
+            <option [ngValue]="null" disabled>Selecione o setor...</option>
+            <option *ngFor="let setor of setores" [ngValue]="setor.id">
+              {{ setor.descricao }}
             </option>
           </select>
           <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
@@ -82,8 +82,8 @@
             formControlName="status"
             class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer appearance-none text-slate-600"
           >
-            <option value="Ativo">Ativo</option>
-            <option value="Inativo">Inativo</option>
+            <option [ngValue]="true">Ativo</option>
+            <option [ngValue]="false">Inativo</option>
           </select>
           <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
         </div>
@@ -100,9 +100,11 @@
       </button>
       <button 
         type="submit" 
-        class="px-10 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-100 transition-all order-1 md:order-2 flex items-center justify-center gap-2"
+        [disabled]="colaboradorForm.invalid"
+        class="px-10 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold rounded-xl shadow-lg shadow-blue-100 transition-all order-1 md:order-2 flex items-center justify-center gap-2"
       >
-        Salvar Colaborador
+        <i class="ph ph-floppy-disk text-xl"></i>
+        {{ isEdicao ? 'Salvar Alterações' : 'Salvar Colaborador' }}
       </button>
     </div>
 
