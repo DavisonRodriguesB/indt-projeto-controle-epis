@@ -4,9 +4,7 @@
       <h2 class="text-2xl font-bold text-slate-800">Catálogo de EPIs</h2>
       <p class="text-slate-500 text-sm">Controle técnico de Certificados de Aprovação (CA) e categorias.</p>
     </div>
-    <button 
-      routerLink="/epis/novo"
-      class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-100">
+    <button routerLink="/epis/novo" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-100">
       <i class="ph ph-package text-xl"></i>
       Novo EPI
     </button>
@@ -22,12 +20,36 @@
         class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20"
       >
     </div>
-    <select 
-      [(ngModel)]="selectedCategoriaId"
-      class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-600">
-      <option value="">Todas as Categorias</option>
-      <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.descricao }}</option>
-    </select>
+
+    <div class="relative w-full md:w-80">
+      <div *ngIf="!filtroCategoria" class="relative">
+        <i class="ph ph-tag absolute left-3 top-2.5 text-slate-400"></i>
+        <input 
+          type="text" 
+          [(ngModel)]="inputCategoria" 
+          (focus)="showSugestoes = true"
+          placeholder="Digitar Categoria..." 
+          class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+        >
+      </div>
+
+      <div *ngIf="filtroCategoria" class="flex items-center justify-between bg-blue-50 border border-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-semibold h-[42px]">
+        <div class="flex items-center gap-2 truncate">
+          <i class="ph ph-tag-chevron text-blue-400"></i>
+          <span class="truncate">{{ filtroCategoria.descricao }}</span>
+        </div>
+        <button (click)="filtroCategoria = null" class="ml-2 hover:text-blue-900 transition-colors">
+          <i class="ph ph-x-circle text-xl"></i>
+        </button>
+      </div>
+
+      <ul *ngIf="showSugestoes && sugestoesCategoria.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto p-1">
+        <li *ngFor="let cat of sugestoesCategoria" (click)="selecionarCategoria(cat)" 
+          class="px-3 py-2 hover:bg-slate-50 rounded cursor-pointer text-sm text-slate-700 font-medium">
+          {{ cat.descricao }}
+        </li>
+      </ul>
+    </div>
   </div>
 
   <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -74,10 +96,7 @@
                   <i class="ph ph-pencil-simple text-2xl"></i>
                 </button>
                 <button (click)="toggleStatus(item)" class="transition-all active:scale-95">
-                  <i class="ph" 
-                     [ngClass]="item.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" 
-                     style="font-size: 32px;">
-                  </i>
+                  <i class="ph" [ngClass]="item.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" style="font-size: 32px;"></i>
                 </button>
               </div>
             </td>
@@ -102,26 +121,13 @@
             </button>
           </div>
         </div>
-        <div class="grid grid-cols-3 gap-2 text-center">
-          <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
-            <p class="text-[9px] uppercase font-bold text-slate-400">Estoque</p>
-            <p class="text-xs font-bold" [class.text-rose-500]="item.estoque_atual <= item.estoque_minimo">{{ item.estoque_atual }}</p>
-          </div>
-          <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
-            <p class="text-[9px] uppercase font-bold text-slate-400">Nº CA</p>
-            <p class="text-xs font-mono font-bold text-blue-600">{{ item.ca }}</p>
-          </div>
-          <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
-            <p class="text-[9px] uppercase font-bold text-slate-400">Vida Útil</p>
-            <p class="text-xs font-medium text-slate-600">{{ item.vida_util_dias }}d</p>
-          </div>
-        </div>
       </div>
     </div>
 
     <div *ngIf="episFiltrados.length === 0" class="p-12 text-center">
       <i class="ph ph-package text-4xl text-slate-300"></i>
       <p class="text-slate-500 mt-2 font-medium">Nenhum EPI encontrado.</p>
+      <button (click)="searchTerm = ''; filtroCategoria = null" class="text-blue-600 text-sm font-bold mt-2 hover:underline">Limpar filtros</button>
     </div>
   </div>
 </div>
