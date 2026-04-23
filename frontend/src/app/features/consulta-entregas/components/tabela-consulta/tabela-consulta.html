@@ -26,7 +26,7 @@
           </td>
           <td class="px-6 py-4 text-center text-sm text-slate-500">{{ item.data_hora }}</td>
           <td class="px-6 py-4 text-right">
-            <button class="text-slate-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-lg">
+            <button (click)="visualizar(item)" class="text-slate-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-lg">
               <i class="ph ph-file-text text-2xl"></i>
             </button>
           </td>
@@ -43,7 +43,7 @@
           <h3 class="font-bold text-slate-800 leading-tight">{{ item.colaborador }}</h3>
           <p class="text-[10px] text-slate-400">{{ item.data_hora }}</p>
         </div>
-        <button class="bg-slate-50 p-2.5 rounded-xl text-blue-600">
+        <button (click)="visualizar(item)" class="bg-slate-50 p-2.5 rounded-xl text-blue-600">
           <i class="ph ph-file-text text-2xl"></i>
         </button>
       </div>

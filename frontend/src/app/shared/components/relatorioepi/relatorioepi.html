@@ -1,11 +1,11 @@
-<div id="section-to-print" class="p-10 bg-white text-slate-900 font-sans min-h-[29.7cm] relative">
+<div *ngIf="dados" id="section-to-print" class="p-10 bg-white text-slate-900 font-sans min-h-[29.7cm] relative shadow-2xl mx-auto my-4 print:m-0 print:shadow-none">
   
   <div class="flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-8">
     <div class="flex flex-col">
       <h2 class="text-2xl font-black uppercase tracking-tighter italic leading-none">Protocolo de Entrega de EPI</h2>
       <p class="text-[10px] text-slate-500 font-mono uppercase tracking-widest mt-1">Documento de Controle Interno</p>
       
-      <div class="mt-4 bg-slate-900 text-white px-3 py-1 rounded-md w-fit flex items-center gap-2">
+      <div class="mt-4 bg-slate-900 text-white px-3 py-1 rounded-md w-fit flex items-center gap-2 print:bg-slate-900 print:text-white">
         <span class="text-[9px] font-bold uppercase tracking-widest opacity-70">Nº Protocolo</span>
         <span class="font-mono font-bold text-sm">{{ dados.protocolo }}</span>
       </div>
@@ -16,7 +16,9 @@
         <p class="font-bold text-sm uppercase text-slate-800">EPI PIM</p>
         <p class="text-slate-500 font-medium">Controle de Estoque</p>
       </div>
-      <img src="logo.png" alt="Logo Sistema" class="h-12 w-auto object-contain">
+      <div>
+         <img src="logo.png" alt="Logo Sistema" class="h-12 w-auto object-contain">
+      </div>
     </div>
   </div>
 
@@ -31,7 +33,7 @@
     </div>
     <div class="space-y-1.5 text-right">
       <p class="text-[9px] uppercase font-bold text-slate-400">Registro da Entrega</p>
-      <p class="text-sm font-bold text-slate-800">{{ dados.dataEntrega | date:"d 'de' MMMM 'de' y 'as' HH:mm" }}</p>
+      <p class="text-sm font-bold text-slate-800">{{ dados.dataEntrega | date:"dd 'de' MMMM 'de' y 'às' HH:mm" }}</p>
       <p class="text-[10px] text-slate-500 uppercase">Emitido por: <span class="font-semibold">{{ dados.usuarioSistema }}</span></p>
     </div>
   </div>
@@ -45,7 +47,7 @@
       </tr>
     </thead>
     <tbody class="divide-y divide-slate-200">
-      <tr *ngFor="let item of dados.itens">
+      <tr *ngFor="let item of dados.itens" class="print:break-inside-avoid">
         <td class="py-4 px-2">
           <p class="text-sm font-bold text-slate-800 uppercase">{{ item.material }}</p>
           <p class="text-[10px] text-slate-400 font-mono tracking-tighter">{{ item.codigo }}</p>
@@ -73,6 +75,6 @@
 
   <div class="absolute bottom-10 left-10 right-10 flex justify-between items-center text-[8px] text-slate-300 uppercase font-mono border-t pt-2">
     <span>Gerado pelo Sistema EPI PIM</span>
-    <span>ID de Segurança: {{ dados.protocolo }}-{{ dados.dataEntrega | date:'yyyyMMdd' }}</span>
+    <span>ID de Segurança: {{ dados.protocolo }}-{{ dados.dataEntrega | date:'yyyyMMddHHmm' }}</span>
   </div>
 </div>

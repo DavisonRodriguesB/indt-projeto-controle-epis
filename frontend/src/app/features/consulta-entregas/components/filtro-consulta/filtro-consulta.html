@@ -1,12 +1,29 @@
 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-5">
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
     
-    <div>
+    <div class="relative">
       <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Colaborador / Matrícula</label>
       <div class="relative">
         <i class="ph ph-user absolute left-3 top-2.5 text-slate-400"></i>
-        <input type="text" [(ngModel)]="filtros.colaboradorMatricula" placeholder="Nome ou Matrícula" 
-          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+        
+        <i *ngIf="buscandoSugestoes" class="ph ph-circle-notch absolute right-3 top-2.5 text-blue-500 animate-spin"></i>
+
+        <input type="text" 
+          [(ngModel)]="filtros.colaboradorMatricula" 
+          (input)="buscarColaboradores(filtros.colaboradorMatricula)"
+          (blur)="fecharSugestoes()"
+          placeholder="Nome ou Matrícula" 
+          class="w-full pl-9 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+        
+        <ul *ngIf="exibirSugestoes" 
+          class="absolute z-[999] w-full bg-white border border-slate-200 rounded-lg mt-1 shadow-2xl max-h-60 overflow-y-auto">
+          <li *ngFor="let colab of sugestoesColaboradores" 
+            (mousedown)="selecionarColaborador(colab)"
+            class="px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm flex flex-col border-b border-slate-50 last:border-0">
+            <span class="font-bold text-slate-700">{{ colab.nome }}</span>
+            <span class="text-blue-500 text-[10px] font-medium uppercase">Matrícula: {{ colab.matricula }}</span>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -14,8 +31,7 @@
       <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Data Início</label>
       <div class="relative">
         <i class="ph ph-calendar-blank absolute left-3 top-2.5 text-slate-400"></i>
-        <input type="date" [(ngModel)]="filtros.dataInicio" 
-          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+        <input type="date" [(ngModel)]="filtros.dataInicio" class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20">
       </div>
     </div>
 
@@ -23,8 +39,7 @@
       <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Data Fim</label>
       <div class="relative">
         <i class="ph ph-calendar-blank absolute left-3 top-2.5 text-slate-400"></i>
-        <input type="date" [(ngModel)]="filtros.dataFim" 
-          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+        <input type="date" [(ngModel)]="filtros.dataFim" class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20">
       </div>
     </div>
 
@@ -32,8 +47,7 @@
       <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Mês de Referência</label>
       <div class="relative">
         <i class="ph ph-calendar-check absolute left-3 top-2.5 text-slate-400"></i>
-        <select [(ngModel)]="filtros.mesReferencia" 
-          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none">
+        <select [(ngModel)]="filtros.mesReferencia" class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none">
           <option value="">Selecione o mês...</option>
           <option *ngFor="let mes of meses" [value]="mes.valor">{{ mes.nome }}</option>
         </select>
@@ -42,49 +56,31 @@
 
     <div>
       <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nº do Protocolo</label>
-      <div class="relative">
-        <i class="ph ph-hash absolute left-3 top-2.5 text-slate-400"></i>
-        <input type="text" [(ngModel)]="filtros.protocolo"
-          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
-      </div>
+      <input type="text" [(ngModel)]="filtros.protocolo" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20">
     </div>
 
     <div>
       <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Usuário (Emissor)</label>
-      <div class="relative">
-        <i class="ph ph-identification-card absolute left-3 top-2.5 text-slate-400"></i>
-        <input type="text" [(ngModel)]="filtros.usuario"
-          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
-      </div>
+      <input type="text" [(ngModel)]="filtros.usuario" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20">
     </div>
 
     <div>
-      <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Código do Material</label>
-      <div class="relative">
-        <i class="ph ph-package absolute left-3 top-2.5 text-slate-400"></i>
-        <input type="text" [(ngModel)]="filtros.codigoMaterial"
-          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
-      </div>
+      <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Código Material</label>
+      <input type="text" [(ngModel)]="filtros.codigoMaterial" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20">
     </div>
 
     <div>
       <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">C.A do Material</label>
-      <div class="relative">
-        <i class="ph ph-shield-check absolute left-3 top-2.5 text-slate-400"></i>
-        <input type="text" [(ngModel)]="filtros.ca"
-          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
-      </div>
+      <input type="text" [(ngModel)]="filtros.ca" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20">
     </div>
 
   </div>
 
   <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
-    <button type="button" (click)="limpar()" 
-      class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors">
+    <button type="button" (click)="limpar()" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors">
       Limpar Filtros
     </button>
-    <button type="button" (click)="buscar()" 
-      class="bg-slate-800 hover:bg-slate-900 text-white px-8 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2">
+    <button type="button" (click)="buscar()" class="bg-slate-800 hover:bg-slate-900 text-white px-8 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all active:scale-95">
       <i class="ph ph-magnifying-glass text-lg"></i>
       <span>Consultar</span>
     </button>

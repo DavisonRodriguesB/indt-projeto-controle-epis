@@ -1,12 +1,14 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { FiltroConsultaComponent } from './components/filtro-consulta/filtro-consulta';
 import { TabelaConsultaComponent } from './components/tabela-consulta/tabela-consulta';
-
 import { RelatorioepiComponent } from '../../shared/components/relatorioepi/relatorioepi';
 import { RelatorioEpiData } from '../../shared/components/relatorioepi/relatorio-epi.model';
+
+import { EntregaCompleta } from '../../core/models/consulta.model';
+import { ConsultaService } from '../../core/services/consulta.service';
 
 @Component({
   selector: 'app-consulta-entregas',
@@ -22,66 +24,66 @@ import { RelatorioEpiData } from '../../shared/components/relatorioepi/relatorio
 })
 export class ConsultaEntregasComponent implements OnInit {
   
-  listaEntregas: any[] = []; 
+  listaEntregas: EntregaCompleta[] = []; 
   entregaSelecionada: RelatorioEpiData | null = null;
   exibirModal = false;
+  loading = false;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(private consultaService: ConsultaService) {}
 
   ngOnInit(): void {}
 
   executarBusca(filtros: any) {
-    
-    this.listaEntregas = [];
-    console.log('Consultando registros com filtros:', filtros);
-    
-    // Simulação de busca retornando dados no formato da RelatorioEpiData
-    setTimeout(() => {
-      this.listaEntregas = [
-        {
-          id: '2026001',
-          colaborador: 'Bruce Wayne',
-          matricula: '20234',
-          setor: 'Desenvolvimento',
-          cargo: 'Software Developer',
-          data_hora: '05/04/2026 14:30',
-          usuario_emissor: 'Admin Sistema',
-          total_itens: 3,
-          itens: [
-            { nome: 'Luva de Vaqueta', numero_ca: '12345', quantidade: 1 },
-            { nome: 'Capacete de Segurança', numero_ca: '98765', quantidade: 1 },
-            { nome: 'Óculos de Proteção', numero_ca: '55443', quantidade: 1 }
-          ]
-        },
-        {
-          id: '2026002',
-          colaborador: 'Tony Stark',
-          matricula: '67890',
-          setor: 'Produção',
-          cargo: 'Operadora',
-          data_hora: '06/04/2026 15:15',
-          usuario_emissor: 'Portaria',
-          total_itens: 1,
-          itens: [
-            { nome: 'Protetor Auricular', numero_ca: '11223', quantidade: 1 }
-          ]
-        }
-      ];
-
-      this.cdr.detectChanges();
-    }, 300); 
+    this.loading = true;
+    this.consultaService.buscarEntregas(filtros).subscribe({
+      next: (res) => { 
+        this.listaEntregas = res; 
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erro na busca:', err);
+        this.loading = false;
+      }
+    });
   }
 
-  // Abre o modal injetando os dados no componente de relatório
+  abrirRelatorio(entrega: EntregaCompleta) {
+    let dataObjeto: Date;
+    try {
+      dataObjeto = new Date(entrega.data_hora);
+      if (isNaN(dataObjeto.getTime())) {
+        throw new Error('Data inválida');
+      }
+    } catch (e) {
+      dataObjeto = new Date(); 
+    }
 
-  abrirRelatorio(entrega: any) {
-  
-    this.entregaSelecionada = entrega as RelatorioEpiData;
+    this.entregaSelecionada = {
+      protocolo: entrega.id,
+      colaborador: entrega.colaborador,
+      funcao: entrega.cargo || 'Não Informado',
+      setor: entrega.setor || 'Geral',
+      dataEntrega: dataObjeto,
+      usuarioSistema: entrega.usuario_emissor || 'Sistema', 
+      itens: (entrega.itens || []).map(item => ({
+        codigo: 'N/A',
+        material: item.nome,
+        ca: item.numero_ca,
+        quantidade: item.quantidade
+      }))
+    };
+    
     this.exibirModal = true;
   }
 
   fecharModal() {
     this.exibirModal = false;
     this.entregaSelecionada = null;
+  }
+
+  imprimir() {
+    setTimeout(() => {
+      window.print();
+    }, 100);
   }
 }
