@@ -19,7 +19,11 @@ export class List implements OnInit {
   epis: Epi[] = [];
   categorias: any[] = [];
   searchTerm: string = '';
-  selectedCategoriaId: string = '';
+  
+  // Controle de Autocomplete e Fixação
+  inputCategoria: string = '';
+  filtroCategoria: any = null;
+  showSugestoes = false;
 
   ngOnInit(): void {
     this.carregarDados();
@@ -41,9 +45,21 @@ export class List implements OnInit {
     });
   }
 
+  get sugestoesCategoria() {
+    if (!this.inputCategoria) return [];
+    return this.categorias.filter(c => 
+      c.descricao.toLowerCase().includes(this.inputCategoria.toLowerCase())
+    );
+  }
+
+  selecionarCategoria(cat: any) {
+    this.filtroCategoria = cat;
+    this.inputCategoria = '';
+    this.showSugestoes = false;
+  }
+
   toggleStatus(item: Epi) {
     const novoStatus = !item.ativo;
-    
     const payload = {
       nome: item.nome,
       ca: item.ca,
@@ -60,15 +76,19 @@ export class List implements OnInit {
       next: () => {
         item.ativo = novoStatus;
         this.cdr.detectChanges();
-      },
-      error: () => alert('Erro ao alterar status do EPI.')
+      }
     });
   }
 
   get episFiltrados() {
     return this.epis.filter(e => {
-      const matchesSearch = e.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || e.ca.includes(this.searchTerm);
-      const matchesCat = this.selectedCategoriaId === '' || e.categoria_id === Number(this.selectedCategoriaId);
+      const matchesSearch = e.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
+                           e.ca.includes(this.searchTerm) || 
+                           (e.codigo && e.codigo.includes(this.searchTerm));
+      
+      const idCat = e.categoria_id;
+      const matchesCat = !this.filtroCategoria || idCat === this.filtroCategoria.id;
+      
       return matchesSearch && matchesCat;
     });
   }

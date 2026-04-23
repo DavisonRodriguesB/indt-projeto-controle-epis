@@ -2,12 +2,69 @@
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
     <div>
       <h2 class="text-2xl font-bold text-slate-800">Colaboradores</h2>
-      <p class="text-slate-500 text-sm">Controle de Funcionários</p>
+      <p class="text-slate-500 text-sm">Gestão de equipe e filtros avançados.</p>
     </div>
-    <button routerLink="/colaboradores/novo" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-100">
+    <button routerLink="/colaboradores/novo" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 shadow-lg shadow-blue-100">
       <i class="ph ph-plus-circle text-xl"></i>
       Novo Colaborador
     </button>
+  </div>
+
+  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:flex-row gap-4 items-center">
+    
+    <div class="relative flex-1 w-full">
+      <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
+      <input type="text" [(ngModel)]="searchTerm" placeholder="Nome ou matrícula..." 
+        class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+    </div>
+
+    <div class="relative w-full lg:w-72">
+      <div *ngIf="!filtroSetor" class="relative">
+        <i class="ph ph-buildings absolute left-3 top-2.5 text-slate-400"></i>
+        <input type="text" [(ngModel)]="inputSetor" (focus)="showSetores = true" 
+          placeholder="Digitar Setor..." 
+          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20">
+      </div>
+      
+      <div *ngIf="filtroSetor" class="flex items-center justify-between bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-semibold">
+        <div class="flex items-center gap-2 truncate">
+          <i class="ph ph-buildings text-blue-400"></i>
+          <span class="truncate">{{ filtroSetor.descricao }}</span>
+        </div>
+        <button (click)="filtroSetor = null" class="ml-2 hover:text-blue-900"><i class="ph ph-x-circle text-lg"></i></button>
+      </div>
+
+      <ul *ngIf="showSetores && sugestoesSetor.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-lg shadow-2xl max-h-48 overflow-y-auto p-1">
+        <li *ngFor="let s of sugestoesSetor" (click)="selecionarSetor(s)" 
+          class="px-3 py-2 hover:bg-blue-50 rounded cursor-pointer text-sm text-slate-700 font-medium border-b border-slate-50 last:border-0">
+          {{ s.descricao }}
+        </li>
+      </ul>
+    </div>
+
+    <div class="relative w-full lg:w-72">
+      <div *ngIf="!filtroCargo" class="relative">
+        <i class="ph ph-briefcase absolute left-3 top-2.5 text-slate-400"></i>
+        <input type="text" [(ngModel)]="inputCargo" (focus)="showCargos = true" 
+          placeholder="Digitar Cargo..." 
+          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20">
+      </div>
+
+      <div *ngIf="filtroCargo" class="flex items-center justify-between bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-1.5 rounded-lg text-sm font-semibold">
+        <div class="flex items-center gap-2 truncate">
+          <i class="ph ph-briefcase text-emerald-400"></i>
+          <span class="truncate">{{ filtroCargo.descricao }}</span>
+        </div>
+        <button (click)="filtroCargo = null" class="ml-2 hover:text-emerald-900"><i class="ph ph-x-circle text-lg"></i></button>
+      </div>
+
+      <ul *ngIf="showCargos && sugestoesCargo.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-lg shadow-2xl max-h-48 overflow-y-auto p-1">
+        <li *ngFor="let c of sugestoesCargo" (click)="selecionarCargo(c)" 
+          class="px-3 py-2 hover:bg-emerald-50 rounded cursor-pointer text-sm text-slate-700 font-medium border-b border-slate-50 last:border-0">
+          {{ c.descricao }}
+        </li>
+      </ul>
+    </div>
   </div>
 
   <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -23,32 +80,37 @@
         <tr *ngFor="let item of colaboradoresFiltrados" class="hover:bg-slate-50/50 transition-colors">
           <td class="px-6 py-4">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs shrink-0">
+              <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-sm">
                 {{ item.nome | slice:0:1 }}
               </div>
-              <span class="font-medium text-slate-800">{{ item.nome }}</span>
+              <div class="flex flex-col">
+                <span class="font-semibold text-slate-800">{{ item.nome }}</span>
+                <span class="text-[11px] text-slate-400 font-mono">MAT: {{ item.matricula }}</span>
+              </div>
             </div>
           </td>
           <td class="px-6 py-4">
-            <p class="text-sm text-slate-800 font-medium">{{ item.cargo?.descricao || 'Sem Cargo' }}</p>
-            <p class="text-xs text-slate-400">{{ item.setor?.descricao || 'Sem Setor' }}</p>
+            <p class="text-sm text-slate-700 font-medium">{{ item.cargo?.descricao || 'N/A' }}</p>
+            <p class="text-[11px] text-slate-400 uppercase font-bold">{{ item.setor?.descricao || 'Geral' }}</p>
           </td>
           <td class="px-6 py-4 text-right">
-            <div class="flex justify-end items-center gap-4">
-              <button [routerLink]="['/colaboradores/editar', item.id]" class="text-slate-400 hover:text-blue-600">
-                <i class="ph ph-pencil-simple text-2xl"></i>
+            <div class="flex justify-end items-center gap-3">
+              <button [routerLink]="['/colaboradores/editar', item.id]" class="p-2 text-slate-400 hover:text-blue-600 transition-all">
+                <i class="ph ph-pencil-simple text-xl"></i>
               </button>
-              
-              <button (click)="toggleStatus(item)" class="transition-all active:scale-95" [title]="item.status ? 'Inativar' : 'Ativar'">
-                <i class="ph" 
-                   [ngClass]="item.status ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" 
-                   style="font-size: 34px;">
-                </i>
+              <button (click)="toggleStatus(item)" class="transition-all active:scale-90">
+                <i class="ph" [ngClass]="item.status ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" style="font-size: 32px;"></i>
               </button>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
+    
+    <div *ngIf="colaboradoresFiltrados.length === 0" class="p-16 text-center">
+      <i class="ph ph-users-three text-4xl text-slate-300 mb-2"></i>
+      <p class="text-slate-500 font-medium">Nenhum colaborador encontrado.</p>
+      <button (click)="searchTerm = ''; filtroSetor = null; filtroCargo = null" class="text-blue-600 text-sm font-bold mt-2">Limpar todos os filtros</button>
+    </div>
   </div>
 </div>
