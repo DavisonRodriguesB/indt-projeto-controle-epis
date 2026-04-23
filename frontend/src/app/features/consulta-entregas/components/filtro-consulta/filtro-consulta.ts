@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ConsultaService } from '../../../../core/services/consulta.service';
 
 @Component({
   selector: 'app-filtro-consulta',
@@ -13,6 +14,7 @@ export class FiltroConsultaComponent {
 
   filtros = {
     colaboradorMatricula: '',
+    colaborador_id: '', 
     dataInicio: '',
     dataFim: '',
     mesReferencia: '',
@@ -22,7 +24,10 @@ export class FiltroConsultaComponent {
     ca: ''
   };
 
-  
+  sugestoesColaboradores: any[] = [];
+  exibirSugestoes = false;
+  buscandoSugestoes = false;
+
   meses = [
     { valor: '01', nome: 'Janeiro' }, { valor: '02', nome: 'Fevereiro' },
     { valor: '03', nome: 'Março' }, { valor: '04', nome: 'Abril' },
@@ -32,13 +37,49 @@ export class FiltroConsultaComponent {
     { valor: '11', nome: 'Novembro' }, { valor: '12', nome: 'Dezembro' }
   ];
 
+  constructor(private consultaService: ConsultaService) {}
+
+  buscarColaboradores(termo: string) {
+    if (!termo || termo.length < 3) {
+      this.sugestoesColaboradores = [];
+      this.exibirSugestoes = false;
+      this.filtros.colaborador_id = ''; 
+      return;
+    }
+
+    this.buscandoSugestoes = true;
+    this.consultaService.buscarSugestoesColaboradores(termo).subscribe({
+      next: (res: any) => {
+        this.sugestoesColaboradores = res; 
+        this.exibirSugestoes = this.sugestoesColaboradores.length > 0;
+        this.buscandoSugestoes = false;
+      },
+      error: () => {
+        this.buscandoSugestoes = false;
+        this.exibirSugestoes = false;
+      }
+    });
+  }
+
+  selecionarColaborador(colab: any) {
+    this.filtros.colaboradorMatricula = `${colab.nome} (${colab.matricula})`;
+    this.filtros.colaborador_id = colab.id; 
+    this.exibirSugestoes = false;
+  }
+
+  fecharSugestoes() {
+    setTimeout(() => this.exibirSugestoes = false, 300);
+  }
+
   buscar() {
+    this.exibirSugestoes = false;
     this.onSearch.emit({ ...this.filtros });
   }
 
   limpar() {
     this.filtros = {
       colaboradorMatricula: '',
+      colaborador_id: '',
       dataInicio: '',
       dataFim: '',
       mesReferencia: '',
@@ -47,5 +88,6 @@ export class FiltroConsultaComponent {
       codigoMaterial: '',
       ca: ''
     };
+    this.onSearch.emit({ ...this.filtros });
   }
 }
