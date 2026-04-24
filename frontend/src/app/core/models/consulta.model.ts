@@ -1,7 +1,9 @@
 export interface EntregaItem {
+  id: number;
   nome: string;
-  numero_ca: string;
   quantidade: number;
+  numero_ca: string;
+  codigo_material: string;
 }
 
 export interface EntregaCompleta {

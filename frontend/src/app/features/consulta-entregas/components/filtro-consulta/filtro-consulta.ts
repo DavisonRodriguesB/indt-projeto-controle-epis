@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConsultaService } from '../../../../core/services/consulta.service';
+import { Subject, debounceTime, distinctUntilChanged, switchMap, Subscription, of } from 'rxjs';
 
 @Component({
   selector: 'app-filtro-consulta',
@@ -9,10 +10,10 @@ import { ConsultaService } from '../../../../core/services/consulta.service';
   imports: [CommonModule, FormsModule],
   templateUrl: './filtro-consulta.html'
 })
-export class FiltroConsultaComponent {
+export class FiltroConsultaComponent implements OnDestroy {
   @Output() onSearch = new EventEmitter<any>();
 
-  filtros = {
+  filtros: any = {
     colaboradorMatricula: '',
     colaborador_id: '', 
     dataInicio: '',
@@ -27,6 +28,9 @@ export class FiltroConsultaComponent {
   sugestoesColaboradores: any[] = [];
   exibirSugestoes = false;
   buscandoSugestoes = false;
+  
+  private searchSubject = new Subject<string>();
+  private searchSubscription: Subscription;
 
   meses = [
     { valor: '01', nome: 'Janeiro' }, { valor: '02', nome: 'Fevereiro' },
@@ -37,46 +41,55 @@ export class FiltroConsultaComponent {
     { valor: '11', nome: 'Novembro' }, { valor: '12', nome: 'Dezembro' }
   ];
 
-  constructor(private consultaService: ConsultaService) {}
-
-  buscarColaboradores(termo: string) {
-    if (!termo || termo.length < 3) {
-      this.sugestoesColaboradores = [];
-      this.exibirSugestoes = false;
-      this.filtros.colaborador_id = ''; 
-      return;
-    }
-
-    this.buscandoSugestoes = true;
-    this.consultaService.buscarSugestoesColaboradores(termo).subscribe({
+  constructor(private consultaService: ConsultaService) {
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(termo => {
+        if (!termo || termo.length < 3) {
+          this.buscandoSugestoes = false;
+          return of([]);
+        }
+        this.buscandoSugestoes = true;
+        return this.consultaService.buscarSugestoesColaboradores(termo);
+      })
+    ).subscribe({
       next: (res: any) => {
-        this.sugestoesColaboradores = res; 
-        this.exibirSugestoes = this.sugestoesColaboradores.length > 0;
+        this.sugestoesColaboradores = res;
+        this.exibirSugestoes = res.length > 0;
         this.buscandoSugestoes = false;
       },
-      error: () => {
-        this.buscandoSugestoes = false;
-        this.exibirSugestoes = false;
-      }
+      error: () => this.buscandoSugestoes = false
     });
   }
 
+  // Método chamado pelo (input) do HTML
+  buscarColaboradores(termo: string) {
+    if (!termo) {
+      this.filtros.colaborador_id = '';
+      this.exibirSugestoes = false;
+    }
+    this.searchSubject.next(termo);
+  }
+
   selecionarColaborador(colab: any) {
+    // ANALISTA: Vinculamos o nome para visualização e o ID para o filtro real
     this.filtros.colaboradorMatricula = `${colab.nome} (${colab.matricula})`;
     this.filtros.colaborador_id = colab.id; 
     this.exibirSugestoes = false;
   }
 
   fecharSugestoes() {
-    setTimeout(() => this.exibirSugestoes = false, 300);
+    setTimeout(() => { this.exibirSugestoes = false; }, 250);
   }
 
   buscar() {
-    this.exibirSugestoes = false;
+    // Emite os filtros atuais para o componente pai
     this.onSearch.emit({ ...this.filtros });
   }
 
   limpar() {
+    // Reseta o objeto de filtros localmente
     this.filtros = {
       colaboradorMatricula: '',
       colaborador_id: '',
@@ -88,6 +101,14 @@ export class FiltroConsultaComponent {
       codigoMaterial: '',
       ca: ''
     };
-    this.onSearch.emit({ ...this.filtros });
+    this.sugestoesColaboradores = [];
+    
+    // ANALISTA: Enviamos 'null' para o pai entender que deve 
+    // apenas limpar a tabela, sem buscar no banco.
+    this.onSearch.emit(null); 
+  }
+
+  ngOnDestroy() {
+    if (this.searchSubscription) this.searchSubscription.unsubscribe();
   }
 }

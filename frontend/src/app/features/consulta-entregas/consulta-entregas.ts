@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -6,84 +6,69 @@ import { FiltroConsultaComponent } from './components/filtro-consulta/filtro-con
 import { TabelaConsultaComponent } from './components/tabela-consulta/tabela-consulta';
 import { RelatorioepiComponent } from '../../shared/components/relatorioepi/relatorioepi';
 import { RelatorioEpiData } from '../../shared/components/relatorioepi/relatorio-epi.model';
-
 import { EntregaCompleta } from '../../core/models/consulta.model';
 import { ConsultaService } from '../../core/services/consulta.service';
 
 @Component({
   selector: 'app-consulta-entregas',
   standalone: true,
-  imports: [
-    CommonModule, 
-    FormsModule, 
-    FiltroConsultaComponent, 
-    TabelaConsultaComponent,
-    RelatorioepiComponent 
-  ],
+  imports: [CommonModule, FormsModule, FiltroConsultaComponent, TabelaConsultaComponent, RelatorioepiComponent],
   templateUrl: './consulta-entregas.html'
 })
 export class ConsultaEntregasComponent implements OnInit {
-  
   listaEntregas: EntregaCompleta[] = []; 
   entregaSelecionada: RelatorioEpiData | null = null;
-  exibirModal = false;
-  loading = false;
+  exibirModal: boolean = false;
+  loading: boolean = false;
 
-  constructor(private consultaService: ConsultaService) {}
+  constructor(
+    private consultaService: ConsultaService,
+    private cdr: ChangeDetectorRef 
+  ) {}
 
   ngOnInit(): void {}
 
-  executarBusca(filtros: any) {
+  imprimir(): void {
+    setTimeout(() => window.print(), 250);
+  }
+
+  executarBusca(filtros: any): void {
     this.loading = true;
     this.consultaService.buscarEntregas(filtros).subscribe({
       next: (res) => { 
         this.listaEntregas = res; 
         this.loading = false;
+        this.cdr.detectChanges(); 
       },
-      error: (err) => {
-        console.error('Erro na busca:', err);
-        this.loading = false;
-      }
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
-  abrirRelatorio(entrega: EntregaCompleta) {
-    let dataObjeto: Date;
-    try {
-      dataObjeto = new Date(entrega.data_hora);
-      if (isNaN(dataObjeto.getTime())) {
-        throw new Error('Data inválida');
-      }
-    } catch (e) {
-      dataObjeto = new Date(); 
-    }
+  abrirRelatorio(entrega: EntregaCompleta): void {
+    const dataObjeto = new Date(entrega.data_hora);
 
     this.entregaSelecionada = {
-      protocolo: entrega.id,
-      colaborador: entrega.colaborador,
-      funcao: entrega.cargo || 'Não Informado',
-      setor: entrega.setor || 'Geral',
+      protocolo: `MOV-${dataObjeto.getFullYear()}-${entrega.id.toString().padStart(6, '0')}`,
+      colaborador: `${entrega.colaborador} (${entrega.matricula})`,
+      funcao: { descricao: entrega.cargo },
+      setor: { descricao: entrega.setor },
       dataEntrega: dataObjeto,
-      usuarioSistema: entrega.usuario_emissor || 'Sistema', 
-      itens: (entrega.itens || []).map(item => ({
-        codigo: 'N/A',
-        material: item.nome,
-        ca: item.numero_ca,
+      usuarioSistema: entrega.usuario_emissor, 
+      itens: entrega.itens.map(item => ({
+        codigo: item.codigo_material, 
+        material: item.nome,          
+        ca: item.numero_ca,           
         quantidade: item.quantidade
       }))
     };
     
     this.exibirModal = true;
+    this.cdr.detectChanges();
   }
 
-  fecharModal() {
+  fecharModal(): void {
     this.exibirModal = false;
     this.entregaSelecionada = null;
-  }
-
-  imprimir() {
-    setTimeout(() => {
-      window.print();
-    }, 100);
+    this.cdr.detectChanges();
   }
 }
