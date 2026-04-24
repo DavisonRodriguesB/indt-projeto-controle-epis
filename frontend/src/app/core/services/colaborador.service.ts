@@ -3,60 +3,23 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environments';
 
-
-export interface CargoResumo {
-  id: number;
-  descricao: string;
-}
-
-export interface SetorResumo {
-  id: number;
-  descricao: string;
-}
-
-
 export interface Colaborador {
   id: number;
   nome: string;
   matricula: string;
-
-  
-  cargoId: number;
-  setorId: number;
-
-  
-  
-  cargo_id?: number;
-  setor_id?: number;
-
-  
-  cargo?: CargoResumo;
-  setor?: SetorResumo;
-
+  cargo_id: number;
+  setor_id: number;
   status: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+  cargo?: { descricao: string }; 
+  setor?: { descricao: string };
+  created_at?: string;
+  updated_at?: string;
 }
-
-
-export interface ColaboradorPayload {
-  nome: string;
-  matricula: string;
-  cargoId: number;
-  setorId: number;
-  status?: boolean;
-}
-
 
 export interface ApiResponse<T> {
   data: T;
-  meta?: {
-    total?: number;
-    page?: number;
-    pageSize?: number;
-  };
+  meta?: { total?: number };
 }
-
 
 @Injectable({ providedIn: 'root' })
 export class ColaboradorService {
@@ -71,15 +34,11 @@ export class ColaboradorService {
     return this.http.get<ApiResponse<Colaborador>>(`${this.baseUrl}/${id}`);
   }
 
-  salvar(payload: ColaboradorPayload): Observable<ApiResponse<Colaborador>> {
+  salvar(payload: any): Observable<ApiResponse<Colaborador>> {
     return this.http.post<ApiResponse<Colaborador>>(this.baseUrl, payload);
   }
 
-  atualizar(id: number, payload: ColaboradorPayload): Observable<ApiResponse<Colaborador>> {
+  atualizar(id: number, payload: any): Observable<ApiResponse<Colaborador>> {
     return this.http.put<ApiResponse<Colaborador>>(`${this.baseUrl}/${id}`, payload);
-  }
-
-  excluir(id: number): Observable<ApiResponse<{ deleted: boolean }>> {
-    return this.http.delete<ApiResponse<{ deleted: boolean }>>(`${this.baseUrl}/${id}`);
   }
 }

@@ -13,89 +13,106 @@ import { BaseService } from '../../../../core/services/base.service';
 })
 export class List implements OnInit {
   private colaboradorService = inject(ColaboradorService);
-  private baseService = inject(BaseService);
-  private cdr = inject(ChangeDetectorRef);
+  private baseService        = inject(BaseService);
+  private cdr                = inject(ChangeDetectorRef);
 
   colaboradores: Colaborador[] = [];
   setores: any[] = [];
-  cargos: any[] = [];
-  
-  searchTerm: string = '';
-  
-  // Estados para Autocomplete e Chips
-  inputSetor: string = '';
-  inputCargo: string = '';
+  cargos: any[]  = [];
+
+  searchTerm   = '';
+  inputSetor   = '';
+  inputCargo   = '';
   filtroSetor: any = null;
   filtroCargo: any = null;
-  showSetores = false;
-  showCargos = false;
+  showSetores  = false;
+  showCargos   = false;
 
   ngOnInit(): void {
     this.carregarDados();
   }
 
-  carregarDados() {
-    this.colaboradorService.listar().subscribe(res => {
-      this.colaboradores = res.data;
-      this.cdr.detectChanges();
+  carregarDados(): void {
+    this.colaboradorService.listar().subscribe({
+      next: (res) => {
+        this.colaboradores = res.data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erro ao carregar colaboradores:', err)
     });
 
-    this.baseService.listar('setores').subscribe(res => this.setores = res.data);
-    this.baseService.listar('cargos').subscribe(res => this.cargos = res.data);
+    this.baseService.listar('setores').subscribe({
+      next: (res) => { 
+        this.setores = res.data; 
+        this.cdr.detectChanges(); 
+      },
+      error: (err) => console.error('Erro ao carregar setores:', err)
+    });
+
+    this.baseService.listar('cargos').subscribe({
+      next: (res) => { 
+        this.cargos = res.data; 
+        this.cdr.detectChanges(); 
+      },
+      error: (err) => console.error('Erro ao carregar cargos:', err)
+    });
   }
 
-  // Filtra as sugestões do dropdown enquanto o usuário digita
   get sugestoesSetor() {
     if (!this.inputSetor) return [];
-    return this.setores.filter(s => 
+    return this.setores.filter(s =>
       s.descricao.toLowerCase().includes(this.inputSetor.toLowerCase())
     );
   }
 
   get sugestoesCargo() {
     if (!this.inputCargo) return [];
-    return this.cargos.filter(c => 
+    return this.cargos.filter(c =>
       c.descricao.toLowerCase().includes(this.inputCargo.toLowerCase())
     );
   }
 
-  selecionarSetor(setor: any) {
+  selecionarSetor(setor: any): void {
     this.filtroSetor = setor;
-    this.inputSetor = '';
+    this.inputSetor  = '';
     this.showSetores = false;
   }
 
-  selecionarCargo(cargo: any) {
+  selecionarCargo(cargo: any): void {
     this.filtroCargo = cargo;
-    this.inputCargo = '';
-    this.showCargos = false;
+    this.inputCargo  = '';
+    this.showCargos  = false;
   }
 
-  get colaboradoresFiltrados() {
+  get colaboradoresFiltrados(): Colaborador[] {
     return this.colaboradores.filter(c => {
-      const matchesSearch = c.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
-                           c.matricula.includes(this.searchTerm);
-      
-      const idSetor = c.setorId ?? c.setor_id ?? c.setor?.id;
-      const matchesSetor = !this.filtroSetor || idSetor === this.filtroSetor.id;
+      const matchesSearch =
+        c.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        c.matricula.includes(this.searchTerm);
 
-      const idCargo = c.cargoId ?? c.cargo_id ?? c.cargo?.id;
-      const matchesCargo = !this.filtroCargo || idCargo === this.filtroCargo.id;
+      const matchesSetor = !this.filtroSetor || c.setor_id === this.filtroSetor.id;
+      const matchesCargo = !this.filtroCargo || c.cargo_id === this.filtroCargo.id;
 
       return matchesSearch && matchesSetor && matchesCargo;
     });
   }
 
-  toggleStatus(item: Colaborador) {
+  toggleStatus(item: Colaborador): void {
     const novoStatus = !item.status;
-    const payload = { ...item, status: novoStatus, 
-      cargoId: item.cargoId ?? item.cargo_id ?? item.cargo?.id,
-      setorId: item.setorId ?? item.setor_id ?? item.setor?.id 
+    const payload = {
+      ...item,
+      status: novoStatus
     };
-    
-    this.colaboradorService.atualizar(item.id!, payload).subscribe(() => {
-      item.status = novoStatus;
-      this.cdr.detectChanges();
+
+    this.colaboradorService.atualizar(item.id, payload).subscribe({
+      next: () => {
+        item.status = novoStatus;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erro ao alterar status:', err);
+        alert('Não foi possível alterar o status.');
+      }
     });
   }
 }

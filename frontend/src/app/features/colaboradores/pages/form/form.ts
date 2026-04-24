@@ -22,22 +22,22 @@ export class ColaboradorFormComponent implements OnInit {
   colaboradorForm!: FormGroup;
   isEdicao = false;
   colaboradorId: number | null = null;
-
+  
   setores: any[] = [];
   cargos: any[] = [];
 
   ngOnInit(): void {
     this.colaboradorForm = this.fb.group({
-      nome:      ['', [Validators.required, Validators.minLength(3)]],
+      nome: ['', [Validators.required, Validators.minLength(3)]],
       matricula: ['', [Validators.required]],
-      cargoId:   [null, [Validators.required]],
-      setorId:   [null, [Validators.required]],
-      status:    [true, [Validators.required]]
+      cargo_id: [null, [Validators.required]],
+      setor_id: [null, [Validators.required]],
+      status: [true]
     });
 
     this.carregarListasAuxiliares(() => {
       const idParam = this.route.snapshot.paramMap.get('id');
-      if (idParam) {
+      if (idParam && idParam !== 'novo') {
         this.isEdicao = true;
         this.colaboradorId = Number(idParam);
         this.carregarDadosParaEdicao(this.colaboradorId);
@@ -51,7 +51,7 @@ export class ColaboradorFormComponent implements OnInit {
 
     this.baseService.listar('setores').subscribe({
       next: (res: any) => {
-        this.setores = res.data ? res.data.filter((s: any) => s.ativo === true) : [];
+        this.setores = res.data?.filter((s: any) => s.ativo === true) ?? [];
         this.cdr.detectChanges();
         concluir();
       },
@@ -60,7 +60,7 @@ export class ColaboradorFormComponent implements OnInit {
 
     this.baseService.listar('cargos').subscribe({
       next: (res: any) => {
-        this.cargos = res.data ? res.data.filter((c: any) => c.ativo === true) : [];
+        this.cargos = res.data?.filter((c: any) => c.ativo === true) ?? [];
         this.cdr.detectChanges();
         concluir();
       },
@@ -71,32 +71,21 @@ export class ColaboradorFormComponent implements OnInit {
   carregarDadosParaEdicao(id: number) {
     this.colaboradorService.buscarPorId(id).subscribe({
       next: (res) => {
-        const dados = res.data;
-
-        this.colaboradorForm.patchValue({
-          nome:      dados.nome,
-          matricula: dados.matricula,
-          cargoId:   dados.cargoId ?? dados.cargo_id ?? dados.cargo?.id,
-          setorId:   dados.setorId ?? dados.setor_id ?? dados.setor?.id,
-          status:    dados.status
-        });
-        this.cdr.detectChanges();
+        if (res.data) {
+          this.colaboradorForm.patchValue(res.data);
+          this.cdr.detectChanges();
+        }
       },
-      error: () => alert('Erro ao carregar dados para edição.')
+      error: (err) => {
+        console.error('Erro na busca por ID:', err);
+        alert('Erro ao carregar dados do colaborador.');
+      }
     });
   }
 
   onSubmit() {
     if (this.colaboradorForm.valid) {
-      const v = this.colaboradorForm.value;
-
-      const payload = {
-        nome:      v.nome,
-        matricula: v.matricula,
-        cargoId:   Number(v.cargoId),
-        setorId:   Number(v.setorId),
-        status:    v.status
-      };
+      const payload = this.colaboradorForm.value;
 
       const request = (this.isEdicao && this.colaboradorId)
         ? this.colaboradorService.atualizar(this.colaboradorId, payload)
@@ -104,10 +93,7 @@ export class ColaboradorFormComponent implements OnInit {
 
       request.subscribe({
         next: () => this.router.navigate(['/colaboradores']),
-        error: (err) => {
-          console.error('Erro ao salvar:', err);
-          alert(err.error?.message || 'Erro na operação.');
-        }
+        error: (err) => alert(err.error?.message || 'Erro ao processar colaborador.')
       });
     }
   }
