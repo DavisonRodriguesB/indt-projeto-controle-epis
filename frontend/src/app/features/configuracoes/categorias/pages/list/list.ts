@@ -25,7 +25,7 @@ export class CategoriasList implements OnInit {
   carregarCategorias() {
     this.baseService.listarTodos('categorias').subscribe({
       next: (res) => this.categorias.set(res.data),
-      error: (err) => console.error('Erro ao carregar categorias:', err.message)
+      error: (err: HttpErrorResponse) => console.error('Erro ao carregar categorias:', err.message)
     });
   }
 
@@ -33,7 +33,14 @@ export class CategoriasList implements OnInit {
     if (!item.id) return;
     const novoStatus = !item.ativo;
     this.baseService.alterarStatus('categorias', item.id, item.descricao, novoStatus).subscribe({
-      next: () => this.carregarCategorias()
+      next: () => {
+        this.categorias.update((lista) =>
+          lista.map((categoria) =>
+            categoria.id === item.id ? { ...categoria, ativo: novoStatus } : categoria
+          )
+        );
+      },
+      error: (err: HttpErrorResponse) => console.error('Erro ao alterar status da categoria:', err.message)
     });
   }
 
@@ -54,14 +61,16 @@ export class CategoriasList implements OnInit {
         next: () => {
           this.carregarCategorias();
           this.closeModal();
-        }
+        },
+        error: (err: HttpErrorResponse) => console.error('Erro ao atualizar categoria:', err.message)
       });
     } else {
       this.baseService.salvar('categorias', { descricao: dados.descricao }).subscribe({
         next: () => {
           this.carregarCategorias();
           this.closeModal();
-        }
+        },
+        error: (err: HttpErrorResponse) => console.error('Erro ao salvar categoria:', err.message)
       });
     }
   }
