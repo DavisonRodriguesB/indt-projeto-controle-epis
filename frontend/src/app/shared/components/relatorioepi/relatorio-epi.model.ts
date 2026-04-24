@@ -1,8 +1,8 @@
 export interface RelatorioEpiData {
   protocolo: string;
   colaborador: string;
-  funcao: string;
-  setor: string;
+  funcao: any;
+  setor: any;
   dataEntrega: Date;
   usuarioSistema: string;
   itens: Array<{

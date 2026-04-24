@@ -54,5 +54,5 @@ export class EpiEntity {
 
   @ManyToOne(() => CategoriaEntity, { onDelete: "RESTRICT" })
   @JoinColumn({ name: "categoria_id" })
-  categoria!: CategoriaEntity;
+  categoria?: CategoriaEntity;
 }

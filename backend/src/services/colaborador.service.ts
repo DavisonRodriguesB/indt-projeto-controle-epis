@@ -20,8 +20,7 @@ function mapEntity(entity: ColaboradorEntity) {
 }
 
 export async function listColaboradores() {
-  const entities = await repo.find({ 
-    where: { status: true }, 
+  const entities = await repo.find({
     order: { nome: "ASC" },
     relations: ["cargo", "setor"] 
   });

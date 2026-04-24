@@ -70,7 +70,7 @@
             <td class="px-6 py-4">
               <div class="flex flex-col">
                 <span class="font-semibold text-slate-800">{{ item.nome }}</span>
-                <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">{{ item.categoria?.descricao || 'Sem Categoria' }}</span>
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">{{ item.categoria || 'Sem Categoria' }}</span>
               </div>
             </td>
             <td class="px-6 py-4 text-center">
@@ -110,7 +110,7 @@
         <div class="flex justify-between items-start">
           <div class="flex flex-col">
             <span class="font-bold text-slate-800">{{ item.nome }}</span>
-            <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">{{ item.categoria?.descricao }}</span>
+            <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">{{ item.categoria || 'Sem Categoria' }}</span>
           </div>
           <div class="flex items-center gap-3">
             <button [routerLink]="['/epis/editar', item.id]" class="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg">

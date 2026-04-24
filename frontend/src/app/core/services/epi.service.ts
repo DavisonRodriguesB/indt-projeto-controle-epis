@@ -3,23 +3,21 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environments';
 
-export interface CategoriaResumo {
-  id: number;
-  descricao: string;
-}
-
 export interface Epi {
   id: number;
   nome: string;
   codigo: string;
   ca: string;
+  categoria: string;      
   categoria_id: number; 
-  categoria?: CategoriaResumo;
   vida_util_dias: number;
   ativo: boolean;
+  pode_editar: boolean;    
   validade: string;
   estoque_atual: number;
   estoque_minimo: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface EpiPayload {
@@ -44,8 +42,8 @@ export class EpiService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/epis`;
 
-  listar(): Observable<ApiResponse<Epi[]>> {
-    return this.http.get<ApiResponse<Epi[]>>(this.baseUrl);
+  listar(page: number = 1, pageSize: number = 10): Observable<ApiResponse<Epi[]>> {
+    return this.http.get<ApiResponse<Epi[]>>(`${this.baseUrl}?page=${page}&pageSize=${pageSize}`);
   }
 
   buscarPorId(id: number): Observable<ApiResponse<Epi>> {
@@ -58,5 +56,9 @@ export class EpiService {
 
   atualizar(id: number, payload: EpiPayload): Observable<ApiResponse<Epi>> {
     return this.http.put<ApiResponse<Epi>>(`${this.baseUrl}/${id}`, payload);
+  }
+
+  excluir(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${id}`);
   }
 }

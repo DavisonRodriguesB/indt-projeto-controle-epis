@@ -19,8 +19,10 @@ export interface EntregaListItem {
     id: number;
     nome: string;
     matricula: string;
-    setor?: string;
+    setor: string;      
+    cargo: string;      
     setor_id: number;
+    cargo_id: number;   
   };
   epi: {
     id: number;

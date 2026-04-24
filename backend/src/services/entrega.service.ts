@@ -58,14 +58,14 @@ export async function createEntrega(input: CreateEntregaInput, usuarioId: number
 
 export async function listEntregas(): Promise<EntregaListItem[]> {
   const entregas = await AppDataSource.getRepository(EntregaEntity).find({
-    relations: {
-      colaborador: true,
-      epi: true,
-      usuario: true
-    },
-    order: {
-      id: "DESC"
-    }
+    relations: [
+      "colaborador", 
+      "colaborador.setor", 
+      "colaborador.cargo", 
+      "epi", 
+      "usuario"
+    ],
+    order: { id: "DESC" }
   });
 
   return entregas.map((entrega) => ({
@@ -77,8 +77,10 @@ export async function listEntregas(): Promise<EntregaListItem[]> {
       id: entrega.colaborador.id,
       nome: entrega.colaborador.nome,
       matricula: entrega.colaborador.matricula,
-      setor: (entrega.colaborador as unknown as { setor?: string }).setor ?? "",
-      setor_id: entrega.colaborador.setorId
+      setor: entrega.colaborador.setor?.descricao ?? "N/A",
+      cargo: entrega.colaborador.cargo?.descricao ?? "N/A",
+      setor_id: entrega.colaborador.setorId,
+      cargo_id: entrega.colaborador.cargoId
     },
     epi: {
       id: entrega.epi.id,

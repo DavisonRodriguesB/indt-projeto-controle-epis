@@ -17,11 +17,16 @@ async function mapEntityToEpi(entity: EpiEntity): Promise<Epi> {
     entregaCount = 0;
   }
 
+  const categoriaInfo = entity.categoria 
+    ? ((entity.categoria as any).nome || (entity.categoria as any).descricao) 
+    : "Sem Categoria";
+
   return {
     id: entity.id,
     codigo: entity.codigo ?? String(entity.id),
     nome: entity.nome,
     ca: entity.ca,
+    categoria: categoriaInfo,
     categoria_id: entity.categoriaId ?? 0,
     vida_util_dias: entity.vidaUtilDias ?? 365,
     ativo: entity.ativo ?? true,
@@ -29,147 +34,90 @@ async function mapEntityToEpi(entity: EpiEntity): Promise<Epi> {
     validade: entity.validade,
     estoque_atual: entity.estoqueAtual,
     estoque_minimo: entity.estoqueMinimo,
-    created_at: entity.createdAt.toISOString(),
-    updated_at: entity.updatedAt.toISOString()
+    created_at: entity.createdAt ? entity.createdAt.toISOString() : new Date().toISOString(),
+    updated_at: entity.updatedAt ? entity.updatedAt.toISOString() : new Date().toISOString()
   };
 }
 
 export function listEpis(): Promise<Epi[]>;
 export function listEpis(input: ListEpisInput): Promise<{ data: Epi[]; total: number }>;
 export async function listEpis(input?: ListEpisInput): Promise<{ data: Epi[]; total: number } | Epi[]> {
+  const options = {
+    relations: ["categoria"],
+    order: { id: "ASC" as const }
+  };
+
   if (!input) {
-    const entities = await epiRepository.find({ order: { id: "ASC" } });
-    return Promise.all(entities.map((entity) => mapEntityToEpi(entity)));
+    const entities = await epiRepository.find(options);
+    return Promise.all(entities.map(mapEntityToEpi));
   }
 
   const [entities, total] = await epiRepository.findAndCount({
-    where: { ativo: true },
-    order: { id: "ASC" },
+    ...options,
     skip: (input.page - 1) * input.pageSize,
     take: input.pageSize
   });
 
-  const rows = await Promise.all(entities.map((entity) => mapEntityToEpi(entity)));
+  const rows = await Promise.all(entities.map(mapEntityToEpi));
   return { data: rows, total };
 }
 
 export async function getEpiById(id: number): Promise<Epi | null> {
-  const entity = await epiRepository.findOne({ where: { id, ativo: true } });
-  if (!entity) {
-    return null;
-  }
-
-  return mapEntityToEpi(entity);
+  const entity = await epiRepository.findOne({ 
+    where: { id },
+    relations: ["categoria"] 
+  });
+  return entity ? mapEntityToEpi(entity) : null;
 }
 
 export async function createEpi(input: CreateEpiInput): Promise<Epi> {
-  if (input.codigo) {
-    const duplicate = await epiRepository.findOne({ where: { codigo: input.codigo } });
-    if (duplicate) {
-      throw new AppError(409, "Codigo de EPI ja cadastrado.", "EPI_CODIGO_ALREADY_EXISTS");
-    }
-  }
-
-  if (typeof input.categoriaId === "number") {
-    const categoria = await categoriaRepository.findOne({ where: { id: input.categoriaId, ativo: true } });
-    if (!categoria) {
-      throw new AppError(404, "Categoria nao encontrada.", "CATEGORIA_NOT_FOUND");
-    }
-  }
-
   const entity = epiRepository.create({
+    ...input,
     codigo: input.codigo ?? `${input.ca}-${Date.now()}`,
-    nome: input.nome,
-    ca: input.ca,
-    categoriaId: input.categoriaId ?? 0,
-    vidaUtilDias: input.vidaUtilDias ?? 365,
-    ativo: input.ativo ?? true,
-    validade: input.validade,
-    estoqueAtual: input.estoqueAtual,
-    estoqueMinimo: input.estoqueMinimo
+    categoriaId: input.categoriaId ?? 0
   });
 
   const saved = await epiRepository.save(entity);
-  const reloaded = await epiRepository.findOne({ where: { id: saved.id } });
-
-  if (!reloaded) {
-    throw new AppError(500, "Falha ao recarregar EPI criado.", "EPI_RELOAD_FAILED");
-  }
-
+  const reloaded = await epiRepository.findOne({ 
+    where: { id: saved.id }, 
+    relations: ["categoria"] 
+  });
+  
+  if (!reloaded) throw new AppError(500, "Erro ao recarregar EPI.");
   return mapEntityToEpi(reloaded);
 }
 
 export async function updateEpi(id: number, input: UpdateEpiInput): Promise<Epi | null> {
   const entity = await epiRepository.findOne({ where: { id } });
-  if (!entity) {
-    return null;
-  }
+  if (!entity) return null;
 
-  if (input.codigo) {
-    const duplicate = await epiRepository.findOne({ where: { codigo: input.codigo } });
-    if (duplicate && duplicate.id !== id) {
-      throw new AppError(409, "Codigo de EPI ja cadastrado.", "EPI_CODIGO_ALREADY_EXISTS");
-    }
-  }
-
-  if (typeof input.categoriaId === "number") {
-    const categoria = await categoriaRepository.findOne({ where: { id: input.categoriaId, ativo: true } });
-    if (!categoria) {
-      throw new AppError(404, "Categoria nao encontrada.", "CATEGORIA_NOT_FOUND");
-    }
-  }
-
-  entity.codigo = input.codigo ?? entity.codigo;
-  entity.nome = input.nome;
-  entity.ca = input.ca;
-  entity.categoriaId = input.categoriaId ?? entity.categoriaId;
-  entity.vidaUtilDias = input.vidaUtilDias ?? entity.vidaUtilDias;
-  entity.ativo = input.ativo ?? entity.ativo;
-  entity.validade = input.validade;
-  entity.estoqueAtual = input.estoqueAtual;
-  entity.estoqueMinimo = input.estoqueMinimo;
-
+  Object.assign(entity, input);
   const updated = await epiRepository.save(entity);
-  const reloaded = await epiRepository.findOne({ where: { id: updated.id } });
-
-  if (!reloaded) {
-    throw new AppError(500, "Falha ao recarregar EPI atualizado.", "EPI_RELOAD_FAILED");
-  }
-
-  return mapEntityToEpi(reloaded);
+  
+  const reloaded = await epiRepository.findOne({ 
+    where: { id: updated.id }, 
+    relations: ["categoria"] 
+  });
+  return reloaded ? mapEntityToEpi(reloaded) : null;
 }
 
 export async function entradaSaldoEpi(id: number, quantidade: number): Promise<Epi | null> {
   const entity = await epiRepository.findOne({ where: { id, ativo: true } });
-  if (!entity) {
-    return null;
-  }
+  if (!entity) return null;
 
-  entity.estoqueAtual = entity.estoqueAtual + quantidade;
+  entity.estoqueAtual += quantidade;
   const updated = await epiRepository.save(entity);
-  const reloaded = await epiRepository.findOne({ where: { id: updated.id } });
-
-  if (!reloaded) {
-    throw new AppError(500, "Falha ao recarregar EPI apos entrada de saldo.", "EPI_RELOAD_FAILED");
-  }
-
-  return mapEntityToEpi(reloaded);
+  
+  const reloaded = await epiRepository.findOne({ 
+    where: { id: updated.id }, 
+    relations: ["categoria"] 
+  });
+  return reloaded ? mapEntityToEpi(reloaded) : null;
 }
 
 export async function deleteEpi(id: number): Promise<boolean> {
-  const deleteFn = (epiRepository as unknown as { delete?: (input: unknown) => Promise<{ affected?: number }> }).delete;
-  if (deleteFn) {
-    const result = await deleteFn({ id });
-    if (typeof result.affected === "number") {
-      return result.affected > 0;
-    }
-  }
-
   const entity = await epiRepository.findOne({ where: { id } });
-  if (!entity) {
-    return false;
-  }
-
+  if (!entity) return false;
   entity.ativo = false;
   await epiRepository.save(entity);
   return true;

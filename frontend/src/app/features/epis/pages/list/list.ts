@@ -19,8 +19,6 @@ export class List implements OnInit {
   epis: Epi[] = [];
   categorias: any[] = [];
   searchTerm: string = '';
-  
-  // Controle de Autocomplete e Fixação
   inputCategoria: string = '';
   filtroCategoria: any = null;
   showSugestoes = false;
@@ -31,24 +29,26 @@ export class List implements OnInit {
 
   carregarDados() {
     this.epiService.listar().subscribe({
-      next: (res) => {
-        this.epis = res.data;
+      next: (res: any) => {
+        this.epis = res.data || [];
         this.cdr.detectChanges();
-      }
+      },
+      error: (err) => console.error('Erro ao carregar EPIs:', err)
     });
 
     this.baseService.listar('categorias').subscribe({
-      next: (res) => {
-        this.categorias = res.data;
+      next: (res: any) => {
+        this.categorias = res.data || [];
         this.cdr.detectChanges();
-      }
+      },
+      error: (err) => console.error('Erro ao carregar Categorias:', err)
     });
   }
 
   get sugestoesCategoria() {
     if (!this.inputCategoria) return [];
     return this.categorias.filter(c => 
-      c.descricao.toLowerCase().includes(this.inputCategoria.toLowerCase())
+      c.descricao && c.descricao.toLowerCase().includes(this.inputCategoria.toLowerCase())
     );
   }
 
@@ -81,13 +81,16 @@ export class List implements OnInit {
   }
 
   get episFiltrados() {
+    if (!this.epis) return [];
+    
     return this.epis.filter(e => {
-      const matchesSearch = e.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
-                           e.ca.includes(this.searchTerm) || 
-                           (e.codigo && e.codigo.includes(this.searchTerm));
+      const search = this.searchTerm.toLowerCase();
+      const matchesSearch = 
+        (e.nome?.toLowerCase().includes(search)) || 
+        (e.ca?.includes(search)) || 
+        (e.codigo?.toLowerCase().includes(search));
       
-      const idCat = e.categoria_id;
-      const matchesCat = !this.filtroCategoria || idCat === this.filtroCategoria.id;
+      const matchesCat = !this.filtroCategoria || e.categoria_id === this.filtroCategoria.id;
       
       return matchesSearch && matchesCat;
     });

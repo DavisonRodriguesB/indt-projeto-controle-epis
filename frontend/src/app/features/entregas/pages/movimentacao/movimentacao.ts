@@ -31,16 +31,12 @@ import { RelatorioEpiData } from '../../../../shared/components/relatorioepi/rel
   styleUrls: ['./movimentacao.css']
 })
 export class Movimentacao implements OnInit {
-  
-  
   isModalVisualizarOpen = false;
   isModalReciboOpen = false;
   isModalSaldoOpen = false; 
 
-  
   formSaidaEpi: FormGroup;
   formEntradaSaldo: FormGroup; 
-  
   
   colaboradorFixado: string | null = null;
   itensMovimentacao: any[] = [];
@@ -49,18 +45,14 @@ export class Movimentacao implements OnInit {
   erroApi: string | null = null;
   enviandoMovimentacao = false;
 
-  
   dadosParaRelatorio!: RelatorioEpiData;
   usuarioLogado = 'Sistema';
 
   private colaboradoresApi: ColaboradorApi[] = [];
   private episApi: EpiApi[] = [];
 
-  
-  listaColaboradoresCompleta = [] as Array<{ nome: string; funcao: string; setor: string }>;
-
-  colaboradores = this.listaColaboradoresCompleta.map(c => c.nome);
-  
+  listaColaboradoresCompleta: Array<{ nome: string; funcao: string; setor: string }> = [];
+  colaboradores: string[] = [];
   estoque: Array<{ id: number; codigo: string; material: string; ca: string; saldo: number }> = [];
 
   constructor(
@@ -88,14 +80,13 @@ export class Movimentacao implements OnInit {
 
   private carregarDadosIniciais(): void {
     this.erroApi = null;
-
     this.movimentacaoApi.listColaboradores().subscribe({
       next: (rows) => {
         this.colaboradoresApi = rows;
-        this.listaColaboradoresCompleta = rows.map((colab) => ({
+        this.listaColaboradoresCompleta = rows.map((colab: any) => ({
           nome: colab.nome,
-          funcao: 'Nao informado',
-          setor: colab.setor ?? 'Nao informado',
+          funcao: colab.cargo?.descricao || 'Não informado',
+          setor: colab.setor?.descricao || 'Não informado',
         }));
         this.colaboradores = this.listaColaboradoresCompleta.map((c) => c.nome);
         this.cdr.detectChanges();
@@ -105,7 +96,6 @@ export class Movimentacao implements OnInit {
         this.cdr.detectChanges();
       },
     });
-
     this.recarregarEpis();
   }
 
@@ -132,19 +122,13 @@ export class Movimentacao implements OnInit {
   salvarNovoSaldo() {
     const { materialCodigo, quantidade, observacao } = this.formEntradaSaldo.value;
     const item = this.estoque.find((i) => i.codigo === materialCodigo);
-
-    if (!item || quantidade <= 0) {
-      return;
-    }
+    if (!item || quantidade <= 0) return;
 
     this.erroApi = null;
     this.enviandoMovimentacao = true;
-
     this.movimentacaoApi
       .createEntradaSaldo([{ epiId: item.id, quantidade }], observacao)
-      .pipe(finalize(() => {
-        this.enviandoMovimentacao = false;
-      }))
+      .pipe(finalize(() => this.enviandoMovimentacao = false))
       .subscribe({
         next: () => {
           alert(`Entrada de saldo para ${item.material} registrada com sucesso!`);
@@ -157,17 +141,8 @@ export class Movimentacao implements OnInit {
       });
   }
 
-  private getColaboradorIdByNome(nome: string | null): number | null {
-    if (!nome) {
-      return null;
-    }
-
-    const colaborador = this.colaboradoresApi.find((row) => row.nome === nome);
-    return colaborador?.id ?? null;
-  }
-
   onFileSelected(event: any) {
-    const file = event.target.files[0];
+    const file = event?.target?.files?.[0] || event;
     if (file) {
       this.nomeArquivoAnexo = file.name;
     }
@@ -198,7 +173,6 @@ export class Movimentacao implements OnInit {
     };
 
     this.itensMovimentacao = [...this.itensMovimentacao, novoItem];
-
     this.colaboradorFixado = colaborador;
     this.formSaidaEpi.get('colaborador')?.disable();
     this.formSaidaEpi.patchValue({ epiId: '', quantidade: 1 });
@@ -206,11 +180,8 @@ export class Movimentacao implements OnInit {
   }
 
   removerItemLista(id: number) {
-    
     this.itensMovimentacao = this.itensMovimentacao.filter(item => item.id !== id);
-    if (this.itensMovimentacao.length === 0) {
-      this.desafixarColaborador();
-    }
+    if (this.itensMovimentacao.length === 0) this.desafixarColaborador();
   }
 
   desafixarColaborador() {
@@ -220,10 +191,6 @@ export class Movimentacao implements OnInit {
     this.formSaidaEpi.patchValue({ colaborador: '' });
   }
 
-  limparErro() { 
-    this.erroSaldo = null; 
-  }
-
   finalizarMovimentacao() {
     const colaboradorId = this.getColaboradorIdByNome(this.colaboradorFixado);
     if (!colaboradorId) {
@@ -231,26 +198,17 @@ export class Movimentacao implements OnInit {
       return;
     }
 
-    const itensPayload = this.itensMovimentacao
-      .map((item) => ({
-        epiId: Number(item.epiId),
-        quantidade: Number(item.quantidade),
-      }))
-      .filter((item): item is { epiId: number; quantidade: number } => !!item.epiId && item.quantidade > 0);
-
-    if (itensPayload.length !== this.itensMovimentacao.length) {
-      this.erroApi = 'Existem itens invalidos na lista de entrega.';
-      return;
-    }
+    const itensPayload = this.itensMovimentacao.map((item) => ({
+      epiId: Number(item.epiId),
+      quantidade: Number(item.quantidade),
+    }));
 
     this.erroApi = null;
     this.enviandoMovimentacao = true;
 
     this.movimentacaoApi
       .createEntrega(colaboradorId, itensPayload)
-      .pipe(finalize(() => {
-        this.enviandoMovimentacao = false;
-      }))
+      .pipe(finalize(() => this.enviandoMovimentacao = false))
       .subscribe({
         next: (created) => {
           const infoColaborador = this.listaColaboradoresCompleta.find(c => c.nome === this.colaboradorFixado);
@@ -260,16 +218,14 @@ export class Movimentacao implements OnInit {
           this.dadosParaRelatorio = {
             protocolo: numeroProtocoloGerado,
             colaborador: this.colaboradorFixado || 'Nao Informado',
-            funcao: infoColaborador?.funcao || 'Operacional',
-            setor: infoColaborador?.setor || 'Geral',
+            funcao: infoColaborador?.funcao || 'Não informado',
+            setor: infoColaborador?.setor || 'Não informado',
             dataEntrega: new Date(),
             usuarioSistema: this.usuarioLogado,
             itens: [...this.itensMovimentacao]
           };
 
           this.isModalReciboOpen = true;
-          this.desafixarColaborador();
-          this.formSaidaEpi.patchValue({ epiId: '', quantidade: 1 });
           this.recarregarEpis();
         },
         error: (error) => {
@@ -278,14 +234,16 @@ export class Movimentacao implements OnInit {
       });
   }
 
-  imprimirRecibo() { 
-    window.print(); 
+  private getColaboradorIdByNome(nome: string | null): number | null {
+    if (!nome) return null;
+    const colaborador = this.colaboradoresApi.find((row) => row.nome === nome);
+    return colaborador?.id ?? null;
   }
 
-  
+  limparErro() { this.erroSaldo = null; }
+  imprimirRecibo() { window.print(); }
   openModalVisualizar() { this.isModalVisualizarOpen = true; }
   closeModalVisualizar() { this.isModalVisualizarOpen = false; }
-  
   openModalSaldo() { this.isModalSaldoOpen = true; }
   closeModalSaldo() { 
     this.isModalSaldoOpen = false; 

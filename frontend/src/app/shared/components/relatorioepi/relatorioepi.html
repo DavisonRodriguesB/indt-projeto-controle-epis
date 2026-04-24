@@ -17,8 +17,9 @@
         <p class="text-slate-500 font-medium">Controle de Estoque</p>
       </div>
       <div>
-         <img src="logo.png" alt="Logo Sistema" class="h-12 w-auto object-contain">
+        <img src="logo.png" alt="Logo" class="h-12 w-auto object-contain">
       </div>
+
     </div>
   </div>
 
@@ -27,8 +28,8 @@
       <p class="text-[9px] uppercase font-bold text-slate-400">Dados do Colaborador</p>
       <p class="font-bold text-lg text-slate-800 leading-none">{{ dados.colaborador }}</p>
       <div class="text-xs text-slate-600 space-y-0.5 pt-1">
-        <p>Setor: <span class="font-bold text-slate-800">{{ dados.setor }}</span></p>
-        <p>Função: <span class="font-bold text-slate-800">{{ dados.funcao }}</span></p>
+        <p>Setor: <span class="font-bold text-slate-800">{{ dados.setor.descricao || dados.setor }}</span></p>
+        <p>Função: <span class="font-bold text-slate-800">{{ dados.funcao.descricao || dados.funcao }}</span></p>
       </div>
     </div>
     <div class="space-y-1.5 text-right">
@@ -71,10 +72,5 @@
       <p class="text-[10px] font-bold uppercase">{{ dados.usuarioSistema }}</p>
       <p class="text-[8px] text-slate-400 tracking-[0.2em] uppercase">Responsável pela Entrega</p>
     </div>
-  </div>
-
-  <div class="absolute bottom-10 left-10 right-10 flex justify-between items-center text-[8px] text-slate-300 uppercase font-mono border-t pt-2">
-    <span>Gerado pelo Sistema EPI PIM</span>
-    <span>ID de Segurança: {{ dados.protocolo }}-{{ dados.dataEntrega | date:'yyyyMMddHHmm' }}</span>
   </div>
 </div>

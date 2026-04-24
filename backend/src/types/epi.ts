@@ -3,6 +3,7 @@ export interface Epi {
   codigo: string;
   nome: string;
   ca: string;
+  categoria: string;
   categoria_id: number;
   vida_util_dias: number;
   ativo: boolean;
@@ -26,7 +27,7 @@ export interface CreateEpiInput {
   estoqueMinimo: number;
 }
 
-export interface UpdateEpiInput extends CreateEpiInput {}
+export interface UpdateEpiInput extends Partial<CreateEpiInput> {}
 
 export interface ListEpisInput {
   page: number;
