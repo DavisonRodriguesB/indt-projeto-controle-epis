@@ -1,7 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
 import { FiltroConsultaComponent } from './components/filtro-consulta/filtro-consulta';
 import { TabelaConsultaComponent } from './components/tabela-consulta/tabela-consulta';
 import { RelatorioepiComponent } from '../../shared/components/relatorioepi/relatorioepi';
@@ -16,14 +15,14 @@ import { ConsultaService } from '../../core/services/consulta.service';
   templateUrl: './consulta-entregas.html'
 })
 export class ConsultaEntregasComponent implements OnInit {
-  listaEntregas: EntregaCompleta[] = []; 
+  listaEntregas: EntregaCompleta[] = [];
   entregaSelecionada: RelatorioEpiData | null = null;
-  exibirModal: boolean = false;
-  loading: boolean = false;
+  exibirModal = false;
+  loading = false;
 
   constructor(
     private consultaService: ConsultaService,
-    private cdr: ChangeDetectorRef 
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {}
@@ -33,35 +32,48 @@ export class ConsultaEntregasComponent implements OnInit {
   }
 
   executarBusca(filtros: any): void {
+    if (!filtros) {
+      this.listaEntregas = [];
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.loading = true;
     this.consultaService.buscarEntregas(filtros).subscribe({
-      next: (res) => { 
-        this.listaEntregas = res; 
+      next: (res) => {
+        this.listaEntregas = res;
         this.loading = false;
-        this.cdr.detectChanges(); 
+        this.cdr.detectChanges();
       },
-      error: () => { this.loading = false; this.cdr.detectChanges(); }
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
   abrirRelatorio(entrega: EntregaCompleta): void {
-    const dataObjeto = new Date(entrega.data_hora);
+    const dataStr = entrega.data_hora?.includes('T')
+      ? entrega.data_hora
+      : `${entrega.data_hora}T00:00:00`;
+
+    const dataObjeto = new Date(dataStr);
 
     this.entregaSelecionada = {
       protocolo: `MOV-${dataObjeto.getFullYear()}-${entrega.id.toString().padStart(6, '0')}`,
       colaborador: `${entrega.colaborador} (${entrega.matricula})`,
-      funcao: { descricao: entrega.cargo },
-      setor: { descricao: entrega.setor },
+      funcao:      { descricao: entrega.cargo },
+      setor:       { descricao: entrega.setor },
       dataEntrega: dataObjeto,
-      usuarioSistema: entrega.usuario_emissor, 
+      usuarioSistema: entrega.usuario_emissor,
       itens: entrega.itens.map(item => ({
-        codigo: item.codigo_material, 
-        material: item.nome,          
-        ca: item.numero_ca,           
+        codigo:    item.codigo_material,
+        material:  item.nome,
+        ca:        item.numero_ca,
         quantidade: item.quantidade
       }))
     };
-    
+
     this.exibirModal = true;
     this.cdr.detectChanges();
   }

@@ -12,7 +12,7 @@
       </thead>
       <tbody class="divide-y divide-slate-100">
         <tr *ngFor="let item of entregas" class="hover:bg-slate-50/50 transition-colors group">
-          <td class="px-6 py-4 font-mono text-blue-600 font-semibold text-sm">{{ item.id }}</td>
+          <td class="px-6 py-4 font-mono text-blue-600 font-semibold text-sm">{{ formatarProtocolo(item) }}</td>
           <td class="px-6 py-4">
             <div class="flex flex-col">
               <span class="font-semibold text-slate-700">{{ item.colaborador }}</span>
@@ -24,7 +24,7 @@
               {{ item.total_itens }} Itens
             </span>
           </td>
-          <td class="px-6 py-4 text-center text-sm text-slate-500">{{ item.data_hora }}</td>
+          <td class="px-6 py-4 text-center text-sm text-slate-500">{{ item.data_hora | date:'dd/MM/yyyy HH:mm' }}</td>
           <td class="px-6 py-4 text-right">
             <button (click)="visualizar(item)" class="text-slate-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-lg">
               <i class="ph ph-file-text text-2xl"></i>

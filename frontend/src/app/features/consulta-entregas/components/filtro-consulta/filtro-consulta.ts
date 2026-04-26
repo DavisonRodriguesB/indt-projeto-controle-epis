@@ -13,102 +13,116 @@ import { Subject, debounceTime, distinctUntilChanged, switchMap, Subscription, o
 export class FiltroConsultaComponent implements OnDestroy {
   @Output() onSearch = new EventEmitter<any>();
 
+  /**
+   * Nomes dos filtros alinhados com o querySchema do backend:
+   *   colaborador_id  → z.coerce.number().optional()
+   *   data_inicio     → z.string().optional()   (era dataInicio no frontend — ERRADO)
+   *   data_fim        → z.string().optional()   (era dataFim no frontend — ERRADO)
+   *   ca              → z.string().optional()
+   *
+   * Campos sem suporte no backend atual (ignorados na busca):
+   *   protocolo, usuario, codigoMaterial, mesReferencia
+   */
   filtros: any = {
-    colaboradorMatricula: '',
-    colaborador_id: '', 
-    dataInicio: '',
-    dataFim: '',
-    mesReferencia: '',
-    protocolo: '',
-    usuario: '',
-    codigoMaterial: '',
-    ca: ''
+    colaboradorLabel: '',  // campo de exibição apenas (não enviado)
+    colaborador_id:   '',
+    data_inicio:      '',
+    data_fim:         '',
+    mesReferencia:    '',  // mantido no HTML — sem suporte no backend atual
+    protocolo:        '',  // mantido no HTML — sem suporte no backend atual
+    usuario:          '',  // mantido no HTML — sem suporte no backend atual
+    codigoMaterial:   '',  // mantido no HTML — sem suporte no backend atual
+    ca:               ''
   };
 
+  // Necessário para o select de mês no HTML
+  meses = [
+    { valor: '01', nome: 'Janeiro'   }, { valor: '02', nome: 'Fevereiro' },
+    { valor: '03', nome: 'Março'     }, { valor: '04', nome: 'Abril'     },
+    { valor: '05', nome: 'Maio'      }, { valor: '06', nome: 'Junho'     },
+    { valor: '07', nome: 'Julho'     }, { valor: '08', nome: 'Agosto'    },
+    { valor: '09', nome: 'Setembro'  }, { valor: '10', nome: 'Outubro'   },
+    { valor: '11', nome: 'Novembro'  }, { valor: '12', nome: 'Dezembro'  }
+  ];
+
   sugestoesColaboradores: any[] = [];
-  exibirSugestoes = false;
+  exibirSugestoes  = false;
   buscandoSugestoes = false;
-  
+
   private searchSubject = new Subject<string>();
   private searchSubscription: Subscription;
-
-  meses = [
-    { valor: '01', nome: 'Janeiro' }, { valor: '02', nome: 'Fevereiro' },
-    { valor: '03', nome: 'Março' }, { valor: '04', nome: 'Abril' },
-    { valor: '05', nome: 'Maio' }, { valor: '06', nome: 'Junho' },
-    { valor: '07', nome: 'Julho' }, { valor: '08', nome: 'Agosto' },
-    { valor: '09', nome: 'Setembro' }, { valor: '10', nome: 'Outubro' },
-    { valor: '11', nome: 'Novembro' }, { valor: '12', nome: 'Dezembro' }
-  ];
 
   constructor(private consultaService: ConsultaService) {
     this.searchSubscription = this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       switchMap(termo => {
-        if (!termo || termo.length < 3) {
+        if (!termo || termo.length < 2) {
           this.buscandoSugestoes = false;
+          this.exibirSugestoes   = false;
           return of([]);
         }
         this.buscandoSugestoes = true;
         return this.consultaService.buscarSugestoesColaboradores(termo);
       })
     ).subscribe({
-      next: (res: any) => {
+      next: (res: any[]) => {
         this.sugestoesColaboradores = res;
-        this.exibirSugestoes = res.length > 0;
-        this.buscandoSugestoes = false;
+        this.exibirSugestoes        = res.length > 0;
+        this.buscandoSugestoes      = false;
       },
-      error: () => this.buscandoSugestoes = false
+      error: () => { this.buscandoSugestoes = false; }
     });
   }
 
-  // Método chamado pelo (input) do HTML
-  buscarColaboradores(termo: string) {
+  buscarColaboradores(termo: string): void {
     if (!termo) {
       this.filtros.colaborador_id = '';
-      this.exibirSugestoes = false;
+      this.exibirSugestoes        = false;
     }
     this.searchSubject.next(termo);
   }
 
-  selecionarColaborador(colab: any) {
-    // ANALISTA: Vinculamos o nome para visualização e o ID para o filtro real
-    this.filtros.colaboradorMatricula = `${colab.nome} (${colab.matricula})`;
-    this.filtros.colaborador_id = colab.id; 
-    this.exibirSugestoes = false;
+  selecionarColaborador(colab: any): void {
+    this.filtros.colaboradorLabel = `${colab.nome} (${colab.matricula})`;
+    this.filtros.colaborador_id   = colab.id;
+    this.exibirSugestoes          = false;
   }
 
-  fecharSugestoes() {
+  fecharSugestoes(): void {
     setTimeout(() => { this.exibirSugestoes = false; }, 250);
   }
 
-  buscar() {
-    // Emite os filtros atuais para o componente pai
-    this.onSearch.emit({ ...this.filtros });
+  buscar(): void {
+    // Monta apenas os filtros que o backend conhece
+    const payload: any = {};
+
+    if (this.filtros.colaborador_id) payload.colaborador_id = this.filtros.colaborador_id;
+    if (this.filtros.data_inicio)    payload.data_inicio    = this.filtros.data_inicio;
+    if (this.filtros.data_fim)       payload.data_fim       = this.filtros.data_fim;
+    if (this.filtros.ca)             payload.ca             = this.filtros.ca;
+
+    this.onSearch.emit(payload);
   }
 
-  limpar() {
-    // Reseta o objeto de filtros localmente
+  limpar(): void {
     this.filtros = {
-      colaboradorMatricula: '',
-      colaborador_id: '',
-      dataInicio: '',
-      dataFim: '',
-      mesReferencia: '',
-      protocolo: '',
-      usuario: '',
-      codigoMaterial: '',
-      ca: ''
+      colaboradorLabel: '',
+      colaborador_id:   '',
+      data_inicio:      '',
+      data_fim:         '',
+      mesReferencia:    '',
+      protocolo:        '',
+      usuario:          '',
+      codigoMaterial:   '',
+      ca:               ''
     };
     this.sugestoesColaboradores = [];
-    
-    // ANALISTA: Enviamos 'null' para o pai entender que deve 
-    // apenas limpar a tabela, sem buscar no banco.
-    this.onSearch.emit(null); 
+    this.exibirSugestoes        = false;
+    this.onSearch.emit(null);
   }
 
-  ngOnDestroy() {
-    if (this.searchSubscription) this.searchSubscription.unsubscribe();
+  ngOnDestroy(): void {
+    this.searchSubscription?.unsubscribe();
   }
 }

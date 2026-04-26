@@ -6,8 +6,9 @@ export interface EntregaItem {
   codigo_material: string;
 }
 
+
 export interface EntregaCompleta {
-  id: string; 
+  id: string;
   colaborador: string;
   matricula: string;
   setor: string;
