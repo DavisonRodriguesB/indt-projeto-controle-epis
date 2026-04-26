@@ -1,8 +1,6 @@
 import { AppDataSource } from "../database/data-source";
 
 export async function consultaEntregas(filtros: any): Promise<any[]> {
-  // ANALISTA: Usando query nativa ou garantindo que o json_agg funcione.
-  // Se o TypeORM estiver ignorando o groupBy, o segredo é o select abaixo.
   
   const query = AppDataSource
     .getRepository("movimentacoes")
@@ -15,7 +13,6 @@ export async function consultaEntregas(filtros: any): Promise<any[]> {
     .innerJoin("users", "u", "u.id = m.usuario_id")
     .where("m.tipo = :tipo", { tipo: "entrega" });
 
-  // Filtros (mantidos)
   if (filtros.colaboradorId) query.andWhere("m.colaborador_id = :colaboradorId", { colaboradorId: filtros.colaboradorId });
   if (filtros.dataInicio && filtros.dataFim) {
     query.andWhere("m.data_movimentacao BETWEEN :dataInicio AND :dataFim", {
@@ -27,20 +24,19 @@ export async function consultaEntregas(filtros: any): Promise<any[]> {
   return query
     .select([
       "m.id AS id",
-      "m.data_movimentacao AS data_hora",
+      "m.created_at AS data_hora",
       "m.observacao AS observacao",
       "c.nome AS colaborador_nome",
       "c.matricula AS colaborador_matricula",
       "s.descricao AS setor_nome", 
       "cg.descricao AS cargo_nome", 
       "u.nome AS usuario_emissor",
-      // CRITICAL: Isso aqui agrupa os 8 itens do seu JSON em um único array
       `json_agg(
         json_build_object(
           'nome', e.nome,
           'numero_ca', e.ca,
           'quantidade', mi.quantidade,
-          'codigo_material', e.codigo_material
+          'codigo_material', e.codigo
         )
       ) AS itens`
     ])

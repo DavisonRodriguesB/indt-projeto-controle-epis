@@ -24,7 +24,7 @@ export class MovimentacaoEntity {
   @Column({ name: "usuario_id", type: "int" })
   usuarioId!: number;
 
-  @Column({ name: "data_movimentacao", type: "date" })
+  @Column({ name: "data_movimentacao", type: "timestamp" })
   dataMovimentacao!: string;
 
   @Column({ type: "text", nullable: true })
