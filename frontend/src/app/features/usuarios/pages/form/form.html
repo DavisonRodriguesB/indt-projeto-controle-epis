@@ -3,9 +3,13 @@
     
     <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
       <h3 class="text-xl font-bold text-slate-800">{{ userData ? 'Editar' : 'Novo' }} Usuário</h3>
-      <button (click)="close()" class="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400">
+      <button type="button" (click)="close()" class="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400">
         <i class="ph ph-x text-xl"></i>
       </button>
+    </div>
+
+    <div *ngIf="submitError" class="mx-6 mt-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+      {{ submitError }}
     </div>
 
     <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="p-6 space-y-4">
@@ -45,22 +49,11 @@
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-1">Perfil</label>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Role</label>
           <div class="relative">
-            <select formControlName="perfil" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl appearance-none outline-none cursor-pointer">
-              <option value="Admin">Administrador</option>
-              <option value="Almoxarife">Almoxarife</option>
-            </select>
-            <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-1">Status</label>
-          <div class="relative">
-            <select formControlName="ativo" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl appearance-none outline-none cursor-pointer">
-              <option [ngValue]="true">Ativo</option>
-              <option [ngValue]="false">Inativo</option>
+            <select formControlName="role" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl appearance-none outline-none cursor-pointer">
+              <option value="admin">Administrador</option>
+              <option value="almoxarife">Almoxarife</option>
             </select>
             <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
           </div>

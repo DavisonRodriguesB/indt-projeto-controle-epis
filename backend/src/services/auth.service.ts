@@ -15,6 +15,13 @@ interface RegisterInput {
   role: UserRole;
 }
 
+interface UpdateUserInput {
+  nome: string;
+  email: string;
+  role: UserRole;
+  senha?: string;
+}
+
 interface LoginResult {
   token: string;
   user: AuthUser;
@@ -27,6 +34,38 @@ function mapToAuthUser(row: UserEntity): AuthUser {
     email: row.email,
     role: row.role
   };
+}
+
+export async function listUsers(): Promise<AuthUser[]> {
+  const users = await userRepository.find({
+    order: { nome: "ASC" }
+  });
+
+  return users.map(mapToAuthUser);
+}
+
+export async function updateUser(id: number, input: UpdateUserInput): Promise<AuthUser> {
+  const user = await userRepository.findOne({ where: { id } });
+
+  if (!user) {
+    throw new AppError(404, "Usuario nao encontrado.", "AUTH_USER_NOT_FOUND");
+  }
+
+  const existingWithEmail = await userRepository.findOne({ where: { email: input.email } });
+  if (existingWithEmail && existingWithEmail.id !== id) {
+    throw new AppError(409, "Ja existe usuario com este email.", "AUTH_EMAIL_ALREADY_EXISTS");
+  }
+
+  user.nome = input.nome;
+  user.email = input.email;
+  user.role = input.role;
+
+  if (input.senha && input.senha.trim().length > 0) {
+    user.senhaHash = await hash(input.senha, 10);
+  }
+
+  const saved = await userRepository.save(user);
+  return mapToAuthUser(saved);
 }
 
 export async function login(email: string, senha: string): Promise<LoginResult> {
