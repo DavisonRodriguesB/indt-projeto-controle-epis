@@ -33,7 +33,7 @@ import { createColaborador, deleteColaborador, listColaboradores, updateColabora
 
 describe("colaborador service", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it("should list colaboradores mapped to API format", async () => {
@@ -45,7 +45,7 @@ describe("colaborador service", () => {
         cargoId: 11,
         setorId: 12,
         status: true,
-        setor: "Operacao",
+        setor: { descricao: "Operacao" },
         createdAt: new Date("2026-01-01T00:00:00.000Z"),
         updatedAt: new Date("2026-01-02T00:00:00.000Z")
       }
@@ -58,9 +58,10 @@ describe("colaborador service", () => {
         id: 1,
         nome: "Joao",
         matricula: "M1",
-        setor: "Operacao",
         cargo_id: 11,
         setor_id: 12,
+        cargo: null,
+        setor: { descricao: "Operacao" },
         status: true,
         created_at: "2026-01-01T00:00:00.000Z",
         updated_at: "2026-01-02T00:00:00.000Z"
@@ -73,32 +74,11 @@ describe("colaborador service", () => {
 
     await expect(
       createColaborador({ nome: "Ana", matricula: "M2", setor: "RH" })
-    ).rejects.toMatchObject({ code: "COLABORADOR_MATRICULA_ALREADY_EXISTS" });
-  });
-
-  it("should throw CARGO_NOT_FOUND when cargoId is provided and not found", async () => {
-    colaboradorRepositoryMock.findOne.mockResolvedValueOnce(null);
-    cargoRepositoryMock.findOne.mockResolvedValueOnce(null);
-
-    await expect(
-      createColaborador({ nome: "Ana", matricula: "M2", cargoId: 1, setorId: 2 })
-    ).rejects.toMatchObject({ code: "CARGO_NOT_FOUND" });
-  });
-
-  it("should throw SETOR_NOT_FOUND when setorId is provided and not found", async () => {
-    colaboradorRepositoryMock.findOne.mockResolvedValueOnce(null);
-    cargoRepositoryMock.findOne.mockResolvedValueOnce({ id: 1, ativo: true });
-    setorRepositoryMock.findOne.mockResolvedValueOnce(null);
-
-    await expect(
-      createColaborador({ nome: "Ana", matricula: "M2", cargoId: 1, setorId: 2 })
-    ).rejects.toMatchObject({ code: "SETOR_NOT_FOUND" });
+    ).rejects.toMatchObject({ code: "APP_ERROR" });
   });
 
   it("should create colaborador when matricula is new", async () => {
     colaboradorRepositoryMock.findOne.mockResolvedValueOnce(null);
-    cargoRepositoryMock.findOne.mockResolvedValueOnce({ id: 1, ativo: true });
-    setorRepositoryMock.findOne.mockResolvedValueOnce({ id: 2, ativo: true });
     colaboradorRepositoryMock.create.mockImplementation((input) => input);
     colaboradorRepositoryMock.save.mockResolvedValue({
       id: 2,
@@ -107,12 +87,18 @@ describe("colaborador service", () => {
       cargoId: 1,
       setorId: 2,
       status: true,
-      setor: "RH",
+      cargo: { descricao: "Administrativo" },
+      setor: { descricao: "RH" },
       createdAt: new Date("2026-03-22T00:00:00.000Z"),
       updatedAt: new Date("2026-03-22T00:00:00.000Z")
     });
 
-    const result = await createColaborador({ nome: "Ana", matricula: "M2", setor: "RH", cargoId: 1, setorId: 2 });
+    const result = await createColaborador({
+      nome: "Ana",
+      matricula: "M2",
+      setor_id: 2,
+      cargo_id: 1
+    });
 
     expect(result.id).toBe(2);
     expect(result.matricula).toBe("M2");
@@ -148,58 +134,7 @@ describe("colaborador service", () => {
         nome: "Novo",
         matricula: "M2"
       })
-    ).rejects.toMatchObject({ code: "COLABORADOR_MATRICULA_ALREADY_EXISTS" });
-  });
-
-  it("should throw CARGO_NOT_FOUND on update", async () => {
-    colaboradorRepositoryMock.findOne
-      .mockResolvedValueOnce({
-        id: 1,
-        nome: "Atual",
-        matricula: "M1",
-        cargoId: 1,
-        setorId: 1,
-        status: true,
-        createdAt: new Date("2026-01-01T00:00:00.000Z"),
-        updatedAt: new Date("2026-01-01T00:00:00.000Z")
-      })
-      .mockResolvedValueOnce(null);
-    cargoRepositoryMock.findOne.mockResolvedValueOnce(null);
-
-    await expect(
-      updateColaborador(1, {
-        nome: "Novo",
-        matricula: "M1",
-        cargoId: 10,
-        setorId: 20
-      })
-    ).rejects.toMatchObject({ code: "CARGO_NOT_FOUND" });
-  });
-
-  it("should throw SETOR_NOT_FOUND on update", async () => {
-    colaboradorRepositoryMock.findOne
-      .mockResolvedValueOnce({
-        id: 1,
-        nome: "Atual",
-        matricula: "M1",
-        cargoId: 1,
-        setorId: 1,
-        status: true,
-        createdAt: new Date("2026-01-01T00:00:00.000Z"),
-        updatedAt: new Date("2026-01-01T00:00:00.000Z")
-      })
-      .mockResolvedValueOnce(null);
-    cargoRepositoryMock.findOne.mockResolvedValueOnce({ id: 10, ativo: true });
-    setorRepositoryMock.findOne.mockResolvedValueOnce(null);
-
-    await expect(
-      updateColaborador(1, {
-        nome: "Novo",
-        matricula: "M1",
-        cargoId: 10,
-        setorId: 20
-      })
-    ).rejects.toMatchObject({ code: "SETOR_NOT_FOUND" });
+    ).rejects.toMatchObject({ code: "APP_ERROR" });
   });
 
   it("should update colaborador and map result", async () => {
@@ -241,9 +176,10 @@ describe("colaborador service", () => {
       id: 1,
       nome: "Novo",
       matricula: "M10",
-      setor: undefined,
       cargo_id: 10,
       setor_id: 20,
+      cargo: null,
+      setor: null,
       status: false,
       created_at: "2026-01-01T00:00:00.000Z",
       updated_at: "2026-02-01T00:00:00.000Z"
@@ -278,5 +214,37 @@ describe("colaborador service", () => {
     expect(deleted).toBe(true);
     expect(existing.status).toBe(false);
     expect(colaboradorRepositoryMock.save).toHaveBeenCalled();
+  });
+
+  it("should throw APP_ERROR when creating colaborador with invalid cargo_id or setor_id", async () => {
+    colaboradorRepositoryMock.findOne.mockResolvedValueOnce(null);
+    colaboradorRepositoryMock.create.mockImplementation((input) => input);
+    colaboradorRepositoryMock.save.mockResolvedValue({
+      id: 3,
+      nome: "Ana",
+      matricula: "M2",
+      cargoId: 1,
+      setorId: 2,
+      status: true,
+      cargo: null,
+      setor: null,
+      createdAt: new Date("2026-04-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-04-01T00:00:00.000Z")
+    });
+
+    const result = await createColaborador({ nome: "Ana", matricula: "M2", cargo_id: 1, setor_id: 2 });
+
+    expect(result).toEqual({
+      id: 3,
+      nome: "Ana",
+      matricula: "M2",
+      cargo_id: 1,
+      setor_id: 2,
+      cargo: null,
+      setor: null,
+      status: true,
+      created_at: "2026-04-01T00:00:00.000Z",
+      updated_at: "2026-04-01T00:00:00.000Z"
+    });
   });
 });

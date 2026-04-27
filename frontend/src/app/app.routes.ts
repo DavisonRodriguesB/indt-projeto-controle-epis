@@ -125,6 +125,13 @@ export const routes: Routes = [
   },
 
   {
+    path: '403',
+    loadComponent: () =>
+      import('./features/errors/pages/forbidden/forbidden').then(
+        (m) => m.ForbiddenComponent
+      ),
+  },
+  {
     path: '**',
     redirectTo: 'login',
   },

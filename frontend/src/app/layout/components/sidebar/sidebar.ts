@@ -1,46 +1,49 @@
-import { Component, inject } from '@angular/core'; 
-import { CommonModule } from '@angular/common'; 
-import { RouterModule, NavigationEnd, Router } from '@angular/router'; 
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule], 
+  imports: [CommonModule, RouterModule],
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.css']
 })
 export class SidebarComponent {
-  private authService = inject(AuthService); 
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   isCadastroBaseOpen = false;
-  isCollapsed = false; 
-  isMobileOpen = false; 
+  isCollapsed = false;
+  isMobileOpen = false;
 
   constructor() {
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      this.isMobileOpen = false;
-    });
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.isMobileOpen = false;
+      });
   }
 
-  toggleCadastroBase() {
+  isAdmin(): boolean {
+    return this.authService.hasRole(['admin']);
+  }
+
+  toggleCadastroBase(): void {
     this.isCadastroBaseOpen = !this.isCadastroBaseOpen;
   }
 
-  toggleSidebar() {
+  toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
   }
 
-  toggleMobile() {
+  toggleMobile(): void {
     this.isMobileOpen = !this.isMobileOpen;
   }
 
-  
-  sair() {
+  sair(): void {
     this.authService.logout();
   }
 }

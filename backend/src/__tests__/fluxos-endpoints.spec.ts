@@ -53,9 +53,10 @@ describe("fluxos de endpoints (contrato de rota sem banco)", () => {
     id: 1,
     nome: "Colaborador Mock",
     matricula: "MAT-001",
-    setor: undefined,
     cargo_id: 1,
     setor_id: 1,
+    cargo: { descricao: "Cargo Mock" },
+    setor: { descricao: "Setor Mock" },
     status: true,
     created_at: "2026-01-01T00:00:00.000Z",
     updated_at: "2026-01-01T00:00:00.000Z"
@@ -65,6 +66,7 @@ describe("fluxos de endpoints (contrato de rota sem banco)", () => {
     codigo: "EPI-001",
     nome: "Luva Mock",
     ca: "CA-001",
+    categoria: "Sem Categoria",
     categoria_id: 1,
     vida_util_dias: 365,
     ativo: true,
@@ -156,8 +158,8 @@ describe("fluxos de endpoints (contrato de rota sem banco)", () => {
     const response = await api.post("/api/colaboradores").set(getAuthHeader()).send({
       nome: "Colaborador Mock",
       matricula: "MAT-001",
-      cargoId: 1,
-      setorId: 1,
+      cargo_id: 1,
+      setor_id: 1,
       status: true
     });
 

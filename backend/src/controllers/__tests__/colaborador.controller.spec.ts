@@ -35,7 +35,8 @@ describe("colaborador controller", () => {
         body: {
           nome: "Ana",
           matricula: "M-10",
-          setor: "RH"
+          cargo_id: 1,
+          setor_id: 2
         }
       } as Request,
       {} as Response

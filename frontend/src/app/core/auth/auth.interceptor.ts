@@ -12,12 +12,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = auth.getAuthToken();
 
   const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    ? req.clone({ setHeaders: { Authorization: 'Bearer ' + token } })
     : req;
 
   return next(authReq).pipe(
     catchError((err: HttpErrorResponse) => {
       const isAuthRoute = req.url.includes('/auth/');
+
+      if (err.status === 403 && !isAuthRoute) {
+        if (router.url !== '/403') {
+          router.navigate(['/403']);
+        }
+        return throwError(() => err);
+      }
 
       if (err.status === 401 && !isAuthRoute && !isRefreshing) {
         isRefreshing = true;
@@ -27,7 +34,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             isRefreshing = false;
             const refreshedToken = auth.getAuthToken();
             const retried = refreshedToken
-              ? req.clone({ setHeaders: { Authorization: `Bearer ${refreshedToken}` } })
+              ? req.clone({ setHeaders: { Authorization: 'Bearer ' + refreshedToken } })
               : req;
             return next(retried);
           }),
