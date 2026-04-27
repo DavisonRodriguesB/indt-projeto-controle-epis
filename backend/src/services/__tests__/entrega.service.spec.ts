@@ -85,7 +85,15 @@ describe("entrega service", () => {
           quantidade: 2,
           dataEntrega: "2026-03-22",
           observacao: "Entrega mensal",
-          colaborador: { id: 10, nome: "Joao", matricula: "MAT1", setor: "Manutencao" },
+          colaborador: {
+            id: 10,
+            nome: "Joao",
+            matricula: "MAT1",
+            setorId: 12,
+            cargoId: 34,
+            setor: { descricao: "Manutencao" },
+            cargo: { descricao: "Almoxarifado" }
+          },
           epi: { id: 4, nome: "Luva", ca: "123" },
           usuario: { id: 8, nome: "Admin", email: "admin@teste.com", role: "admin" }
         }
@@ -100,7 +108,15 @@ describe("entrega service", () => {
         quantidade: 2,
         data_entrega: "2026-03-22",
         observacao: "Entrega mensal",
-        colaborador: { id: 10, nome: "Joao", matricula: "MAT1", setor: "Manutencao" },
+        colaborador: {
+          id: 10,
+          nome: "Joao",
+          matricula: "MAT1",
+          setor: "Manutencao",
+          cargo: "Almoxarifado",
+          setor_id: 12,
+          cargo_id: 34
+        },
         epi: { id: 4, nome: "Luva", ca: "123" },
         usuario: { id: 8, nome: "Admin", email: "admin@teste.com", role: "admin" }
       }
