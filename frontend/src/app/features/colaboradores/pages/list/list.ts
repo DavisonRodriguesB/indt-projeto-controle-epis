@@ -2,7 +2,13 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ColaboradorService, Colaborador } from '../../../../core/services/colaborador.service';
+import {
+  ColaboradorService,
+  Colaborador,
+  EpiColaborador,
+  calcularStatusValidade,
+  StatusValidade
+} from '../../../../core/services/colaborador.service';
 import { BaseService } from '../../../../core/services/base.service';
 
 @Component({
@@ -19,7 +25,6 @@ export class List implements OnInit {
   colaboradores: Colaborador[] = [];
   setores: any[] = [];
   cargos: any[]  = [];
-
   searchTerm   = '';
   inputSetor   = '';
   inputCargo   = '';
@@ -28,35 +33,30 @@ export class List implements OnInit {
   showSetores  = false;
   showCargos   = false;
 
+  modalAberto              = false;
+  colaboradorModal: Colaborador | null = null;
+  episModal: EpiColaborador[]          = [];
+  carregandoEpis                       = false;
+
   ngOnInit(): void {
     this.carregarDados();
   }
 
   carregarDados(): void {
     this.colaboradorService.listar().subscribe({
-      next: (res) => {
-        this.colaboradores = res.data;
-        this.cdr.detectChanges();
-      },
+      next: (res) => { this.colaboradores = res.data; this.cdr.detectChanges(); },
       error: (err) => console.error('Erro ao carregar colaboradores:', err)
     });
-
     this.baseService.listar('setores').subscribe({
-      next: (res) => { 
-        this.setores = res.data; 
-        this.cdr.detectChanges(); 
-      },
+      next: (res) => { this.setores = res.data; this.cdr.detectChanges(); },
       error: (err) => console.error('Erro ao carregar setores:', err)
     });
-
     this.baseService.listar('cargos').subscribe({
-      next: (res) => { 
-        this.cargos = res.data; 
-        this.cdr.detectChanges(); 
-      },
+      next: (res) => { this.cargos = res.data; this.cdr.detectChanges(); },
       error: (err) => console.error('Erro ao carregar cargos:', err)
     });
   }
+
 
   get sugestoesSetor() {
     if (!this.inputSetor) return [];
@@ -73,15 +73,11 @@ export class List implements OnInit {
   }
 
   selecionarSetor(setor: any): void {
-    this.filtroSetor = setor;
-    this.inputSetor  = '';
-    this.showSetores = false;
+    this.filtroSetor = setor; this.inputSetor = ''; this.showSetores = false;
   }
 
   selecionarCargo(cargo: any): void {
-    this.filtroCargo = cargo;
-    this.inputCargo  = '';
-    this.showCargos  = false;
+    this.filtroCargo = cargo; this.inputCargo = ''; this.showCargos = false;
   }
 
   get colaboradoresFiltrados(): Colaborador[] {
@@ -89,30 +85,51 @@ export class List implements OnInit {
       const matchesSearch =
         c.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         c.matricula.includes(this.searchTerm);
-
       const matchesSetor = !this.filtroSetor || c.setor_id === this.filtroSetor.id;
       const matchesCargo = !this.filtroCargo || c.cargo_id === this.filtroCargo.id;
-
       return matchesSearch && matchesSetor && matchesCargo;
     });
   }
 
   toggleStatus(item: Colaborador): void {
     const novoStatus = !item.status;
-    const payload = {
-      ...item,
-      status: novoStatus
-    };
-
-    this.colaboradorService.atualizar(item.id, payload).subscribe({
-      next: () => {
-        item.status = novoStatus;
-        this.cdr.detectChanges();
-      },
+    this.colaboradorService.atualizar(item.id, { ...item, status: novoStatus }).subscribe({
+      next: () => { item.status = novoStatus; this.cdr.detectChanges(); },
       error: (err) => {
         console.error('Erro ao alterar status:', err);
         alert('Não foi possível alterar o status.');
       }
     });
+  }
+
+
+  abrirEpis(colaborador: Colaborador): void {
+    this.colaboradorModal = colaborador;
+    this.episModal        = [];
+    this.carregandoEpis   = true;
+    this.modalAberto      = true;
+    this.cdr.detectChanges();
+
+    this.colaboradorService.buscarEpis(colaborador.id).subscribe({
+      next: (res) => {
+        this.episModal      = res.data;
+        this.carregandoEpis = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.carregandoEpis = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  fecharModal(): void {
+    this.modalAberto      = false;
+    this.colaboradorModal = null;
+    this.episModal        = [];
+  }
+
+  statusValidade(dataVencimento: string | null): StatusValidade {
+    return calcularStatusValidade(dataVencimento);
   }
 }
