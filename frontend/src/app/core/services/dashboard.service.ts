@@ -22,6 +22,7 @@ export interface DashboardEpiAlert {
   diasParaVencer: number;
   colaborador?: string;
   equipamento?: string;
+  matricula?: string
 }
 
 export interface DashboardData {
@@ -69,8 +70,8 @@ export class DashboardService {
               label: 'EPIs Vencidos',
               value: alertas.validade.filter((alerta) => alerta.status === 'vencido').length,
               icon: 'ph-warning-octagon',
-              color: 'text-red-600 bg-red-50 border-red-500',
-              description: 'Itens fora da validade e que exigem ação imediata',
+              color: 'text-red-500 bg-red-50 border-red-500',
+              description: 'Itens fora da validade',
               trend: alertas.validade.length > 0 ? 'Revisar inventário' : 'Sem vencimentos no período',
             },
             {
@@ -78,14 +79,14 @@ export class DashboardService {
               value: alertas.estoqueMinimo.length,
               icon: 'ph-package',
               color: 'text-amber-600 bg-amber-50 border-amber-500',
-              description: 'EPIs abaixo do mínimo configurado',
+              description: 'EPIs abaixo do mínimo',
               trend: alertas.estoqueMinimo.length > 0 ? 'Repor prioridade' : 'Estoque saudável',
             },
             {
               label: 'Entregas / Mês',
               value: totalEntregasMes,
               icon: 'ph-check-square',
-              color: 'text-blue-600 bg-blue-50 border-blue-500',
+              color: 'text-blue-500 bg-blue-50 border-blue-500',
               description: 'Entregas realizadas no mês atual',
               trend: totalEntregasMes > 0 ? 'Dados reais do período' : 'Sem entregas neste mês',
             },
@@ -119,13 +120,13 @@ export class DashboardService {
 
   private enriqueceAlertas(alertas: AlertaValidade[], entregasMes: any[]): DashboardEpiAlert[] {
     return alertas.map((alerta) => {
-      // Procura a entrega mais recente deste EPI para pegar o colaborador
       const ultimaEntrega = entregasMes.find((entrega: any) =>
         entrega.itens?.some((item: any) => item.numero_ca === alerta.ca)
       );
 
       let equipamento = alerta.nome;
       let colaborador = '';
+      let matricula = '';
 
       if (ultimaEntrega) {
         const itemEntrega = ultimaEntrega.itens?.find((item: any) => item.numero_ca === alerta.ca);
@@ -133,6 +134,7 @@ export class DashboardService {
           equipamento = itemEntrega.nome;
         }
         colaborador = ultimaEntrega.colaborador || '';
+        matricula = ultimaEntrega.matricula || '';
       }
 
       return {
@@ -144,6 +146,7 @@ export class DashboardService {
         diasParaVencer: alerta.diasParaVencer,
         colaborador,
         equipamento,
+        matricula,
       };
     });
   }

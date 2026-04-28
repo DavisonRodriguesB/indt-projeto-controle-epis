@@ -8,6 +8,11 @@
         
         <i *ngIf="buscandoSugestoes" class="ph ph-circle-notch absolute right-3 top-2.5 text-blue-500 animate-spin"></i>
 
+        <i *ngIf="filtros.colaboradorMatricula && !buscandoSugestoes" 
+           (click)="limparColaborador()" 
+           class="ph ph-x-circle absolute right-3 top-2.5 text-slate-400 hover:text-red-500 cursor-pointer transition-colors z-10">
+        </i>
+
         <input type="text" 
           [(ngModel)]="filtros.colaboradorMatricula" 
           (input)="buscarColaboradores(filtros.colaboradorMatricula)"

@@ -25,7 +25,6 @@ export class SetoresList implements OnInit {
   carregarSetores() {
     this.baseService.listar('setores').subscribe({
       next: (res) => {
-        // Garantimos que estamos recebendo todos os registros (ativos e inativos)
         this.setores.set(res.data);
       },
       error: (err: HttpErrorResponse) => console.error('Erro ao carregar:', err.message)
@@ -44,7 +43,6 @@ export class SetoresList implements OnInit {
 
   salvarSetor(dados: { id?: number, descricao: string }) {
     if (dados.id) {
-      // Para edição, preservamos o status atual do objeto
       const setorAtual = this.setores().find(s => s.id === dados.id);
       const statusAtivo = setorAtual ? setorAtual.ativo : true;
 
@@ -68,10 +66,8 @@ export class SetoresList implements OnInit {
     if (!item.id) return;
     
     const novoStatus = !item.ativo;
-    // Chamada para o backend atualizar o status
     this.baseService.alterarStatus('setores', item.id, item.descricao, novoStatus).subscribe({
       next: () => {
-        // Atualiza localmente o item no signal para refletir as cores novas sem dar refresh na tela inteira
         this.setores.update(lista => {
           return lista.map(s => s.id === item.id ? { ...s, ativo: novoStatus } : s);
         });

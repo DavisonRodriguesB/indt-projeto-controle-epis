@@ -23,6 +23,8 @@ export class Home implements OnInit {
   error = '';
   emptyState = false;
 
+  exibirModal = false;
+
   ngOnInit(): void {
     this.loadDashboard();
   }
@@ -44,6 +46,19 @@ export class Home implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+
+  abrirModalListagemCompleta(): void {
+    this.exibirModal = true;
+    document.body.style.overflow = 'hidden';
+    this.cdr.markForCheck();
+  }
+
+  fecharModal(): void {
+    this.exibirModal = false;
+    document.body.style.overflow = 'auto';
+    this.cdr.markForCheck();
   }
 
   trackByAlertId(_: number, alerta: DashboardData['alertasVencimento'][number]): number {
