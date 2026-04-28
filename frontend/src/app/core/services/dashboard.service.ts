@@ -22,7 +22,7 @@ export interface DashboardEpiAlert {
   diasParaVencer: number;
   colaborador?: string;
   equipamento?: string;
-  matricula?: string
+  matricula?: string;
 }
 
 export interface DashboardData {
@@ -31,16 +31,6 @@ export interface DashboardData {
   alertasVencimento: DashboardEpiAlert[];
   totalEpis: number;
   totalEntregasMes: number;
-}
-
-interface EpiListResponse {
-  data: unknown[];
-  meta?: { total?: number };
-}
-
-interface EntregaFiltro {
-  dataInicio: string;
-  dataFim: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -58,9 +48,11 @@ export class DashboardService {
       entregasMes: this.consultaService.buscarEntregas({ dataInicio, dataFim }),
     }).pipe(
       map(({ alertas, epis, entregasMes }) => {
-        const episResponse = epis as EpiListResponse;
+        const episResponse = epis as any;
         const totalEpis = episResponse.meta?.total ?? episResponse.data?.length ?? 0;
+
         const alertasVencimento = this.enriqueceAlertas(alertas.validade, entregasMes).slice(0, 10);
+        
         const totalEntregasMes = entregasMes.length;
         const conformidadeGeral = this.calcularConformidade(totalEpis, alertas.validade, alertas.estoqueMinimo);
 
@@ -68,11 +60,11 @@ export class DashboardService {
           stats: [
             {
               label: 'EPIs Vencidos',
-              value: alertas.validade.filter((alerta) => alerta.status === 'vencido').length,
+              value: alertasVencimento.filter((a) => a.status === 'vencido').length,
               icon: 'ph-warning-octagon',
               color: 'text-red-500 bg-red-50 border-red-500',
-              description: 'Itens fora da validade',
-              trend: alertas.validade.length > 0 ? 'Revisar inventário' : 'Sem vencimentos no período',
+              description: 'Uso expirado (Vida Útil)',
+              trend: alertasVencimento.length > 0 ? 'Substituição necessária' : 'Em conformidade',
             },
             {
               label: 'Estoque Crítico',
@@ -87,8 +79,8 @@ export class DashboardService {
               value: totalEntregasMes,
               icon: 'ph-check-square',
               color: 'text-blue-500 bg-blue-50 border-blue-500',
-              description: 'Entregas realizadas no mês atual',
-              trend: totalEntregasMes > 0 ? 'Dados reais do período' : 'Sem entregas neste mês',
+              description: 'Movimentações no período',
+              trend: 'Dados reais do mês',
             },
           ],
           conformidadeGeral,
@@ -100,24 +92,6 @@ export class DashboardService {
     );
   }
 
-  private currentMonthRange(): EntregaFiltro {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-    return {
-      dataInicio: this.formatDateOnly(start),
-      dataFim: this.formatDateOnly(end),
-    };
-  }
-
-  private formatDateOnly(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
   private enriqueceAlertas(alertas: AlertaValidade[], entregasMes: any[]): DashboardEpiAlert[] {
     return alertas.map((alerta) => {
       const ultimaEntrega = entregasMes.find((entrega: any) =>
@@ -127,23 +101,36 @@ export class DashboardService {
       let equipamento = alerta.nome;
       let colaborador = '';
       let matricula = '';
+      let dataVencimentoCalculada = new Date(alerta.validade);
 
       if (ultimaEntrega) {
         const itemEntrega = ultimaEntrega.itens?.find((item: any) => item.numero_ca === alerta.ca);
+        
         if (itemEntrega) {
           equipamento = itemEntrega.nome;
+          
+          if (itemEntrega.vida_util_dias) {
+            const dataEntrega = new Date(ultimaEntrega.data_movimentacao);
+            dataEntrega.setDate(dataEntrega.getDate() + itemEntrega.vida_util_dias);
+            dataVencimentoCalculada = dataEntrega;
+          }
         }
         colaborador = ultimaEntrega.colaborador || '';
         matricula = ultimaEntrega.matricula || '';
       }
 
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      const diffTime = dataVencimentoCalculada.getTime() - hoje.getTime();
+      const diasRestantes = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
       return {
         id: alerta.id,
         nome: alerta.nome,
         ca: alerta.ca,
-        validade: new Date(alerta.validade),
-        status: alerta.status,
-        diasParaVencer: alerta.diasParaVencer,
+        validade: dataVencimentoCalculada,
+        status: diasRestantes <= 0 ? 'vencido' : (diasRestantes <= 7 ? 'vence_em_breve' : 'vence_em_breve'), 
+        diasParaVencer: diasRestantes,
         colaborador,
         equipamento,
         matricula,
@@ -151,26 +138,24 @@ export class DashboardService {
     });
   }
 
-  private calcularConformidade(
-    totalEpis: number,
-    validade: AlertaValidade[],
-    estoqueMinimo: AlertaEstoque[],
-  ): number {
-    if (totalEpis <= 0) {
-      return 100;
-    }
+  private currentMonthRange() {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return {
+      dataInicio: this.formatDateOnly(start),
+      dataFim: this.formatDateOnly(end),
+    };
+  }
 
-    const episEmAlerta = new Set<number>();
+  private formatDateOnly(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
 
-    for (const item of validade) {
-      episEmAlerta.add(item.id);
-    }
-
-    for (const item of estoqueMinimo) {
-      episEmAlerta.add(item.id);
-    }
-
-    const percentual = ((totalEpis - episEmAlerta.size) / totalEpis) * 100;
+  private calcularConformidade(totalEpis: number, validade: AlertaValidade[], estoque: AlertaEstoque[]): number {
+    if (totalEpis <= 0) return 100;
+    const alertasUnicos = new Set([...validade.map(v => v.id), ...estoque.map(e => e.id)]);
+    const percentual = ((totalEpis - alertasUnicos.size) / totalEpis) * 100;
     return Math.max(0, Math.min(100, Math.round(percentual)));
   }
 }

@@ -22,7 +22,6 @@
   <ng-container *ngIf="!loading && !error">
     
     <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      
       <div class="lg:col-span-1 bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm relative overflow-hidden group">
         <div class="relative z-10">
           <p class="text-sm font-semibold text-slate-400 mb-1">Conformidade global</p>
@@ -39,15 +38,12 @@
         </div>
       </div>
 
-      <div *ngFor="let item of stats" 
-           class="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300">
+      <div *ngFor="let item of stats" class="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300">
         <div class="flex justify-between items-start mb-4">
-          <div class="p-3 rounded-2xl" [ngClass]="item.color.split(' ')[1] + ' ' + item.color.split(' ')[0]">
+          <div class="p-3 rounded-2xl" [ngClass]="item.color">
             <i class="ph {{ item.icon }} text-2xl"></i>
           </div>
-          <span *ngIf="item.trend" class="px-2.5 py-1 rounded-lg bg-slate-50 text-[10px] font-bold text-slate-400">
-            {{ item.trend }}
-          </span>
+          <span *ngIf="item.trend" class="px-2.5 py-1 rounded-lg bg-slate-50 text-[10px] font-bold text-slate-400">{{ item.trend }}</span>
         </div>
         <div>
           <h3 class="text-3xl font-semibold text-slate-800">{{ item.value }}</h3>
@@ -66,18 +62,17 @@
         <div class="p-8 border-b border-slate-50 flex justify-between items-center">
           <div>
             <h2 class="text-xl font-semibold text-slate-800">Próximos vencimentos</h2>
-            <p class="text-xs text-slate-400 font-medium mt-0.5">Top 10 itens que exigem atenção imediata</p>
+            <p class="text-xs text-slate-400 font-medium mt-0.5">Itens que exigem atenção imediata</p>
           </div>
-          <button (click)="abrirModalListagemCompleta()" class="flex items-center gap-2 px-5 py-2.5 bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 rounded-xl text-xs font-semibold transition-all group">
-            Ver todos
-            <i class="ph ph-list transition-transform group-hover:scale-110"></i>
+          <button (click)="abrirModalListagemCompleta()" class="flex items-center gap-2 px-5 py-2.5 bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 rounded-xl text-xs font-semibold transition-all">
+            Ver todos <i class="ph ph-list"></i>
           </button>
         </div>
 
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead>
-              <tr class="text-slate-400 text-[11px] font-semibold border-b border-slate-50">
+              <tr class="text-slate-400 text-[11px] font-semibold border-b border-slate-50 uppercase tracking-wider">
                 <th class="px-8 py-4 text-left">Colaborador</th>
                 <th class="px-8 py-4 text-left">EPI / CA</th>
                 <th class="px-8 py-4 text-left">Validade</th>
@@ -85,31 +80,33 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-50">
-              <tr *ngFor="let alerta of alertasVencimento; trackBy: trackByAlertId" class="group transition-colors hover:bg-slate-50/50">
+              <tr *ngFor="let alerta of alertasVencimento; trackBy: trackByAlertId" class="group hover:bg-slate-50/50 transition-colors">
+                
                 <td class="px-8 py-5">
                   <div class="flex flex-col">
-                    <span class="font-semibold text-slate-700 group-hover:text-blue-600 transition-colors">{{ alerta.colaborador }}</span>
-                    <span class="text-[10px] text-slate-400 font-medium">Mat. {{ alerta.matricula }}</span>
+                    <span class="font-bold text-slate-700 text-sm tracking-tight">{{ alerta.colaborador }}</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Mat: {{ alerta.matricula || '---' }}</span>
                   </div>
                 </td>
+
                 <td class="px-8 py-5">
                   <div class="flex flex-col">
-                    <span class="text-sm font-medium text-slate-600">{{ alerta.equipamento }}</span>
-                    <span class="text-[10px] px-1.5 py-0.5 bg-slate-100 rounded w-fit text-slate-500 mt-1 font-mono">CA {{ alerta.ca }}</span>
+                    <span class="text-xs font-semibold text-slate-600">{{ alerta.equipamento }}</span>
+                    <span class="text-[10px] font-mono text-slate-400 bg-slate-100 w-fit px-1 rounded mt-0.5">CA {{ alerta.ca }}</span>
                   </div>
                 </td>
-                <td class="px-8 py-5 text-xs font-semibold text-slate-500">
+
+                <td class="px-8 py-5 text-xs font-bold text-slate-500">
                   {{ alerta.validade | date:'dd/MM/yyyy' }}
                 </td>
+
                 <td class="px-8 py-5 text-center">
-                  <div [ngClass]="{
-                    'bg-red-50 text-red-600': alerta.status === 'vencido',
-                    'bg-amber-50 text-amber-600': alerta.status === 'vence_em_breve'
-                  }" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border border-current/10">
-                    <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
+                  <span [ngClass]="alerta.status === 'vencido' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-amber-50 text-amber-600 border-amber-100'" 
+                        class="px-3 py-1 rounded-full text-[10px] font-bold border whitespace-nowrap uppercase">
                     {{ alerta.status === 'vencido' ? 'Vencido' : 'Crítico' }}
-                  </div>
+                  </span>
                 </td>
+
               </tr>
             </tbody>
           </table>
@@ -119,92 +116,37 @@
       <div class="space-y-6">
         <div class="bg-blue-600 p-8 rounded-[2.5rem] text-white shadow-xl shadow-blue-500/20 relative overflow-hidden group">
           <div class="relative z-10">
-            <h3 class="text-xl font-semibold mb-2">Entregas</h3>
-            <p class="text-blue-100 text-sm leading-relaxed mb-6">Registre a entrega de um novo EPI para manter o sistema atualizado.</p>
-            
+            <h3 class="text-xl font-semibold mb-2">Ações Rápidas</h3>
+            <p class="text-blue-100 text-sm mb-6">Mantenha o controle de estoque e entregas em dia.</p>
             <div class="flex flex-col gap-3">
-              <button routerLink="/entregas" class="w-full py-3 bg-white text-blue-600 rounded-2xl font-semibold text-sm hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
-                <i class="ph ph-plus-circle text-lg"></i>
-                Nova Entrega
-              </button>
-              
-              <button routerLink="/consulta-entregas" class="w-full py-3 bg-blue-500/30 text-white border border-blue-400/30 rounded-2xl font-semibold text-sm hover:bg-blue-500/50 transition-colors flex items-center justify-center gap-2">
-                <i class="ph ph-magnifying-glass text-lg"></i>
-                Consultar Entregas
-              </button>
+              <button routerLink="/entregas" class="w-full py-3 bg-white text-blue-600 rounded-2xl font-semibold text-sm hover:bg-blue-50 transition-all shadow-sm">Nova Entrega</button>
+              <button routerLink="/consulta-entregas" class="w-full py-3 bg-blue-500/30 text-white border border-blue-400/30 rounded-2xl font-semibold text-sm hover:bg-blue-500/50 transition-all">Consultar</button>
             </div>
           </div>
-          <i class="ph ph-package absolute -right-6 -top-6 text-[12rem] text-white/10 group-hover:rotate-12 transition-transform duration-700"></i>
+          <i class="ph ph-package absolute -right-6 -top-6 text-[12rem] text-white/10"></i>
         </div>
 
         <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200/60 shadow-sm">
-          <h3 class="font-semibold text-slate-800 mb-4">Dica de segurança</h3>
-          <div class="flex gap-4">
-            <div class="w-12 h-12 shrink-0 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500">
-              <i class="ph ph-lightbulb text-2xl"></i>
-            </div>
-            <p class="text-xs text-slate-500 leading-relaxed">
-              Equipamentos vencidos perdem a certificação de proteção. Mantenha-se atento às datas de validade para garantir a segurança dos colaboradores.
-            </p>
-          </div>
+          <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="ph ph-lightbulb text-amber-500"></i> Dica de segurança
+          </h3>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            Equipamentos vencidos perdem a certificação de proteção. Mantenha as trocas em dia para evitar incidentes.
+          </p>
         </div>
       </div>
     </section>
   </ng-container>
 
-  <div *ngIf="exibirModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+  <div *ngIf="exibirModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="fecharModal()"></div>
-
-    <div class="relative bg-white w-full max-w-5xl max-h-[90vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
-      
-      <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-white">
-        <div>
-          <h2 class="text-2xl font-semibold text-slate-800">Relatório de Vencimentos</h2>
-          <p class="text-sm text-slate-500 font-medium mt-1">Listagem detalhada de todos os itens em alerta</p>
-        </div>
-        <button (click)="fecharModal()" class="p-3 hover:bg-slate-100 rounded-2xl transition-colors text-slate-400 hover:text-slate-600">
-          <i class="ph ph-x text-2xl"></i>
-        </button>
+    <div class="relative bg-white w-full max-w-5xl max-h-[90vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95">
+      <div class="p-8 border-b border-slate-100 flex justify-between items-center">
+        <h2 class="text-2xl font-semibold text-slate-800">Relatório Completo</h2>
+        <button (click)="fecharModal()" class="p-2 hover:bg-slate-100 rounded-xl text-slate-400"><i class="ph ph-x text-2xl"></i></button>
       </div>
-
       <div class="overflow-y-auto p-8 flex-1">
-        <table class="w-full">
-          <thead>
-            <tr class="text-slate-400 text-xs font-semibold border-b border-slate-50">
-              <th class="px-6 py-4 text-left">Colaborador</th>
-              <th class="px-6 py-4 text-left">Equipamento</th>
-              <th class="px-6 py-4 text-left">CA</th>
-              <th class="px-6 py-4 text-left">Vencimento</th>
-              <th class="px-6 py-4 text-center">Status</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-50">
-            <tr *ngFor="let alerta of alertasVencimento; trackBy: trackByAlertId" class="hover:bg-slate-50/50 transition-colors">
-              <td class="px-6 py-4">
-                <div class="flex flex-col">
-                  <span class="font-semibold text-slate-700">{{ alerta.colaborador }}</span>
-                  <span class="text-[10px] text-slate-400">Mat. {{ alerta.matricula }}</span>
-                </div>
-              </td>
-              <td class="px-6 py-4 text-sm text-slate-600">{{ alerta.equipamento }}</td>
-              <td class="px-6 py-4 font-mono text-[11px] text-slate-500">CA {{ alerta.ca }}</td>
-              <td class="px-6 py-4 text-sm font-semibold text-slate-500">{{ alerta.validade | date:'dd/MM/yyyy' }}</td>
-              <td class="px-6 py-4 text-center">
-                <span [ngClass]="alerta.status === 'vencido' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'" 
-                      class="px-3 py-1 rounded-full text-[10px] font-bold border border-current/10">
-                  {{ alerta.status === 'vencido' ? 'Vencido' : 'Crítico' }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-        <button (click)="fecharModal()" class="px-8 py-3 bg-slate-800 text-white rounded-2xl font-semibold text-sm hover:bg-slate-900 transition-all active:scale-95">
-          Fechar Visualização
-        </button>
-      </div>
+        </div>
     </div>
   </div>
 </div>

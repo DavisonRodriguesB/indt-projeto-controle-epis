@@ -23,6 +23,9 @@ export class List implements OnInit {
   filtroCategoria: any = null;
   showSugestoes = false;
 
+  paginaAtual: number = 1;
+  itensPorPagina: number = 10;
+
   ngOnInit(): void {
     this.carregarDados();
   }
@@ -56,6 +59,7 @@ export class List implements OnInit {
     this.filtroCategoria = cat;
     this.inputCategoria = '';
     this.showSugestoes = false;
+    this.paginaAtual = 1;
   }
 
   toggleStatus(item: Epi) {
@@ -94,5 +98,25 @@ export class List implements OnInit {
       
       return matchesSearch && matchesCat;
     });
+  }
+
+  get episPaginados() {
+    const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
+    const fim = inicio + this.itensPorPagina;
+    return this.episFiltrados.slice(inicio, fim);
+  }
+
+  get totalPaginas(): number {
+    return Math.ceil(this.episFiltrados.length / this.itensPorPagina);
+  }
+
+  get listaDePaginas(): number[] {
+    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  }
+
+  mudarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaAtual = pagina;
+    }
   }
 }

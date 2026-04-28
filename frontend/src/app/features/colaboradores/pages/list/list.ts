@@ -19,7 +19,7 @@ import { BaseService } from '../../../../core/services/base.service';
 })
 export class List implements OnInit {
   private colaboradorService = inject(ColaboradorService);
-  private baseService        = inject(BaseService);
+  private baseService         = inject(BaseService);
   private cdr                = inject(ChangeDetectorRef);
 
   colaboradores: Colaborador[] = [];
@@ -36,7 +36,10 @@ export class List implements OnInit {
   modalAberto              = false;
   colaboradorModal: Colaborador | null = null;
   episModal: EpiColaborador[]          = [];
-  carregandoEpis                       = false;
+  carregandoEpis                        = false;
+
+  paginaAtual: number = 1;
+  itensPorPagina: number = 10;
 
   ngOnInit(): void {
     this.carregarDados();
@@ -57,7 +60,6 @@ export class List implements OnInit {
     });
   }
 
-
   get sugestoesSetor() {
     if (!this.inputSetor) return [];
     return this.setores.filter(s =>
@@ -74,10 +76,12 @@ export class List implements OnInit {
 
   selecionarSetor(setor: any): void {
     this.filtroSetor = setor; this.inputSetor = ''; this.showSetores = false;
+    this.paginaAtual = 1; 
   }
 
   selecionarCargo(cargo: any): void {
     this.filtroCargo = cargo; this.inputCargo = ''; this.showCargos = false;
+    this.paginaAtual = 1; 
   }
 
   get colaboradoresFiltrados(): Colaborador[] {
@@ -91,6 +95,26 @@ export class List implements OnInit {
     });
   }
 
+  get colaboradoresPaginados(): Colaborador[] {
+    const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
+    const fim = inicio + this.itensPorPagina;
+    return this.colaboradoresFiltrados.slice(inicio, fim);
+  }
+
+  get totalPaginas(): number {
+    return Math.ceil(this.colaboradoresFiltrados.length / this.itensPorPagina);
+  }
+
+  get listaDePaginas(): number[] {
+    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  }
+
+  mudarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaAtual = pagina;
+    }
+  }
+
   toggleStatus(item: Colaborador): void {
     const novoStatus = !item.status;
     this.colaboradorService.atualizar(item.id, { ...item, status: novoStatus }).subscribe({
@@ -101,7 +125,6 @@ export class List implements OnInit {
       }
     });
   }
-
 
   abrirEpis(colaborador: Colaborador): void {
     this.colaboradorModal = colaborador;
