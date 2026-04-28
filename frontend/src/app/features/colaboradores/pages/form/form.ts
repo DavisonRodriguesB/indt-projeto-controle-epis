@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { BaseService } from '../../../../core/services/base.service';
 import { ColaboradorService } from '../../../../core/services/colaborador.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-colaborador-form',
@@ -18,6 +19,7 @@ export class ColaboradorFormComponent implements OnInit {
   private baseService = inject(BaseService);
   private colaboradorService = inject(ColaboradorService);
   private cdr = inject(ChangeDetectorRef);
+  private notif = inject(NotificationService);
 
   colaboradorForm!: FormGroup;
   isEdicao = false;
@@ -55,7 +57,10 @@ export class ColaboradorFormComponent implements OnInit {
         this.cdr.detectChanges();
         concluir();
       },
-      error: () => concluir()
+      error: () => {
+        this.notif.show('Erro ao carregar lista de setores.', 'error');
+        concluir();
+      }
     });
 
     this.baseService.listar('cargos').subscribe({
@@ -64,7 +69,10 @@ export class ColaboradorFormComponent implements OnInit {
         this.cdr.detectChanges();
         concluir();
       },
-      error: () => concluir()
+      error: () => {
+        this.notif.show('Erro ao carregar lista de cargos.', 'error');
+        concluir();
+      }
     });
   }
 
@@ -77,8 +85,8 @@ export class ColaboradorFormComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Erro na busca por ID:', err);
-        alert('Erro ao carregar dados do colaborador.');
+        this.notif.show('Erro ao carregar dados do colaborador.', 'error');
+        this.router.navigate(['/colaboradores']);
       }
     });
   }
@@ -92,8 +100,13 @@ export class ColaboradorFormComponent implements OnInit {
         : this.colaboradorService.salvar(payload);
 
       request.subscribe({
-        next: () => this.router.navigate(['/colaboradores']),
-        error: (err) => alert(err.error?.message || 'Erro ao processar colaborador.')
+        next: () => {
+          this.notif.show(this.isEdicao ? 'Colaborador atualizado!' : 'Colaborador cadastrado!', 'success');
+          this.router.navigate(['/colaboradores']);
+        },
+        error: (err) => {
+          this.notif.show(err.error?.message || 'Erro ao processar colaborador.', 'error');
+        }
       });
     }
   }

@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { ApiErrorService } from '../../../../core/http/api-error.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 import { FormularioEntrega } from './components/formulario-entrega/formulario-entrega';
 import { ListaResumo } from './components/lista-resumo/lista-resumo';
@@ -31,6 +32,12 @@ import { RelatorioEpiData } from '../../../../shared/components/relatorioepi/rel
   styleUrls: ['./movimentacao.css']
 })
 export class Movimentacao implements OnInit {
+  private fb = inject(FormBuilder);
+  private movimentacaoApi = inject(MovimentacaoApiService);
+  private cdr = inject(ChangeDetectorRef);
+  private apiErrorService = inject(ApiErrorService);
+  private notif = inject(NotificationService);
+
   isModalVisualizarOpen = false;
   isModalReciboOpen = false;
   isModalSaldoOpen = false; 
@@ -55,12 +62,7 @@ export class Movimentacao implements OnInit {
   colaboradores: string[] = [];
   estoque: Array<{ id: number; codigo: string; material: string; ca: string; saldo: number }> = [];
 
-  constructor(
-    private fb: FormBuilder,
-    private movimentacaoApi: MovimentacaoApiService,
-    private cdr: ChangeDetectorRef,
-    private apiErrorService: ApiErrorService,
-  ) {
+  constructor() {
     this.formSaidaEpi = this.fb.group({
       colaborador: ['', Validators.required],
       epiId: ['', Validators.required],
@@ -93,6 +95,7 @@ export class Movimentacao implements OnInit {
       },
       error: (error: unknown) => {
         this.erroApi = this.apiErrorService.getMessage(error, 'Falha ao carregar colaboradores.');
+        this.notif.show(this.erroApi, 'error');
         this.cdr.detectChanges();
       },
     });
@@ -114,6 +117,7 @@ export class Movimentacao implements OnInit {
       },
       error: (error: unknown) => {
         this.erroApi = this.apiErrorService.getMessage(error, 'Falha ao carregar EPIs.');
+        this.notif.show(this.erroApi, 'error');
         this.cdr.detectChanges();
       },
     });
@@ -131,12 +135,13 @@ export class Movimentacao implements OnInit {
       .pipe(finalize(() => this.enviandoMovimentacao = false))
       .subscribe({
         next: () => {
-          alert(`Entrada de saldo para ${item.material} registrada com sucesso!`);
+          this.notif.show(`Entrada de saldo para ${item.material} registrada!`, 'success');
           this.closeModalSaldo();
           this.recarregarEpis();
         },
         error: (error) => {
-          this.erroApi = this.apiErrorService.getMessage(error, 'Nao foi possivel registrar a entrada de saldo.');
+          this.erroApi = this.apiErrorService.getMessage(error, 'Não foi possível registrar a entrada de saldo.');
+          this.notif.show(this.erroApi, 'error');
         },
       });
   }
@@ -154,7 +159,7 @@ export class Movimentacao implements OnInit {
     const itemEstoque = this.estoque.find((item) => item.id === selectedEpiId) ?? null;
 
     if (!itemEstoque) {
-      this.erroSaldo = 'Selecione um EPI valido da lista.';
+      this.erroSaldo = 'Selecione um EPI válido da lista.';
       return;
     }
 
@@ -194,7 +199,8 @@ export class Movimentacao implements OnInit {
   finalizarMovimentacao() {
     const colaboradorId = this.getColaboradorIdByNome(this.colaboradorFixado);
     if (!colaboradorId) {
-      this.erroApi = 'Colaborador invalido para finalizar movimentacao.';
+      this.erroApi = 'Colaborador inválido para finalizar movimentação.';
+      this.notif.show(this.erroApi, 'error');
       return;
     }
 
@@ -217,7 +223,7 @@ export class Movimentacao implements OnInit {
 
           this.dadosParaRelatorio = {
             protocolo: numeroProtocoloGerado,
-            colaborador: this.colaboradorFixado || 'Nao Informado',
+            colaborador: this.colaboradorFixado || 'Não Informado',
             funcao: infoColaborador?.funcao || 'Não informado',
             setor: infoColaborador?.setor || 'Não informado',
             dataEntrega: new Date(),
@@ -225,11 +231,14 @@ export class Movimentacao implements OnInit {
             itens: [...this.itensMovimentacao]
           };
 
+          this.notif.show('Movimentação finalizada com sucesso!', 'success');
           this.isModalReciboOpen = true;
           this.recarregarEpis();
+          this.desafixarColaborador(); // Limpa a lista após sucesso
         },
         error: (error) => {
-          this.erroApi = this.apiErrorService.getMessage(error, 'Nao foi possivel finalizar a movimentacao de entrega.');
+          this.erroApi = this.apiErrorService.getMessage(error, 'Não foi possível finalizar a movimentação.');
+          this.notif.show(this.erroApi, 'error');
         },
       });
   }

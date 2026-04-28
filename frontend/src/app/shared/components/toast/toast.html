@@ -1,0 +1,26 @@
+<div *ngIf="(notif$ | async)?.visible" 
+     class="fixed bottom-8 right-8 z-[200] animate-in slide-in-from-right-10 duration-300">
+  
+  <div [ngClass]="{
+    'bg-emerald-500': (notif$ | async)?.type === 'success',
+    'bg-red-500': (notif$ | async)?.type === 'error',
+    'bg-amber-500': (notif$ | async)?.type === 'warning'
+  }" class="flex items-center gap-4 px-6 py-4 rounded-[1.5rem] shadow-2xl text-white min-w-[300px]">
+    
+    <i class="ph" [ngClass]="{
+      'ph-check-circle': (notif$ | async)?.type === 'success',
+      'ph-x-circle': (notif$ | async)?.type === 'error',
+      'ph-warning': (notif$ | async)?.type === 'warning'
+    }" class="text-2xl"></i>
+
+    <div class="flex-1">
+      <p class="text-sm font-bold tracking-wide">
+        {{ (notif$ | async)?.message }}
+      </p>
+    </div>
+
+    <button (click)="close()" class="opacity-70 hover:opacity-100 transition-opacity">
+      <i class="ph ph-x font-bold"></i>
+    </button>
+  </div>
+</div>

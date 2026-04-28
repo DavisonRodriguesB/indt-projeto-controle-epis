@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { BaseService } from '../../../../core/services/base.service';
 import { EpiService } from '../../../../core/services/epi.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-epi-form',
@@ -18,6 +19,7 @@ export class EpiFormComponent implements OnInit {
   private baseService = inject(BaseService);
   private epiService = inject(EpiService);
   private cdr = inject(ChangeDetectorRef);
+  private notif = inject(NotificationService);
 
   epiForm!: FormGroup;
   isEdicao = false;
@@ -54,7 +56,10 @@ export class EpiFormComponent implements OnInit {
         this.cdr.detectChanges();
         callback?.();
       },
-      error: () => callback?.()
+      error: () => {
+        this.notif.show('Erro ao carregar categorias.', 'error');
+        callback?.();
+      }
     });
   }
 
@@ -74,6 +79,10 @@ export class EpiFormComponent implements OnInit {
           ativo: d.ativo
         });
         this.cdr.detectChanges();
+      },
+      error: () => {
+        this.notif.show('Erro ao carregar dados do EPI.', 'error');
+        this.router.navigate(['/epis']);
       }
     });
   }
@@ -94,8 +103,13 @@ export class EpiFormComponent implements OnInit {
         : this.epiService.salvar(payload);
 
       request.subscribe({
-        next: () => this.router.navigate(['/epis']),
-        error: (err) => alert(err.error?.message || 'Erro ao salvar EPI.')
+        next: () => {
+          this.notif.show(this.isEdicao ? 'EPI atualizado com sucesso!' : 'EPI cadastrado com sucesso!', 'success');
+          this.router.navigate(['/epis']);
+        },
+        error: (err) => {
+          this.notif.show(err.error?.message || 'Erro ao salvar EPI.', 'error');
+        }
       });
     }
   }
