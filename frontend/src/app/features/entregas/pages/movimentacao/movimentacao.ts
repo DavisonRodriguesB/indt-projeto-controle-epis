@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { finalize } from 'rxjs';
 import { ApiErrorService } from '../../../../core/http/api-error.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/auth/auth.service';
 
 import { FormularioEntrega } from './components/formulario-entrega/formulario-entrega';
 import { ListaResumo } from './components/lista-resumo/lista-resumo';
@@ -37,6 +38,7 @@ export class Movimentacao implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private apiErrorService = inject(ApiErrorService);
   private notif = inject(NotificationService);
+  private authService = inject(AuthService); // Injetando o AuthService
 
   isModalVisualizarOpen = false;
   isModalReciboOpen = false;
@@ -53,7 +55,6 @@ export class Movimentacao implements OnInit {
   enviandoMovimentacao = false;
 
   dadosParaRelatorio!: RelatorioEpiData;
-  usuarioLogado = 'Sistema';
 
   private colaboradoresApi: ColaboradorApi[] = [];
   private episApi: EpiApi[] = [];
@@ -221,20 +222,22 @@ export class Movimentacao implements OnInit {
           const anoAtual = new Date().getFullYear();
           const numeroProtocoloGerado = `MOV-${anoAtual}-${String(created.id).padStart(6, '0')}`;
 
+          const nomeUsuarioLogado = this.authService.currentUser()?.nome || 'Sistema';
+
           this.dadosParaRelatorio = {
             protocolo: numeroProtocoloGerado,
             colaborador: this.colaboradorFixado || 'Não Informado',
             funcao: infoColaborador?.funcao || 'Não informado',
             setor: infoColaborador?.setor || 'Não informado',
             dataEntrega: new Date(),
-            usuarioSistema: this.usuarioLogado,
+            usuarioSistema: nomeUsuarioLogado,
             itens: [...this.itensMovimentacao]
           };
 
           this.notif.show('Movimentação finalizada com sucesso!', 'success');
           this.isModalReciboOpen = true;
           this.recarregarEpis();
-          this.desafixarColaborador(); // Limpa a lista após sucesso
+          this.desafixarColaborador();
         },
         error: (error) => {
           this.erroApi = this.apiErrorService.getMessage(error, 'Não foi possível finalizar a movimentação.');
