@@ -1,58 +1,61 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface StatCard {
-  label: string;
-  value: string | number;
-  icon: string;
-  color: string;
-  description: string;
-  trend?: string;
-}
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { DashboardData, DashboardService, StatCard } from '../../../../core/services/dashboard.service';
 
 @Component({
   selector: 'app-dashboard-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './home.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Home implements OnInit {
-  
-  // Dados simulados para os cards de estatísticas
-  stats: StatCard[] = [
-    { 
-      label: 'EPIs Vencidos', 
-      value: 12, 
-      icon: 'ph-warning-octagon', 
-      color: 'text-red-600 bg-red-50 border-red-500',
-      description: 'Colaboradores com EPIs vencidos',
-      trend: 'Ação imediata'
-    },
-    { 
-      label: 'Estoque Crítico', 
-      value: 5, 
-      icon: 'ph-package', 
-      color: 'text-amber-600 bg-amber-50 border-amber-500',
-      description: 'Itens abaixo do mínimo'
-    },
-    { 
-      label: 'Entregas / Mês', 
-      value: 148, 
-      icon: 'ph-check-square', 
-      color: 'text-blue-600 bg-blue-50 border-blue-500',
-      description: 'Entregas realizadas no mês atual',
-    }
-  ];
+  private readonly dashboardService = inject(DashboardService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  conformidadeGeral = 92;
-
-  alertasVencimento = [
-    { colaborador: 'Carlos Silva', epi: 'Protetor Auricular Plug', data: new Date('2026-04-10'), status: 'critico' },
-    { colaborador: 'Ana Souza', epi: 'Capacete Classe B', data: new Date('2026-04-15'), status: 'alerta' },
-    { colaborador: 'Juliana Costa', epi: 'Bota de Segurança', data: new Date('2026-04-20'), status: 'normal' },
-  ];
+  stats: StatCard[] = [];
+  conformidadeGeral = 0;
+  alertasVencimento: DashboardData['alertasVencimento'] = [];
+  totalEpis = 0;
+  totalEntregasMes = 0;
+  loading = true;
+  error = '';
+  emptyState = false;
 
   ngOnInit(): void {
-  
+    this.loadDashboard();
+  }
+
+  loadDashboard(): void {
+    this.loading = true;
+    this.error = '';
+    this.cdr.markForCheck();
+
+    this.dashboardService.carregarDashboard().subscribe({
+      next: (data) => {
+        this.applyDashboardData(data);
+        this.loading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loading = false;
+        this.error = 'Não foi possível carregar os dados reais do dashboard. Tente novamente.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  trackByAlertId(_: number, alerta: DashboardData['alertasVencimento'][number]): number {
+    return alerta.id;
+  }
+
+  private applyDashboardData(data: DashboardData): void {
+    this.stats = data.stats;
+    this.conformidadeGeral = data.conformidadeGeral;
+    this.alertasVencimento = data.alertasVencimento;
+    this.totalEpis = data.totalEpis;
+    this.totalEntregasMes = data.totalEntregasMes;
+    this.emptyState = this.alertasVencimento.length === 0 && this.totalEntregasMes === 0;
   }
 }
