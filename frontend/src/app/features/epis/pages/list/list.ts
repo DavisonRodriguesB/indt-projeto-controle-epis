@@ -24,7 +24,7 @@ export class List implements OnInit {
   showSugestoes = false;
 
   paginaAtual: number = 1;
-  itensPorPagina: number = 10;
+  itensPorPagina: number = 5;
 
   ngOnInit(): void {
     this.carregarDados();
