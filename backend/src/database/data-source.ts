@@ -28,7 +28,7 @@ export const AppDataSource = new DataSource({
     MovimentacaoEntity,
     MovimentacaoItemEntity
   ],
-  synchronize: env.TYPEORM_SYNCHRONIZE,
+  synchronize: true,
   logging: false
 });
 
