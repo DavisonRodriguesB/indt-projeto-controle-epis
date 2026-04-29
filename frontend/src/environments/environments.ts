@@ -1,6 +1,5 @@
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:3333/api',
+  production: true,
+  apiUrl: 'https://indt-projeto-controle-epis.onrender.com/api',
   notificationsPollingMs: 15000,
 };
-
