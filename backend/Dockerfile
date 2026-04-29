@@ -3,7 +3,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Como o Root Directory no Render é 'backend', os arquivos já estão aqui
+# O Root Directory no Render está como 'backend', então os arquivos já estão aqui
 COPY package*.json ./
 RUN npm ci
 
@@ -24,8 +24,8 @@ RUN npm ci --omit=dev
 # Copia a pasta dist gerada no builder
 COPY --from=builder /app/dist ./dist
 
-# Render espera que seu app use a porta da variável de ambiente PORT
+# Expõe a porta (Render usa a variável PORT internamente)
 EXPOSE 3333
 
-# O comando abaixo primeiro roda as migrations para criar as tabelas e depois inicia o servidor
+# O segredo está aqui: Rodar as migrations ANTES de iniciar o servidor
 CMD npx typeorm migration:run -d dist/database/data-source.js && node dist/server.js
