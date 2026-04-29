@@ -3,13 +3,12 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copia os arquivos de configuração da pasta backend
-COPY backend/package*.json ./
+# Como o Root Directory é 'backend', os arquivos já estão aqui
+COPY package*.json ./
 RUN npm ci
 
-# Copia o restante dos arquivos do backend
-COPY backend/tsconfig.json ./
-COPY backend/src ./src
+COPY tsconfig.json ./
+COPY src ./src
 
 RUN npm run build
 
@@ -19,14 +18,12 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Copia os arquivos de dependência para instalação limpa de produção
-COPY backend/package*.json ./
+COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copia a pasta dist gerada no estágio builder
 COPY --from=builder /app/dist ./dist
 
-# Railway usa a variável de ambiente PORT automaticamente
+# Render espera que seu app use a porta da variável de ambiente PORT
 EXPOSE 3333
 
 CMD ["node", "dist/server.js"]
