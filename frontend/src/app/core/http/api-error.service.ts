@@ -17,7 +17,7 @@ interface BackendErrorPayload {
 export class ApiErrorService {
   getMessage(error: unknown, fallbackMessage: string): string {
     if (error instanceof HttpErrorResponse && error.status === 0) {
-      return 'Nao foi possivel conectar ao servidor.      Invoke-WebRequest http://localhost:3333/api/health -UseBasicParsing';
+      return 'Nao foi possivel conectar ao servidor. Verifique se a API esta disponivel.';
     }
 
     if (error instanceof HttpErrorResponse) {
