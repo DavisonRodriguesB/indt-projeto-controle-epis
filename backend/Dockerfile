@@ -1,32 +1,32 @@
+# --- Estágio 1: Builder ---
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copia arquivos de dependência primeiro para aproveitar o cache do Docker
-COPY package*.json ./
+# Copia os arquivos de configuração da pasta backend
+COPY backend/package*.json ./
 RUN npm ci
 
-# Copia todo o conteúdo da pasta backend (incluindo tsconfig.json e src)
-COPY . .
+# Copia o restante dos arquivos do backend
+COPY backend/tsconfig.json ./
+COPY backend/src ./src
 
-# Executa o build (gera a pasta dist)
 RUN npm run build
 
-# --- Estágio de Execução ---
+# --- Estágio 2: Runner ---
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Copia apenas o necessário para rodar em produção
-COPY package*.json ./
+# Copia os arquivos de dependência para instalação limpa de produção
+COPY backend/package*.json ./
 RUN npm ci --omit=dev
 
-# Copia o código compilado do estágio anterior
+# Copia a pasta dist gerada no estágio builder
 COPY --from=builder /app/dist ./dist
 
-# Railway injeta a porta dinamicamente, mas expomos a 3333 por padrão
+# Railway usa a variável de ambiente PORT automaticamente
 EXPOSE 3333
 
-# Comando para iniciar
 CMD ["node", "dist/server.js"]
