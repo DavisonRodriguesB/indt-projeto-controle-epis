@@ -16,14 +16,17 @@ export class Home implements OnInit {
 
   stats: StatCard[] = [];
   conformidadeGeral = 0;
-  alertasVencimento: DashboardData['alertasVencimento'] = [];
-  totalEpis = 0;
-  totalEntregasMes = 0;
-  loading = true;
-  error = '';
-  emptyState = false;
 
-  exibirModal = false;
+  
+  alertasVencimento: DashboardData['alertasVencimento'] = [];
+  alertasHome: DashboardData['alertasVencimento'] = [];
+
+  totalEpis        = 0;
+  totalEntregasMes = 0;
+  loading          = true;
+  error            = '';
+  emptyState       = false;
+  exibirModal      = false;
 
   ngOnInit(): void {
     this.loadDashboard();
@@ -31,7 +34,7 @@ export class Home implements OnInit {
 
   loadDashboard(): void {
     this.loading = true;
-    this.error = '';
+    this.error   = '';
     this.cdr.markForCheck();
 
     this.dashboardService.carregarDashboard().subscribe({
@@ -42,12 +45,11 @@ export class Home implements OnInit {
       },
       error: () => {
         this.loading = false;
-        this.error = 'Não foi possível carregar os dados reais do dashboard. Tente novamente.';
+        this.error   = 'Não foi possível carregar os dados do dashboard. Tente novamente.';
         this.cdr.markForCheck();
       },
     });
   }
-
 
   abrirModalListagemCompleta(): void {
     this.exibirModal = true;
@@ -66,11 +68,12 @@ export class Home implements OnInit {
   }
 
   private applyDashboardData(data: DashboardData): void {
-    this.stats = data.stats;
+    this.stats             = data.stats;
     this.conformidadeGeral = data.conformidadeGeral;
-    this.alertasVencimento = data.alertasVencimento;
-    this.totalEpis = data.totalEpis;
-    this.totalEntregasMes = data.totalEntregasMes;
-    this.emptyState = this.alertasVencimento.length === 0 && this.totalEntregasMes === 0;
+    this.alertasVencimento = data.alertasVencimento; 
+    this.alertasHome       = data.alertasHome;       
+    this.totalEpis         = data.totalEpis;
+    this.totalEntregasMes  = data.totalEntregasMes;
+    this.emptyState        = this.alertasHome.length === 0 && this.totalEntregasMes === 0;
   }
 }
