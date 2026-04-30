@@ -1,126 +1,158 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { environment } from '../../../../../environments/environments';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import {
+  ColaboradorService,
+  Colaborador,
+  EpiColaborador,
+  calcularStatusValidade,
+  StatusValidade
+} from '../../../../core/services/colaborador.service';
+import { BaseService } from '../../../../core/services/base.service';
 
-export interface CargoResumo  { id: number; descricao: string; }
-export interface SetorResumo  { id: number; descricao: string; }
+@Component({
+  selector: 'app-colaborador-list',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './list.html'
+})
+export class List implements OnInit {
+  private colaboradorService = inject(ColaboradorService);
+  private baseService         = inject(BaseService);
+  private cdr                = inject(ChangeDetectorRef);
 
-export interface Colaborador {
-  id: number;
-  nome: string;
-  matricula: string;
-  cargoId: number;
-  setorId: number;
-  cargo_id?: number;
-  setor_id?: number;
-  cargo?: CargoResumo;
-  setor?: SetorResumo;
-  status: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-}
+  colaboradores: Colaborador[] = [];
+  setores: any[] = [];
+  cargos: any[]  = [];
+  searchTerm   = '';
+  inputSetor   = '';
+  inputCargo   = '';
+  filtroSetor: any = null;
+  filtroCargo: any = null;
+  showSetores  = false;
+  showCargos   = false;
 
-export interface ColaboradorPayload {
-  nome: string;
-  matricula: string;
-  cargoId: number;
-  setorId: number;
-  status?: boolean;
-}
+  modalAberto              = false;
+  colaboradorModal: Colaborador | null = null;
+  episModal: EpiColaborador[]          = [];
+  carregandoEpis                        = false;
 
-export interface ApiResponse<T> {
-  data: T;
-  meta?: { total?: number; page?: number; pageSize?: number; };
-}
+  paginaAtual: number = 1;
+  itensPorPagina: number = 5;
 
-export interface EpiColaborador {
-  movimentacao_item_id: number;
-  movimentacao_id: number;
-  epi_id: number;
-  epi_nome: string;
-  epi_ca: string;
-  epi_codigo: string;
-  quantidade: number;
-  data_entrega: string;
-  data_vencimento: string | null;
-}
+  ngOnInit(): void {
+    this.carregarDados();
+  }
 
-export type StatusValidade = 'valido' | 'proximo' | 'vencido';
+  carregarDados(): void {
+    this.colaboradorService.listar().subscribe({
+      next: (res) => { this.colaboradores = res.data; this.cdr.detectChanges(); },
+      error: (err) => console.error('Erro ao carregar colaboradores:', err)
+    });
+    this.baseService.listar('setores').subscribe({
+      next: (res) => { this.setores = res.data; this.cdr.detectChanges(); },
+      error: (err) => console.error('Erro ao carregar setores:', err)
+    });
+    this.baseService.listar('cargos').subscribe({
+      next: (res) => { this.cargos = res.data; this.cdr.detectChanges(); },
+      error: (err) => console.error('Erro ao carregar cargos:', err)
+    });
+  }
 
-export function calcularStatusValidade(dataVencimento: string | null | undefined): StatusValidade {
-  if (!dataVencimento) return 'valido';
-
- 
-  const apenasData = String(dataVencimento).slice(0, 10);
-  const [ano, mes, dia] = apenasData.split('-').map(Number);
-  if (!ano || !mes || !dia) return 'valido';
-
-  const venc = new Date(ano, mes - 1, dia); // fuso local
-
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
-
-  const diffMs   = venc.getTime() - hoje.getTime();
-  const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDias < 0)  return 'vencido';
-  if (diffDias < 30) return 'proximo';
-  return 'valido';
-}
-
-
-function normalizar(raw: any): Colaborador {
-  return {
-    id:        raw.id,
-    nome:      raw.nome,
-    matricula: raw.matricula,
-    cargoId:   raw.cargoId  ?? raw.cargo_id  ?? raw.cargo?.id,
-    setorId:   raw.setorId  ?? raw.setor_id  ?? raw.setor?.id,
-    cargo_id:  raw.cargo_id ?? raw.cargoId,
-    setor_id:  raw.setor_id ?? raw.setorId,
-    cargo:     raw.cargo,
-    setor:     raw.setor,
-    status:    raw.status,
-    createdAt: raw.createdAt ?? raw.created_at,
-    updatedAt: raw.updatedAt ?? raw.updated_at,
-  };
-}
-
-@Injectable({ providedIn: 'root' })
-export class ColaboradorService {
-  private http    = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/colaboradores`;
-
-  listar(): Observable<ApiResponse<Colaborador[]>> {
-    return this.http.get<ApiResponse<any[]>>(this.baseUrl).pipe(
-      map(res => ({ ...res, data: res.data.map(normalizar) }))
+  get sugestoesSetor() {
+    if (!this.inputSetor) return [];
+    return this.setores.filter(s =>
+      s.descricao.toLowerCase().includes(this.inputSetor.toLowerCase())
     );
   }
 
-  buscarPorId(id: number): Observable<ApiResponse<Colaborador>> {
-    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/${id}`).pipe(
-      map(res => ({ ...res, data: normalizar(res.data) }))
+  get sugestoesCargo() {
+    if (!this.inputCargo) return [];
+    return this.cargos.filter(c =>
+      c.descricao.toLowerCase().includes(this.inputCargo.toLowerCase())
     );
   }
 
-  salvar(payload: ColaboradorPayload): Observable<ApiResponse<Colaborador>> {
-    return this.http.post<ApiResponse<any>>(this.baseUrl, payload).pipe(
-      map(res => ({ ...res, data: normalizar(res.data) }))
-    );
+  selecionarSetor(setor: any): void {
+    this.filtroSetor = setor; this.inputSetor = ''; this.showSetores = false;
+    this.paginaAtual = 1; 
   }
 
-  atualizar(id: number, payload: any): Observable<ApiResponse<Colaborador>> {
-    return this.http.put<ApiResponse<any>>(`${this.baseUrl}/${id}`, payload).pipe(
-      map(res => ({ ...res, data: normalizar(res.data) }))
-    );
+  selecionarCargo(cargo: any): void {
+    this.filtroCargo = cargo; this.inputCargo = ''; this.showCargos = false;
+    this.paginaAtual = 1; 
   }
 
-  excluir(id: number): Observable<ApiResponse<{ deleted: boolean }>> {
-    return this.http.delete<ApiResponse<{ deleted: boolean }>>(`${this.baseUrl}/${id}`);
+  get colaboradoresFiltrados(): Colaborador[] {
+    return this.colaboradores.filter(c => {
+      const matchesSearch =
+        c.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        c.matricula.includes(this.searchTerm);
+      const matchesSetor = !this.filtroSetor || c.setor_id === this.filtroSetor.id;
+      const matchesCargo = !this.filtroCargo || c.cargo_id === this.filtroCargo.id;
+      return matchesSearch && matchesSetor && matchesCargo;
+    });
   }
 
-  buscarEpis(id: number): Observable<ApiResponse<EpiColaborador[]>> {
-    return this.http.get<ApiResponse<EpiColaborador[]>>(`${this.baseUrl}/${id}/epis`);
+  get colaboradoresPaginados(): Colaborador[] {
+    const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
+    const fim = inicio + this.itensPorPagina;
+    return this.colaboradoresFiltrados.slice(inicio, fim);
+  }
+
+  get totalPaginas(): number {
+    return Math.ceil(this.colaboradoresFiltrados.length / this.itensPorPagina);
+  }
+
+  get listaDePaginas(): number[] {
+    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  }
+
+  mudarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaAtual = pagina;
+    }
+  }
+
+  toggleStatus(item: Colaborador): void {
+    const novoStatus = !item.status;
+    this.colaboradorService.atualizar(item.id, { ...item, status: novoStatus }).subscribe({
+      next: () => { item.status = novoStatus; this.cdr.detectChanges(); },
+      error: (err) => {
+        console.error('Erro ao alterar status:', err);
+        alert('Não foi possível alterar o status.');
+      }
+    });
+  }
+
+  abrirEpis(colaborador: Colaborador): void {
+    this.colaboradorModal = colaborador;
+    this.episModal        = [];
+    this.carregandoEpis   = true;
+    this.modalAberto      = true;
+    this.cdr.detectChanges();
+
+    this.colaboradorService.buscarEpis(colaborador.id).subscribe({
+      next: (res) => {
+        this.episModal      = res.data;
+        this.carregandoEpis = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.carregandoEpis = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  fecharModal(): void {
+    this.modalAberto      = false;
+    this.colaboradorModal = null;
+    this.episModal        = [];
+  }
+
+  statusValidade(dataVencimento: string | null): StatusValidade {
+    return calcularStatusValidade(dataVencimento);
   }
 }

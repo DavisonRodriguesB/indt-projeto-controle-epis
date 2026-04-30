@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environments';
 
-
 export interface CargoResumo  { id: number; descricao: string; }
 export interface SetorResumo  { id: number; descricao: string; }
 
@@ -43,23 +42,32 @@ export interface EpiColaborador {
   epi_ca: string;
   epi_codigo: string;
   quantidade: number;
-  data_entrega: string;          
-  data_vencimento: string | null; 
+  data_entrega: string;
+  data_vencimento: string | null;
 }
 
 export type StatusValidade = 'valido' | 'proximo' | 'vencido';
 
-export function calcularStatusValidade(dataVencimento: string | null): StatusValidade {
+export function calcularStatusValidade(dataVencimento: string | null | undefined): StatusValidade {
   if (!dataVencimento) return 'valido';
+
+
+  const apenasData = String(dataVencimento).slice(0, 10);
+  const [ano, mes, dia] = apenasData.split('-').map(Number);
+  if (!ano || !mes || !dia) return 'valido';
+
+  const venc = new Date(ano, mes - 1, dia); // fuso local
+
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
-  const venc = new Date(dataVencimento + 'T00:00:00');
-  const diffDias = Math.floor((venc.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+
+  const diffMs   = venc.getTime() - hoje.getTime();
+  const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
   if (diffDias < 0)  return 'vencido';
   if (diffDias < 30) return 'proximo';
   return 'valido';
 }
-
 
 function normalizar(raw: any): Colaborador {
   return {
@@ -77,7 +85,6 @@ function normalizar(raw: any): Colaborador {
     updatedAt: raw.updatedAt ?? raw.updated_at,
   };
 }
-
 
 @Injectable({ providedIn: 'root' })
 export class ColaboradorService {
@@ -111,7 +118,6 @@ export class ColaboradorService {
   excluir(id: number): Observable<ApiResponse<{ deleted: boolean }>> {
     return this.http.delete<ApiResponse<{ deleted: boolean }>>(`${this.baseUrl}/${id}`);
   }
-
 
   buscarEpis(id: number): Observable<ApiResponse<EpiColaborador[]>> {
     return this.http.get<ApiResponse<EpiColaborador[]>>(`${this.baseUrl}/${id}/epis`);
