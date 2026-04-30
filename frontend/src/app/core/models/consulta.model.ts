@@ -4,8 +4,8 @@ export interface EntregaItem {
   quantidade: number;
   numero_ca: string;
   codigo_material: string;
+  data_vencimento: string | null;
 }
-
 
 export interface EntregaCompleta {
   id: string;
