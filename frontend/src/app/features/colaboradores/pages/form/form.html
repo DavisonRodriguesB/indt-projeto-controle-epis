@@ -1,112 +1,108 @@
-<div class="max-w-2xl mx-auto p-4 md:p-0">
+<main class="max-w-2xl mx-auto p-4 md:p-0">
   
-  <div class="flex items-center gap-4 mb-8">
-    <button routerLink="/colaboradores" class="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
+
+  <header class="flex items-center gap-4 mb-8">
+    <button routerLink="/colaboradores" class="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400" aria-label="Voltar">
       <i class="ph ph-arrow-left text-2xl"></i>
     </button>
-    <div>
+    <hgroup>
       <h2 class="text-2xl font-bold text-slate-800">{{ isEdicao ? 'Editar Colaborador' : 'Novo Colaborador' }}</h2>
       <p class="text-slate-500">Registre os dados para controle de entrega de EPIs.</p>
-    </div>
-  </div>
+    </hgroup>
+  </header>
 
-  <form [formGroup]="colaboradorForm" (ngSubmit)="onSubmit()" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8 space-y-6">
+
+  <form [formGroup]="colaboradorForm" (ngSubmit)="onSubmit()" 
+    class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8 space-y-6">
     
-    <div>
-      <label class="block text-sm font-semibold text-slate-700 mb-2">Nome Completo</label>
+  
+    <label class="block">
+      <span class="block text-sm font-semibold text-slate-700 mb-2">Nome Completo</span>
       <input 
         type="text" 
         formControlName="nome"
         placeholder="Digite o nome completo"
         class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-        [class.border-red-400]="colaboradorForm.get('nome')?.invalid && colaboradorForm.get('nome')?.touched"
-      >
-      <span *ngIf="colaboradorForm.get('nome')?.invalid && colaboradorForm.get('nome')?.touched" class="text-red-500 text-xs mt-1">
+        [class.border-red-400]="colaboradorForm.get('nome')?.invalid && colaboradorForm.get('nome')?.touched">
+      <small *ngIf="colaboradorForm.get('nome')?.invalid && colaboradorForm.get('nome')?.touched" class="text-red-500 text-xs mt-1 block">
         O nome é obrigatório e deve ter no mínimo 3 letras.
-      </span>
-    </div>
+      </small>
+    </label>
 
+  
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Nº Matrícula</label>
+      <label class="block">
+        <span class="block text-sm font-semibold text-slate-700 mb-2">Nº Matrícula</span>
         <input 
           type="text" 
           formControlName="matricula"
           placeholder="000000"
           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none font-mono"
-          [class.border-red-400]="colaboradorForm.get('matricula')?.invalid && colaboradorForm.get('matricula')?.touched"
-        >
+          [class.border-red-400]="colaboradorForm.get('matricula')?.invalid && colaboradorForm.get('matricula')?.touched">
         <p class="text-[10px] text-slate-400 mt-1 uppercase">Deve ser única no sistema.</p>
-      </div>
+      </label>
 
-      <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Cargo / Função</label>
+      <label class="block">
+        <span class="block text-sm font-semibold text-slate-700 mb-2">Cargo / Função</span>
         <div class="relative">
           <select 
             formControlName="cargo_id"
             class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer appearance-none text-slate-600"
-            [class.border-red-400]="colaboradorForm.get('cargo_id')?.invalid && colaboradorForm.get('cargo_id')?.touched"
-          >
+            [class.border-red-400]="colaboradorForm.get('cargo_id')?.invalid && colaboradorForm.get('cargo_id')?.touched">
             <option [ngValue]="null" disabled>Selecione o cargo...</option>
-            <option *ngFor="let cargo of cargos" [ngValue]="cargo.id">
-              {{ cargo.descricao }}
-            </option>
+            <option *ngFor="let cargo of cargos" [ngValue]="cargo.id">{{ cargo.descricao }}</option>
           </select>
           <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
         </div>
-      </div>
+      </label>
     </div>
 
+  
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Setor / Departamento</label>
+      <label class="block">
+        <span class="block text-sm font-semibold text-slate-700 mb-2">Setor / Departamento</span>
         <div class="relative">
           <select 
             formControlName="setor_id"
             class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer appearance-none text-slate-600"
-            [class.border-red-400]="colaboradorForm.get('setor_id')?.invalid && colaboradorForm.get('setor_id')?.touched"
-          >
+            [class.border-red-400]="colaboradorForm.get('setor_id')?.invalid && colaboradorForm.get('setor_id')?.touched">
             <option [ngValue]="null" disabled>Selecione o setor...</option>
-            <option *ngFor="let setor of setores" [ngValue]="setor.id">
-              {{ setor.descricao }}
-            </option>
+            <option *ngFor="let setor of setores" [ngValue]="setor.id">{{ setor.descricao }}</option>
           </select>
           <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
         </div>
-      </div>
+      </label>
 
-      <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Status</label>
+      <label class="block">
+        <span class="block text-sm font-semibold text-slate-700 mb-2">Status</span>
         <div class="relative">
           <select 
             formControlName="status"
-            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer appearance-none text-slate-600"
-          >
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer appearance-none text-slate-600">
             <option [ngValue]="true">Ativo</option>
             <option [ngValue]="false">Inativo</option>
           </select>
           <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
         </div>
-      </div>
+      </label>
     </div>
 
-    <div class="flex flex-col md:flex-row justify-end gap-3 pt-6 border-t border-slate-50">
+
+    <footer class="flex flex-col md:flex-row justify-end gap-3 pt-6 border-t border-slate-50">
       <button 
         type="button" 
         routerLink="/colaboradores"
-        class="px-6 py-3 text-slate-600 font-medium hover:bg-slate-50 rounded-xl transition-colors order-2 md:order-1"
-      >
+        class="px-6 py-3 text-slate-600 font-medium hover:bg-slate-50 rounded-xl transition-colors order-2 md:order-1">
         Cancelar
       </button>
       <button 
         type="submit" 
         [disabled]="colaboradorForm.invalid"
-        class="px-10 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold rounded-xl shadow-lg shadow-blue-100 transition-all order-1 md:order-2 flex items-center justify-center gap-2"
-      >
+        class="px-10 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold rounded-xl shadow-lg shadow-blue-100 transition-all order-1 md:order-2 flex items-center justify-center gap-2">
         <i class="ph ph-floppy-disk text-xl"></i>
         {{ isEdicao ? 'Salvar Alterações' : 'Salvar Colaborador' }}
       </button>
-    </div>
+    </footer>
 
   </form>
-</div>
+</main>

@@ -1,17 +1,17 @@
-<div class="flex flex-col gap-6">
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-    <div>
+<main class="flex flex-col gap-6">
+  <header class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+    <hgroup>
       <h2 class="text-2xl font-bold text-slate-800">Catálogo de EPIs</h2>
       <p class="text-slate-500 text-sm">Gestão do Catálogo de Equipamentos.</p>
-    </div>
+    </hgroup>
     <button routerLink="/epis/novo" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-100">
       <i class="ph ph-package text-xl"></i>
       Novo EPI
     </button>
-  </div>
+  </header>
 
-  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4">
-    <div class="relative flex-1">
+  <section class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4">
+    <label class="relative flex-1">
       <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
       <input 
         type="text" 
@@ -20,10 +20,10 @@
         placeholder="Buscar por nome, código ou CA..." 
         class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20"
       >
-    </div>
+    </label>
 
     <div class="relative w-full md:w-80">
-      <div *ngIf="!filtroCategoria" class="relative">
+      <label *ngIf="!filtroCategoria" class="relative block">
         <i class="ph ph-tag absolute left-3 top-2.5 text-slate-400"></i>
         <input 
           type="text" 
@@ -32,7 +32,7 @@
           placeholder="Digitar Categoria..." 
           class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
         >
-      </div>
+      </label>
 
       <div *ngIf="filtroCategoria" class="flex items-center justify-between bg-blue-50 border border-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-semibold h-[42px]">
         <div class="flex items-center gap-2 truncate">
@@ -51,9 +51,9 @@
         </li>
       </ul>
     </div>
-  </div>
+  </section>
 
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+  <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
     <div class="hidden lg:block overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead class="bg-slate-50 border-b border-slate-200">
@@ -69,10 +69,10 @@
         <tbody class="divide-y divide-slate-100">
           <tr *ngFor="let item of episPaginados" class="hover:bg-slate-50/50 transition-colors">
             <td class="px-6 py-4">
-              <div class="flex flex-col">
+              <hgroup class="flex flex-col">
                 <span class="font-semibold text-slate-800">{{ item.nome }}</span>
                 <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">{{ item.categoria || 'Sem Categoria' }}</span>
-              </div>
+              </hgroup>
             </td>
             <td class="px-6 py-4 text-center">
               <span class="text-sm font-mono text-slate-600 font-medium">{{ item.codigo || '---' }}</span>
@@ -93,10 +93,10 @@
             </td>
             <td class="px-6 py-4 text-right">
               <div class="flex justify-end items-center gap-2">
-                <button [routerLink]="['/epis/editar', item.id]" class="text-slate-400 hover:text-blue-600 transition-colors p-1">
+                <button [routerLink]="['/epis/editar', item.id]" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Editar">
                   <i class="ph ph-pencil-simple text-2xl"></i>
                 </button>
-                <button (click)="toggleStatus(item)" class="transition-all active:scale-95">
+                <button (click)="toggleStatus(item)" class="transition-all active:scale-95" [title]="item.ativo ? 'Desativar' : 'Ativar'">
                   <i class="ph" [ngClass]="item.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-rose-500'" style="font-size: 32px;"></i>
                 </button>
               </div>
@@ -106,17 +106,18 @@
       </table>
     </div>
 
+    <!-- Mobile View -->
     <div class="lg:hidden divide-y divide-slate-100">
-      <div *ngFor="let item of episPaginados" class="p-4 space-y-4">
+      <article *ngFor="let item of episPaginados" class="p-4 space-y-4">
         <div class="flex justify-between items-start">
-          <div class="flex flex-col">
+          <hgroup class="flex flex-col">
             <span class="font-bold text-slate-800">{{ item.nome }}</span>
             <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">{{ item.categoria || 'Sem Categoria' }}</span>
             <div class="mt-2 flex gap-2">
               <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">CA: {{ item.ca }}</span>
               <span class="text-[10px] font-bold" [class.text-rose-500]="item.estoque_atual <= item.estoque_minimo">Estoque: {{ item.estoque_atual }}</span>
             </div>
-          </div>
+          </hgroup>
           <div class="flex items-center gap-3">
             <button [routerLink]="['/epis/editar', item.id]" class="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg">
               <i class="ph ph-pencil-simple text-xl"></i>
@@ -126,21 +127,21 @@
             </button>
           </div>
         </div>
-      </div>
+      </article>
     </div>
 
-    <div *ngIf="episFiltrados.length === 0" class="p-12 text-center">
+    <article *ngIf="episFiltrados.length === 0" class="p-12 text-center">
       <i class="ph ph-package text-4xl text-slate-300"></i>
       <p class="text-slate-500 mt-2 font-medium">Nenhum EPI encontrado.</p>
       <button (click)="searchTerm = ''; filtroCategoria = null; paginaAtual = 1" class="text-blue-600 text-sm font-bold mt-2 hover:underline">Limpar filtros</button>
-    </div>
+    </article>
 
-    <div *ngIf="episFiltrados.length > itensPorPagina" class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+    <footer *ngIf="episFiltrados.length > itensPorPagina" class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
       <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
         Página {{ paginaAtual }} de {{ totalPaginas }}
       </span>
 
-      <div class="flex items-center gap-2">
+      <nav class="flex items-center gap-2">
         <button (click)="mudarPagina(paginaAtual - 1)" [disabled]="paginaAtual === 1"
           class="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all">
           <i class="ph ph-caret-left font-bold"></i>
@@ -158,7 +159,7 @@
           class="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all">
           <i class="ph ph-caret-right font-bold"></i>
         </button>
-      </div>
-    </div>
-  </div>
-</div>
+      </nav>
+    </footer>
+  </section>
+</main>
