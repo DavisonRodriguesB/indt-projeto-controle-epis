@@ -1,111 +1,117 @@
-<div class="flex flex-col gap-6">
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-    <div>
-      <h2 class="text-2xl font-bold text-slate-800">Usuarios</h2>
-      <p class="text-slate-500 text-sm">Gestao de acesso ao sistema</p>
-    </div>
+<main class="flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+  <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+    <hgroup>
+      <h2 class="text-3xl font-semibold text-slate-800 tracking-tight">Usuários</h2>
+      <p class="text-slate-500 font-medium mt-1">Gestão de acessos e permissões do sistema</p>
+    </hgroup>
 
     <button
       (click)="openModal()"
       [disabled]="saving()"
-      class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-100"
-    >
-      <i class="ph ph-user-plus text-xl"></i>
-      {{ saving() ? 'Salvando...' : 'Novo Usuario' }}
+      class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none text-white px-8 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-xl shadow-blue-500/20 active:scale-95">
+      <i *ngIf="!saving()" class="ph ph-user-plus text-xl"></i>
+      <i *ngIf="saving()" class="ph ph-circle-notch animate-spin text-xl"></i>
+      {{ saving() ? 'Processando...' : 'Novo Usuário' }}
     </button>
-  </div>
+  </header>
 
   <div
     *ngIf="listErrorMessage()"
-    class="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-lg"
-  >
+    class="rounded-2xl border border-red-100 bg-red-50/50 px-6 py-4 text-xs font-bold text-red-600 uppercase tracking-wide animate-in shake duration-500 flex items-center gap-3">
+    <i class="ph ph-warning-circle text-xl"></i>
     {{ listErrorMessage() }}
   </div>
 
-  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4">
-    <div class="relative flex-1">
-      <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
+  <section class="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm flex flex-col md:flex-row gap-6">
+    <div class="relative flex-1 group">
+      <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg transition-colors group-focus-within:text-blue-500"></i>
       <input
         type="text"
         [(ngModel)]="searchTerm"
-        placeholder="Buscar por nome ou e-mail"
-        class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20"
+        placeholder="Buscar por nome ou e-mail..."
+        class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all text-slate-700"
       />
     </div>
 
-    <select
-      [(ngModel)]="selectedRole"
-      class="w-full md:w-48 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none text-slate-600 cursor-pointer focus:ring-2 focus:ring-blue-500/20"
-    >
-      <option value="">Todos os perfis</option>
-      <option value="admin">Administrador</option>
-      <option value="almoxarife">Almoxarife</option>
-    </select>
-  </div>
+    <div class="relative group">
+      <i class="ph ph-funnel absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg transition-colors group-focus-within:text-blue-500 pointer-events-none"></i>
+      <select
+        [(ngModel)]="selectedRole"
+        class="w-full md:w-56 pl-12 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer">
+        <option value="">Todos os perfis</option>
+        <option value="admin">Administrador</option>
+        <option value="almoxarife">Almoxarife</option>
+      </select>
+      <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+    </div>
+  </section>
 
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-    <div *ngIf="loading()" class="p-6 text-sm text-slate-500">
-      Carregando usuarios...
+  <section class="bg-white rounded-[2.5rem] border border-slate-200/60 shadow-sm overflow-hidden">
+    <div *ngIf="loading()" class="p-20 text-center flex flex-col items-center justify-center space-y-4">
+      <i class="ph ph-circle-notch animate-spin text-4xl text-blue-500"></i>
+      <p class="text-slate-400 font-bold text-xs uppercase tracking-widest">Sincronizando usuários...</p>
     </div>
 
-    <table *ngIf="!loading()" class="w-full text-left">
-      <thead class="bg-slate-50 border-b border-slate-200">
-        <tr>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Usuario</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Perfil</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Acoes</th>
+    <table *ngIf="!loading()" class="w-full text-left border-collapse">
+      <thead>
+        <tr class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em] border-b border-slate-50 bg-slate-50/30">
+          <th class="px-8 py-5">Usuário</th>
+          <th class="px-8 py-5">Perfil de Acesso</th>
+          <th class="px-8 py-5 text-right">Ações</th>
         </tr>
       </thead>
 
-      <tbody class="divide-y divide-slate-100">
-        <tr *ngFor="let user of usuariosFiltrados" class="hover:bg-slate-50/50 transition-colors">
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
-                {{ user.nome | slice:0:1 }}
+      <tbody class="divide-y divide-slate-50">
+        <tr *ngFor="let user of usuariosFiltrados" class="group hover:bg-slate-50/50 transition-colors">
+          <td class="px-8 py-5">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-sm shrink-0 shadow-sm">
+                {{ user.nome | slice:0:1 | uppercase }}
               </div>
               <div>
-                <p class="font-medium text-slate-800 leading-none">{{ user.nome }}</p>
-                <p class="text-xs text-slate-400 mt-1">{{ user.email }}</p>
+                <p class="font-bold text-slate-700 text-sm tracking-tight leading-none">{{ user.nome }}</p>
+                <p class="text-[11px] text-slate-400 font-medium mt-1.5">{{ user.email }}</p>
               </div>
             </div>
           </td>
 
-          <td class="px-6 py-4 text-sm text-slate-600">
-            <span class="flex items-center gap-1.5">
-              <i
-                class="ph"
-                [ngClass]="user.role === 'admin' ? 'ph-shield-check text-orange-500' : 'ph-user text-blue-500'"
-              ></i>
+          <td class="px-8 py-5">
+            <span 
+              class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all"
+              [ngClass]="user.role === 'admin' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-blue-50 text-blue-600 border-blue-100'">
+              <i class="ph text-base" [ngClass]="user.role === 'admin' ? 'ph-shield-check' : 'ph-user-gear'"></i>
               {{ user.role === 'admin' ? 'Administrador' : 'Almoxarife' }}
             </span>
           </td>
 
-          <td class="px-6 py-4 text-right">
+          <td class="px-8 py-5 text-right">
             <button
               (click)="editUser(user)"
               [disabled]="saving()"
-              class="text-slate-400 hover:text-blue-600 disabled:opacity-50 p-1 transition-colors"
-            >
+              class="p-2.5 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all active:scale-90"
+              title="Editar Usuário">
               <i class="ph ph-pencil-simple text-2xl"></i>
             </button>
           </td>
         </tr>
 
         <tr *ngIf="usuariosFiltrados.length === 0">
-          <td colspan="3" class="px-6 py-8 text-center text-sm text-slate-500">
-            Nenhum usuario encontrado.
+          <td colspan="3" class="px-8 py-24 text-center">
+            <div class="flex flex-col items-center justify-center space-y-4 opacity-40">
+              <i class="ph ph-users-three text-6xl text-slate-300"></i>
+              <p class="text-slate-500 font-bold text-sm italic">Nenhum usuário encontrado para esta busca.</p>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
-  </div>
-</div>
+  </section>
+</main>
 
 <app-user-form
   *ngIf="isModalOpen"
   [userData]="selectedUser"
   [submitError]="formErrorMessage()"
   (onClose)="closeModal()"
-  (onSave)="saveUser($event)"
-></app-user-form>
+  (onSave)="saveUser($event)">
+</app-user-form>

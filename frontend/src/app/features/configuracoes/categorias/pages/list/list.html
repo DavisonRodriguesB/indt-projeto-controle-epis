@@ -1,59 +1,76 @@
-<div class="p-6">
-  <div class="flex justify-between items-center mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">Categorias de EPI</h1>
-      <p class="text-sm text-slate-500">Gerencie as categorias de equipamentos (Ex: Proteção Auditiva, Visual)</p>
-    </div>
-    
-    <button (click)="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-200">
+<main class="p-8 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+  <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <hgroup>
+      <h1 class="text-3xl font-semibold text-slate-800 tracking-tight">Categorias de EPI</h1>
+      <p class="text-slate-500 font-medium mt-1">Organize os equipamentos por tipo de proteção</p>
+    </hgroup>
+
+    <button (click)="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
       <i class="ph ph-plus-circle text-xl"></i>
       <span>Nova Categoria</span>
     </button>
-  </div>
+  </header>
 
-  <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-    <table class="w-full text-left border-collapse">
-      <thead>
-        <tr class="bg-slate-50 border-b border-slate-200">
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700">Descrição da Categoria</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Status</th>
-          <th class="px-6 py-4 text-sm font-semibold text-slate-700 text-right">Ações</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100">
-        @for (cat of categorias(); track cat.id) {
-          <tr class="hover:bg-slate-50/50 transition-colors" [ngClass]="{'bg-slate-50/30': !cat.ativo}">
-            <td class="px-6 py-4 flex items-center gap-3">
-              <i class="ph ph-tag text-lg" [ngClass]="cat.ativo ? 'text-slate-400' : 'text-slate-300'"></i>
-              <span class="font-medium" [ngClass]="cat.ativo ? 'text-slate-700' : 'text-slate-400 italic line-through'">
-                {{ cat.descricao }}
-              </span>
-            </td>
-
-            <td class="px-6 py-4 text-center">
-              <span [class]="cat.ativo ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'" 
-                    class="px-2 py-1 rounded-full text-[10px] font-bold uppercase whitespace-nowrap">
-                {{ cat.ativo ? 'Ativo' : 'Inativo' }}
-              </span>
-            </td>
-            
-            <td class="px-6 py-4 text-right">
-              <div class="flex justify-end items-center gap-2">
-                <button (click)="openModal(cat)" class="text-slate-400 hover:text-blue-600 p-1" title="Editar">
-                  <i class="ph ph-pencil-simple text-2xl"></i>
-                </button>
-                
-                <button (click)="toggleStatus(cat)" class="transition-all active:scale-95">
-                  <i class="ph" [ngClass]="cat.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-slate-300'" style="font-size: 32px;"></i>
-                </button>
-              </div>
-            </td>
+  <section class="bg-white rounded-[2.5rem] border border-slate-200/60 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="text-slate-400 text-[11px] font-semibold border-b border-slate-50 uppercase tracking-wider bg-slate-50/50">
+            <th class="px-8 py-5">Descrição da Categoria</th>
+            <th class="px-8 py-5 text-center">Status</th>
+            <th class="px-8 py-5 text-right">Ações</th>
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-</div>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          @for (cat of categorias(); track cat.id) {
+            <tr class="group hover:bg-slate-50/50 transition-colors" [ngClass]="{'opacity-60 bg-slate-50/30': !cat.ativo}">
+              <td class="px-8 py-5">
+                <div class="flex items-center gap-4">
+                  <div class="p-2.5 rounded-xl transition-colors" [ngClass]="cat.ativo ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'">
+                    <i class="ph ph-tag text-xl"></i>
+                  </div>
+                  <span class="font-bold text-slate-700 text-sm tracking-tight" [ngClass]="{'italic line-through text-slate-400': !cat.ativo}">
+                    {{ cat.descricao }}
+                  </span>
+                </div>
+              </td>
+
+              <td class="px-8 py-5 text-center">
+                <span [ngClass]="cat.ativo ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200'" class="px-3 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide">
+                  {{ cat.ativo ? 'Ativo' : 'Inativo' }}
+                </span>
+              </td>
+
+              <td class="px-8 py-5 text-right">
+                <div class="flex justify-end items-center gap-3">
+                  <button (click)="openModal(cat)" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all" title="Editar Categoria">
+                    <i class="ph ph-pencil-simple text-2xl"></i>
+                  </button>
+                  
+                  <div class="h-6 w-px bg-slate-100 mx-1"></div>
+
+                  <button (click)="toggleStatus(cat)" class="transition-all active:scale-90" [title]="cat.ativo ? 'Desativar' : 'Ativar'">
+                    <i class="ph" [ngClass]="cat.ativo ? 'ph-toggle-right text-emerald-500' : 'ph-toggle-left text-slate-300'" style="font-size: 36px;"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3" class="py-20 text-center">
+                <div class="flex flex-col items-center justify-center space-y-3">
+                  <i class="ph ph-tag-chevron text-5xl text-slate-200"></i>
+                  <p class="text-slate-500 font-medium text-sm">Nenhuma categoria cadastrada</p>
+                  <p class="text-slate-400 text-xs">Adicione categorias para classificar seus equipamentos de segurança.</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
 
 <app-modal-categoria 
   [isOpen]="isModalOpen" 

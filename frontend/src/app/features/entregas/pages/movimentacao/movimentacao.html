@@ -1,52 +1,53 @@
-<div class="p-6 max-w-6xl mx-auto space-y-6">
+<main class="p-8 max-w-[1400px] mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-  <div *ngIf="erroApi" class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-    {{ erroApi }}
+  <div *ngIf="erroApi" class="rounded-2xl border border-red-100 bg-red-50/50 px-6 py-4 text-xs font-bold text-red-600 uppercase tracking-wide animate-in shake duration-500">
+    <div class="flex items-center gap-3">
+      <i class="ph ph-warning-circle text-xl"></i>
+      {{ erroApi }}
+    </div>
   </div>
   
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">Movimentação de EPI</h1>
-      <p class="text-sm text-slate-500">Gerencie entregas aos colaboradores e saldo de estoque</p>
-    </div>
-    <div class="flex gap-3">
-      <button (click)="openModalVisualizar()" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-50 flex items-center gap-2 shadow-sm text-sm">
+  <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <hgroup>
+      <h1 class="text-3xl font-semibold text-slate-800 tracking-tight">Movimentação de EPI</h1>
+      <p class="text-slate-500 font-medium mt-1">Gerencie entregas aos colaboradores e controle de estoque físico</p>
+    </hgroup>
+    <div class="flex items-center gap-3">
+      <button (click)="openModalVisualizar()" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold hover:bg-slate-50 hover:border-slate-300 flex items-center gap-2 transition-all text-sm shadow-sm">
         <i class="ph ph-eye text-xl"></i> Visualizar Saldo
       </button>
-      <button (click)="openModalSaldo()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium flex items-center gap-2 transition-all shadow-md shadow-emerald-100 text-sm">
+      <button (click)="openModalSaldo()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold flex items-center gap-2 transition-all shadow-xl shadow-emerald-500/20 text-sm active:scale-95">
         <i class="ph ph-plus-circle text-xl"></i> Incluir Saldo
       </button>
     </div>
-  </div>
+  </header>
 
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-    
-      <div class="lg:col-span-4">
-        <app-formulario-entrega 
-          [form]="formSaidaEpi"
-          [colaboradores]="colaboradores"
-          [estoque]="estoque"
-          [erroSaldo]="erroSaldo"
-          [colaboradorFixado]="colaboradorFixado"
-          [itensIncluidos]="itensMovimentacao"
-          (onIncluir)="incluirItemNaLista()"
-          (onDesafixar)="desafixarColaborador()"
-          (onLimparErro)="limparErro()">
-        </app-formulario-entrega>
-      </div>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="lg:col-span-4">
+      <app-formulario-entrega 
+        [form]="formSaidaEpi"
+        [colaboradores]="colaboradores"
+        [estoque]="estoque"
+        [erroSaldo]="erroSaldo"
+        [colaboradorFixado]="colaboradorFixado"
+        [itensIncluidos]="itensMovimentacao"
+        (onIncluir)="incluirItemNaLista()"
+        (onDesafixar)="desafixarColaborador()"
+        (onLimparErro)="limparErro()">
+      </app-formulario-entrega>
+    </div>
 
-      <div class="lg:col-span-8">
-        <app-lista-resumo 
-          [itens]="itensMovimentacao"
-          [colaboradorFixado]="colaboradorFixado"
-          [enviando]="enviandoMovimentacao"
-          (onRemover)="removerItemLista($event)"
-          (onFinalizar)="finalizarMovimentacao()">
-        </app-lista-resumo>
-      </div>
-
+    <div class="lg:col-span-8">
+      <app-lista-resumo 
+        [itens]="itensMovimentacao"
+        [colaboradorFixado]="colaboradorFixado"
+        [enviando]="enviandoMovimentacao"
+        (onRemover)="removerItemLista($event)"
+        (onFinalizar)="finalizarMovimentacao()">
+      </app-lista-resumo>
     </div>
   </div>
+</main>
 
 <app-modal-entrada-saldo 
   [isOpen]="isModalSaldoOpen"
@@ -59,45 +60,66 @@
 </app-modal-entrada-saldo>
 
 <div *ngIf="isModalVisualizarOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in" (click)="closeModalVisualizar()"></div>
-  <div class="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in">
-    <div class="p-5 border-b flex justify-between items-center bg-slate-50/50">
-      <div class="flex items-center gap-3">
-        <div class="p-2 bg-blue-100 text-blue-600 rounded-lg"><i class="ph ph-database text-xl"></i></div>
-        <h3 class="font-bold text-slate-800">Saldo Atual em Estoque</h3>
-      </div>
-      <button (click)="closeModalVisualizar()" class="text-slate-400 p-2"><i class="ph ph-x text-xl"></i></button>
-    </div>
-    <div class="p-0 max-h-[60vh] overflow-y-auto">
-      <table class="w-full text-left">
-        <thead class="text-slate-400 text-[10px] uppercase border-b bg-white sticky top-0">
-          <tr><th class="px-6 py-3">Código</th><th class="px-6 py-3">Material (CA)</th><th class="px-6 py-3 text-right">Saldo</th></tr>
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" (click)="closeModalVisualizar()"></div>
+  <section class="relative bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+    <header class="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+      <hgroup>
+        <h3 class="font-bold text-slate-800 text-lg">Saldo Atual em Estoque</h3>
+        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">Consulta de Disponibilidade</p>
+      </hgroup>
+      <button (click)="closeModalVisualizar()" class="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition-colors">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </header>
+
+    <div class="max-h-[60vh] overflow-y-auto custom-scrollbar">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-50 bg-white sticky top-0 z-10">
+            <th class="px-8 py-4">Código</th>
+            <th class="px-8 py-4">Material (CA)</th>
+            <th class="px-8 py-4 text-right">Saldo Disponível</th>
+          </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr *ngFor="let item of estoque" class="text-sm hover:bg-slate-50/50">
-            <td class="px-6 py-4 text-slate-500 font-mono text-xs">{{ item.codigo }}</td>
-            <td class="px-6 py-4 font-semibold text-slate-700">{{ item.material }} ({{ item.ca }})</td>
-            <td class="px-6 py-4 text-right">
-              <span [class]="item.saldo > 5 ? 'text-emerald-600' : 'text-orange-500'" class="font-bold">{{ item.saldo }} un</span>
+        <tbody class="divide-y divide-slate-50">
+          <tr *ngFor="let item of estoque" class="group hover:bg-slate-50/50 transition-colors">
+            <td class="px-8 py-4 text-slate-400 font-mono text-[11px] font-bold tracking-tight">{{ item.codigo }}</td>
+            <td class="px-8 py-4">
+              <span class="font-bold text-slate-700 text-sm">{{ item.material }}</span>
+              <span class="text-[10px] text-blue-500 font-bold block">CA: {{ item.ca }}</span>
+            </td>
+            <td class="px-8 py-4 text-right">
+              <span [ngClass]="item.saldo > 5 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-orange-50 text-orange-600 border-orange-100'" 
+                class="px-3 py-1 rounded-full text-xs font-bold border">
+                {{ item.saldo }} un
+              </span>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-  </div>
+  </section>
 </div>
 
-<div *ngIf="isModalReciboOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm print:bg-white">
-  <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl print:shadow-none">
-    <div class="p-4 border-b flex justify-between items-center bg-slate-50 print:hidden">
-      <h3 class="font-bold text-slate-800 italic text-sm px-2">Pré-visualização do Protocolo</h3>
-      <div class="flex gap-2">
-        <button (click)="isModalReciboOpen = false" class="px-4 py-2 text-sm font-semibold text-slate-500 rounded-lg">Cancelar</button>
-        <button (click)="imprimirRecibo()" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold flex items-center gap-2 shadow-lg shadow-blue-200">
-          <i class="ph ph-printer text-lg"></i> Gerar PDF
+<div *ngIf="isModalReciboOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 print:p-0">
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300 print:hidden" (click)="isModalReciboOpen = false"></div>
+  <section class="relative bg-white w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col print:rounded-none print:max-h-none print:shadow-none">
+    
+    <header class="px-10 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30 print:hidden">
+      <hgroup>
+        <h3 class="font-bold text-slate-800 text-xl italic">Pré-visualização do Protocolo</h3>
+        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">Conferência Final</p>
+      </hgroup>
+      <div class="flex gap-3">
+        <button (click)="isModalReciboOpen = false" class="px-6 py-3 text-sm font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-2xl transition-all">Cancelar</button>
+        <button (click)="imprimirRecibo()" class="px-8 py-3 bg-blue-600 text-white rounded-2xl text-sm font-bold flex items-center gap-2 shadow-xl shadow-blue-500/20 active:scale-95">
+          <i class="ph ph-printer text-xl"></i> Gerar PDF
         </button>
       </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-10 custom-scrollbar print:overflow-visible print:p-0">
+      <app-relatorioepi [dados]="dadosParaRelatorio"></app-relatorioepi>
     </div>
-    <app-relatorioepi [dados]="dadosParaRelatorio"></app-relatorioepi>
-  </div>
+  </section>
 </div>

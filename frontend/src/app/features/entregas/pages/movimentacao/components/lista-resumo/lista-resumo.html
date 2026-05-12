@@ -1,48 +1,79 @@
-<div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[450px]">
-  <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-    <span class="font-bold text-slate-700 uppercase text-xs tracking-wider">Resumo da Entrega</span>
-    <span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-bold">{{ itens.length }} ITENS</span>
-  </div>
+<section class="lg:col-span-2 bg-white rounded-[2.5rem] border border-slate-200/60 shadow-sm overflow-hidden flex flex-col min-h-[500px] animate-in fade-in duration-500">
+  <header class="px-8 py-5 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center">
+    <hgroup class="flex items-center gap-3">
+      <div class="p-2 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/20">
+        <i class="ph ph-list-checks text-xl"></i>
+      </div>
+      <span class="font-bold text-slate-700 uppercase text-xs tracking-[0.15em]">Resumo da Entrega</span>
+    </hgroup>
+    <span class="bg-blue-50 text-blue-600 text-[10px] px-4 py-1.5 rounded-full font-black tracking-widest border border-blue-100/50">
+      {{ itens.length }} {{ itens.length === 1 ? 'ITEM' : 'ITENS' }}
+    </span>
+  </header>
 
-  <div class="flex-1 overflow-y-auto">
+  <div class="flex-1 overflow-y-auto custom-scrollbar">
     <table class="w-full text-left border-collapse">
       <thead>
-        <tr class="text-[10px] text-slate-400 uppercase bg-white border-b sticky top-0">
-          <th class="px-6 py-4 font-bold">Material / CA</th>
-          <th class="px-6 py-4 text-center font-bold">Quantidade</th>
-          <th class="px-6 py-4 text-right font-bold">Remover</th>
+        <tr class="text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-white border-b border-slate-50 sticky top-0 z-10">
+          <th class="px-8 py-5">Material / CA</th>
+          <th class="px-8 py-5 text-center">Quantidade</th>
+          <th class="px-8 py-5 text-right">Ações</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-50">
-        <tr *ngFor="let item of itens" class="hover:bg-slate-50/50 transition-colors">
-          <td class="px-6 py-4">
+        <tr *ngFor="let item of itens" class="group hover:bg-slate-50/50 transition-all">
+          <td class="px-8 py-5">
             <div class="flex flex-col">
-              <span class="text-sm font-semibold text-slate-700">{{ item.material }}</span>
-              <span class="text-[10px] text-slate-400 font-mono">Cód: {{ item.codigo }} | CA: {{ item.ca }}</span>
+              <span class="text-sm font-bold text-slate-700 tracking-tight">{{ item.material }}</span>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] text-slate-400 font-bold uppercase">Cód: {{ item.codigo }}</span>
+                <span class="w-1 h-1 bg-slate-200 rounded-full"></span>
+                <span class="text-[10px] text-blue-500 font-bold uppercase">CA: {{ item.ca }}</span>
+              </div>
             </div>
           </td>
-          <td class="px-6 py-4 text-center">
-            <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg font-bold text-sm">{{ item.quantidade }}</span>
+          <td class="px-8 py-5 text-center">
+            <span class="bg-slate-100 text-slate-600 px-4 py-1.5 rounded-xl font-black text-xs border border-slate-200/50">
+              {{ item.quantidade }} un
+            </span>
           </td>
-          <td class="px-6 py-4 text-right">
-            <button (click)="onRemover.emit(item.id)" class="text-slate-300 hover:text-red-500 p-1">
-              <i class="ph ph-trash text-xl"></i>
+          <td class="px-8 py-5 text-right">
+            <button 
+              (click)="onRemover.emit(item.id)" 
+              class="text-slate-300 hover:text-rose-500 hover:bg-rose-50 p-2.5 rounded-2xl transition-all active:scale-90"
+              title="Remover item">
+              <i class="ph ph-trash text-2xl"></i>
             </button>
           </td>
         </tr>
+        
         <tr *ngIf="itens.length === 0">
-          <td colspan="3" class="px-6 py-20 text-center text-slate-300 italic text-sm">Não há materiais incluídos...</td>
+          <td colspan="3" class="px-8 py-24 text-center">
+            <div class="flex flex-col items-center justify-center space-y-4 opacity-40">
+              <i class="ph ph-shopping-cart text-6xl text-slate-300"></i>
+              <p class="text-slate-500 font-bold text-sm italic">Nenhum material incluído na lista...</p>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <div class="p-6 bg-slate-50 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
-    <p class="text-xs text-slate-500 italic">
-      {{ colaboradorFixado ? 'Entrega para: ' + colaboradorFixado : 'Selecione um colaborador para finalizar.' }}
-    </p>
-    <button (click)="onFinalizar.emit()" [disabled]="itens.length === 0 || enviando" class="w-full md:w-auto px-12 py-3.5 bg-slate-900 hover:bg-black text-white font-bold rounded-xl transition-all shadow-xl disabled:bg-slate-300">
-      {{ enviando ? 'Enviando...' : 'Finalizar e Gerar Protocolo' }}
+  <footer class="p-8 bg-slate-50/80 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div class="flex items-center gap-3">
+      <div [ngClass]="colaboradorFixado ? 'bg-emerald-500' : 'bg-slate-300'" class="w-2.5 h-2.5 rounded-full animate-pulse"></div>
+      <p class="text-xs font-bold uppercase tracking-tight" [ngClass]="colaboradorFixado ? 'text-slate-700' : 'text-slate-400'">
+        {{ colaboradorFixado ? 'Protocolo para: ' + colaboradorFixado : 'Aguardando seleção de colaborador...' }}
+      </p>
+    </div>
+
+    <button 
+      (click)="onFinalizar.emit()" 
+      [disabled]="itens.length === 0 || !colaboradorFixado || enviando" 
+      class="w-full md:w-auto px-10 py-4 bg-slate-900 hover:bg-blue-600 disabled:bg-slate-200 text-white font-black text-sm uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-slate-900/10 active:scale-95 flex items-center justify-center gap-3">
+      <i *ngIf="!enviando" class="ph ph-signature text-xl"></i>
+      <i *ngIf="enviando" class="ph ph-circle-notch animate-spin text-xl"></i>
+      {{ enviando ? 'Processando...' : 'Finalizar Entrega' }}
     </button>
-  </div>
-</div>
+  </footer>
+</section>

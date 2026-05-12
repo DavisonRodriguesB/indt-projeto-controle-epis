@@ -1,56 +1,70 @@
-<div class="flex flex-col gap-6">
-  <div class="flex flex-col">
-    <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Consultar Entregas</h2>
-    <p class="text-slate-500 text-sm">Histórico detalhado de movimentações e protocolos de EPI.</p>
-  </div>
+<main class="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+  <header class="flex flex-col gap-1">
+    <h1 class="text-3xl font-semibold text-slate-800 tracking-tight">Consultar Entregas</h1>
+    <p class="text-slate-500 font-medium">Histórico detalhado de movimentações e protocolos de EPI</p>
+  </header>
 
-  <app-filtro-consulta (onSearch)="executarBusca($event)"></app-filtro-consulta>
+  <section class="bg-white p-2 rounded-[2rem] border border-slate-200/60 shadow-sm">
+    <app-filtro-consulta (onSearch)="executarBusca($event)"></app-filtro-consulta>
+  </section>
 
-  <div class="relative">
-    <div *ngIf="loading" class="absolute inset-0 z-10 bg-white/60 backdrop-blur-[1px] flex items-center justify-center rounded-xl">
-      <div class="w-8 h-8 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+  <section class="relative bg-white rounded-[2.5rem] border border-slate-200/60 shadow-sm overflow-hidden">
+    <div *ngIf="loading" class="absolute inset-0 z-20 bg-white/70 backdrop-blur-[2px] flex items-center justify-center animate-in fade-in duration-300">
+      <div class="flex flex-col items-center gap-3">
+        <div class="w-10 h-10 border-[3px] border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Atualizando</span>
+      </div>
     </div>
 
     <app-tabela-consulta 
       [entregas]="listaEntregas" 
       (onView)="abrirRelatorio($event)">
     </app-tabela-consulta>
-  </div>
+  </section>
 
   <div *ngIf="exibirModal" 
-    class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4">
     
-    <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in zoom-in-95 duration-300">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" (click)="fecharModal()"></div>
+    
+    <section class="relative bg-white rounded-[3rem] w-full max-w-5xl max-h-[92vh] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col">
       
-      <button (click)="fecharModal()" 
-        class="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full z-10 transition-colors text-slate-400 hover:text-slate-800">
-        <i class="ph ph-x text-2xl"></i>
-      </button>
+      <header class="px-10 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+        <hgroup>
+          <h3 class="font-bold text-slate-800 text-xl">Protocolo de Entrega</h3>
+          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">Visualização de Registro</p>
+        </hgroup>
+        <button (click)="fecharModal()" 
+          class="p-2.5 hover:bg-slate-100 rounded-2xl transition-all text-slate-400 hover:text-slate-800">
+          <i class="ph ph-x text-2xl"></i>
+        </button>
+      </header>
       
-      <div class="p-4 md:p-10">
+      <div class="flex-1 overflow-y-auto p-10 custom-scrollbar">
         <ng-container *ngIf="entregaSelecionada; else loadingState">
           <app-relatorioepi [dados]="entregaSelecionada"></app-relatorioepi>
-          
-          <div class="mt-8 pt-6 border-t border-slate-100 flex justify-end gap-3 no-print">
-            <button (click)="fecharModal()" 
-              class="px-6 py-2.5 border border-slate-200 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-              Fechar Consulta
-            </button>
-            <button (click)="imprimir()"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-lg shadow-blue-100">
-              <i class="ph ph-printer text-xl"></i>
-              Imprimir Protocolo
-            </button>
-          </div>
         </ng-container>
 
         <ng-template #loadingState>
-          <div class="py-20 text-center flex flex-col items-center gap-4">
-            <div class="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
-            <p class="text-slate-400 font-medium">Carregando dados do registro...</p>
+          <div class="py-32 text-center flex flex-col items-center gap-6">
+            <div class="w-14 h-14 border-[4px] border-slate-100 border-t-blue-600 rounded-full animate-spin shadow-inner"></div>
+            <p class="text-slate-400 font-bold text-sm uppercase tracking-widest">Sincronizando dados...</p>
           </div>
         </ng-template>
       </div>
-    </div>
+
+      <footer *ngIf="entregaSelecionada" class="px-10 py-8 bg-slate-50/50 border-t border-slate-50 flex justify-end gap-4 no-print">
+        <button (click)="fecharModal()" 
+          class="px-8 py-3.5 text-sm font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-2xl transition-all">
+          Fechar Consulta
+        </button>
+        
+        <button (click)="imprimir()"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3.5 rounded-2xl text-sm font-bold flex items-center gap-3 transition-all shadow-xl shadow-blue-500/20 active:scale-95">
+          <i class="ph ph-printer text-xl"></i>
+          Imprimir Protocolo
+        </button>
+      </footer>
+    </section>
   </div>
-</div>
+</main>
