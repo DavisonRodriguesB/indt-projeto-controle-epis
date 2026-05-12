@@ -1,51 +1,26 @@
-<div *ngIf="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" (click)="handleClose()"></div>
-
-  <section class="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in duration-200">
-    <header class="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-      <hgroup>
-        <h3 class="font-bold text-slate-800 text-lg">
-          {{ setorParaEdicao ? 'Editar Setor' : 'Novo Setor' }}
-        </h3>
-        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">Local de alocação</p>
-      </hgroup>
-      <button (click)="handleClose()" class="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition-colors">
-        <i class="ph ph-x text-xl"></i>
+<div *ngIf="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+      <h3 class="text-xl font-bold text-slate-800">{{ setorParaEdicao ? 'Editar Setor' : 'Novo Setor' }}</h3>
+      <button (click)="handleClose()" class="text-slate-400 hover:text-slate-600 transition-colors">
+        <i class="ph ph-x text-2xl"></i>
       </button>
-    </header>
-
-    <div class="p-8">
-      <form [formGroup]="formSetor" (ngSubmit)="handleSave()" class="space-y-6">
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Descrição do Setor</label>
-          <div class="relative group">
-            <i class="ph ph-tree-structure absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl transition-colors group-focus-within:text-blue-500"></i>
-            <input 
-              type="text" 
-              formControlName="descricao"
-              placeholder="Ex: Almoxarifado, Produção..." 
-              class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all text-slate-700 font-medium"
-              [ngClass]="{'border-red-300 bg-red-50/30': formSetor.get('descricao')?.invalid && formSetor.get('descricao')?.touched}">
-          </div>
-          
-          <span *ngIf="formSetor.get('descricao')?.invalid && formSetor.get('descricao')?.touched" class="text-[11px] text-red-500 font-semibold mt-2 flex items-center gap-1.5 ml-1 animate-in slide-in-from-top-1">
-            <i class="ph ph-warning-circle text-sm"></i> Mínimo de 3 caracteres necessários.
-          </span>
-        </div>
-
-        <button type="submit" class="hidden"></button>
-      </form>
     </div>
 
-    <footer class="px-8 py-6 bg-slate-50/50 border-t border-slate-50 flex justify-end gap-3">
-      <button (click)="handleClose()" class="px-5 py-3 text-sm font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-2xl transition-all">
-        Cancelar
-      </button>
-      
-      <button (click)="handleSave()" [disabled]="formSetor.invalid" class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white px-8 py-3 rounded-2xl text-sm font-bold transition-all shadow-xl shadow-blue-500/20 flex items-center gap-2 active:scale-95">
-        <i class="ph" [ngClass]="setorParaEdicao ? 'ph-check-circle' : 'ph-plus-circle'"></i>
-        {{ setorParaEdicao ? 'Salvar Alterações' : 'Confirmar Cadastro' }}
-      </button>
-    </footer>
-  </section>
+    <form [formGroup]="formSetor" (ngSubmit)="handleSave()" class="p-6 space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">Descrição do Setor</label>
+        <div class="relative">
+          <i class="ph ph-tree-structure absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+          <input type="text" formControlName="descricao" placeholder="Ex: Almoxarifado, Produção..." class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" [ngClass]="{'border-red-500 bg-red-50': formSetor.get('descricao')?.invalid && formSetor.get('descricao')?.touched}">
+        </div>
+        <p *ngIf="formSetor.get('descricao')?.invalid && formSetor.get('descricao')?.touched" class="text-xs text-red-500 mt-1">A descrição é obrigatória (mínimo 3 caracteres).</p>
+      </div>
+
+      <div class="flex gap-3 pt-4">
+        <button type="button" (click)="handleClose()" class="flex-1 px-4 py-2 border border-slate-200 text-slate-600 font-medium rounded-lg hover:bg-slate-50 transition-colors">Cancelar</button>
+        <button type="submit" [disabled]="formSetor.invalid" class="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-blue-200">{{ setorParaEdicao ? 'Salvar Alterações' : 'Cadastrar Setor' }}</button>
+      </div>
+    </form>
+  </div>
 </div>
