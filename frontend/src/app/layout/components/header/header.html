@@ -1,122 +1,83 @@
-<header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-8 shadow-sm sticky top-0 z-40 transition-all">
+<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm sticky top-0 z-40">
   <div class="flex items-center gap-4">
-    <div class="p-2.5 bg-slate-900 rounded-2xl shadow-lg shadow-slate-200">
-      <i class="ph-fill ph-shield-checkered text-white text-xl"></i>
-    </div>
-    <h1 class="text-lg font-black text-slate-800 tracking-tight uppercase">
-      Controle de <span class="text-blue-600">EPIs</span>
-    </h1>
+    <h1 class="text-base font-semibold text-slate-800">Controle de EPIs</h1>
   </div>
 
   <div class="flex items-center gap-6">
     <div class="relative">
       <button
         (click)="toggleNotifications()"
-        class="text-slate-400 hover:text-blue-600 hover:bg-blue-50 relative p-2.5 rounded-2xl transition-all active:scale-90 group"
-        aria-label="Abrir notificações"
+        class="text-gray-500 hover:text-slate-800 relative p-1 transition-all active:scale-90"
+        aria-label="Abrir notificacoes"
         aria-haspopup="true"
         [attr.aria-expanded]="isNotificationsOpen">
-        <i class="ph ph-bell text-2xl group-hover:shake"></i>
+        <i class="ph ph-bell text-2xl"></i>
         <span
           *ngIf="unreadNotificationCount > 0"
-          class="absolute top-2 right-2 min-w-5 h-5 px-1 bg-rose-500 text-white rounded-full border-2 border-white shadow-md text-[10px] font-black flex items-center justify-center animate-bounce">
+          class="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-blue-600 text-white rounded-full border-2 border-white shadow-sm text-[10px] font-bold flex items-center justify-center">
           {{ unreadNotificationCount > 9 ? '9+' : unreadNotificationCount }}
         </span>
       </button>
 
       <div
         *ngIf="isNotificationsOpen"
-        class="absolute right-0 mt-4 w-96 bg-white border border-slate-100 rounded-[2rem] shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
-        <header class="px-6 py-5 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
-          <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest">Notificações Recentes</h3>
-          <span class="text-[10px] bg-white px-2 py-1 rounded-lg border border-slate-200 text-slate-400 font-bold">Hoje</span>
-        </header>
-
-        <div class="max-h-[450px] overflow-y-auto custom-scrollbar">
-          <div *ngIf="isLoadingNotifications" class="p-10 text-center flex flex-col items-center gap-3">
-            <i class="ph ph-circle-notch animate-spin text-2xl text-blue-500"></i>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Sincronizando...</p>
-          </div>
-
-          <div *ngIf="!isLoadingNotifications && notificationError" class="p-8 text-center">
-            <p class="text-xs font-bold text-rose-500 uppercase">{{ notificationError }}</p>
-          </div>
-
-          <ul *ngIf="!isLoadingNotifications && !notificationError && notificationCount > 0" class="divide-y divide-slate-50">
-            <li *ngFor="let item of notifications" class="px-6 py-4 hover:bg-slate-50 transition-all cursor-pointer group">
-              <div class="flex items-start justify-between gap-4">
-                <div class="min-w-0">
-                  <p class="text-sm font-bold text-slate-700 truncate group-hover:text-blue-600 transition-colors">{{ getNotificationTitle(item) }}</p>
-                  <p class="text-[11px] font-medium text-slate-500 mt-0.5 line-clamp-1 italic">{{ getNotificationDescription(item) }}</p>
-                </div>
-                <span
-                  class="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl shadow-sm whitespace-nowrap border"
-                  [ngClass]="getNotificationBadgeClass(item)">
-                  {{ getNotificationBadgeLabel(item) }}
-                </span>
-              </div>
-              <footer class="mt-2 flex items-center gap-2 text-[10px] font-bold text-slate-300 uppercase tracking-tighter">
-                <i class="ph ph-clock"></i>
-                {{ item.eventAt | date:'dd MMM, HH:mm' }}
-              </footer>
-            </li>
-          </ul>
-
-          <div *ngIf="!isLoadingNotifications && !notificationError && notificationCount === 0" class="p-16 text-center opacity-30">
-            <i class="ph ph-envelope-open text-5xl text-slate-300 mb-3 block"></i>
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Tudo limpo por aqui</p>
-          </div>
+        class="absolute right-0 mt-3 w-96 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50">
+        <div class="px-4 py-3 border-b border-slate-100 bg-slate-50">
+          <h3 class="text-sm font-bold text-slate-800">Notificações</h3>
         </div>
+
+        <div *ngIf="isLoadingNotifications" class="p-4 text-sm text-slate-500">Carregando notificacoes...</div>
+
+        <div *ngIf="!isLoadingNotifications && notificationError" class="p-4 text-sm text-red-600">{{ notificationError }}</div>
+
+        <ul *ngIf="!isLoadingNotifications && !notificationError && notificationCount > 0" class="max-h-96 overflow-y-auto divide-y divide-slate-100">
+          <li *ngFor="let item of notifications" class="px-4 py-3 hover:bg-slate-50 transition-colors">
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-slate-700 truncate">{{ getNotificationTitle(item) }}</p>
+                <p class="text-xs text-slate-500 truncate">{{ getNotificationDescription(item) }}</p>
+              </div>
+              <span
+                class="text-[10px] font-semibold px-2 py-1 rounded-full"
+                [ngClass]="getNotificationBadgeClass(item)">
+                {{ getNotificationBadgeLabel(item) }}
+              </span>
+            </div>
+            <p class="mt-1 text-[11px] text-slate-400">{{ item.eventAt | date:'dd/MM/yyyy HH:mm' }}</p>
+          </li>
+        </ul>
+
+        <div *ngIf="!isLoadingNotifications && !notificationError && notificationCount === 0" class="p-4 text-sm text-slate-500">Nenhuma movimentacao recente encontrada.</div>
       </div>
     </div>
 
-    <div class="h-10 w-px bg-slate-200/60"></div>
+    <div class="h-8 w-px bg-gray-100"></div>
 
     <div class="relative">
       <button 
         (click)="toggleMenu()" 
-        class="flex items-center gap-4 p-1.5 pl-4 rounded-2xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group">
+        class="flex items-center gap-3 p-1.5 pl-3 rounded-xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-200">
         <div class="text-right hidden sm:block">
-          <p class="text-sm font-black text-slate-800 leading-none tracking-tight">
-            {{ user()?.nome }}
-          </p>
-          <p class="text-[10px] font-black text-blue-500 leading-none uppercase tracking-widest mt-1.5 opacity-70">
-            {{ user()?.perfil }}
-          </p>
+          <p class="text-sm font-bold text-slate-800 leading-tight">{{ user()?.nome }}</p>
+          <p class="text-xs font-normal text-slate-500 leading-tight capitalize">{{ user()?.perfil }}</p>
         </div>
-        
-        <div class="w-11 h-11 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-black text-sm shadow-xl shadow-slate-900/10 group-hover:scale-105 transition-transform">
-          {{ getInitial() | uppercase }}
-        </div>
+        <div class="w-9 h-9 bg-blue-100 border border-blue-200 rounded-xl flex items-center justify-center text-blue-700 font-bold shadow-sm">{{ getInitial() }}</div>
       </button>
 
       @if (menuOpen) {
         <div
           (clickOutside)="menuOpen = false"
-          class="absolute right-0 mt-4 w-72 bg-white rounded-[2rem] shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-          <div class="px-6 py-6 bg-slate-50/50 border-b border-slate-100">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-black">
-                {{ getInitial() }}
-              </div>
-              <div class="min-w-0">
-                <p class="text-sm font-black text-slate-900 truncate leading-none">{{ user()?.nome }}</p>
-                <p class="text-[10px] font-bold text-slate-400 truncate mt-1">{{ user()?.email }}</p>
-              </div>
-            </div>
-            <div class="bg-blue-500/10 text-blue-600 text-[9px] font-black uppercase tracking-[0.2em] py-1 px-3 rounded-lg text-center">
-              Acesso: {{ user()?.perfil }}
-            </div>
+          class="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden py-2 animate-in fade-in zoom-in duration-150">
+          <div class="px-4 py-3 border-b border-gray-50 mb-1">
+            <p class="text-sm font-semibold text-slate-900">{{ user()?.nome }}</p>
+            <p class="text-xs font-normal text-slate-500 truncate">{{ user()?.email }}</p>
           </div>
-
-          <div class="p-2">
-            <button
-              (click)="logout()"
-              class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 transition-all group">
-              <i class="ph ph-sign-out text-xl transition-transform group-hover:translate-x-1"></i>
-              Sair do Sistema
-            </button>
-          </div>
+          <button
+            (click)="logout()"
+            class="w-full flex items-center gap-3 px-4 py-2.5 mt-1 border-t border-gray-50 text-sm font-medium text-red-600 hover:bg-red-50 transition-all">
+            <i class="ph ph-sign-out text-xl text-red-500"></i>
+            Sair do sistema
+          </button>
         </div>
       }
     </div>
